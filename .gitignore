@@ -1,0 +1,27 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Evaluation response cache (reports in backend/eval/reports/ are committed)
+backend/eval/.cache/
+
+# Part 2 frontend
+node_modules/
+.next/
+
+.DS_Store
+*.log
+
+# Claude Code: personal settings (shared ones go in .claude/settings.json)
+.claude/settings.local.json

@@ -1,0 +1,14 @@
+{
+  "languages": ["python"],
+  "format": {
+    "extensions": [".py"],
+    "command": ["uv", "run", "--directory", "backend", "ruff", "format", "{file}"]
+  },
+  "checks": {
+    "lint": "uv run --directory backend ruff check .",
+    "format": "uv run --directory backend ruff format --check .",
+    "typecheck": "uv run --directory backend mypy",
+    "test": "uv run --directory backend pytest"
+  },
+  "allowAgentCommits": true
+}
