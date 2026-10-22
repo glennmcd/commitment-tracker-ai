@@ -30,7 +30,7 @@ and update the policy.
 ## Attach it
 
 Set the project account's id in the shell first; account ids are not stored in this repository. The commands use
-a `g26work-mgmt` profile for the management account and a `commitment-tracker` profile for the new account.
+a `g26work-mgmt` profile for the management account and a `g26work2` profile for the new account.
 
 ```bash
 export CT_ACCOUNT_ID=<commitment-tracker-account-id>
@@ -75,11 +75,11 @@ From the project account's profile, a call in another Region and a call to a ser
 fail with an explicit deny in a service control policy:
 
 ```bash
-aws sqs list-queues --region us-east-2 --profile commitment-tracker
+aws sqs list-queues --region us-east-2 --profile g26work2
 ```
 
 ```bash
-aws transcribe list-transcription-jobs --region us-west-2 --profile commitment-tracker
+aws transcribe list-transcription-jobs --region us-west-2 --profile g26work2
 ```
 
 The same Transcribe call in us-east-2 should succeed.
