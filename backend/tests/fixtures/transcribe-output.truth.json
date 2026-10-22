@@ -1,0 +1,71 @@
+{
+  "note": "Ground truth for transcribe-output.json: an 11-turn, 59 s clip from Polly standard voices (A: Matthew, B: Joanna), 16 kHz mono WAV, captured from a real batch job on 2026-10-21.",
+  "turns": [
+    {
+      "speaker": "A",
+      "text": "Thanks for making time today. I wanted to go over where we are on the renewal before your board meeting.",
+      "start_ms": 0,
+      "end_ms": 5108
+    },
+    {
+      "speaker": "B",
+      "text": "Sure. Honestly, the main blocker is still the security review. Our team needs the updated questionnaire.",
+      "start_ms": 5508,
+      "end_ms": 11937
+    },
+    {
+      "speaker": "A",
+      "text": "Understood. I will send the completed security questionnaire to you by Thursday afternoon.",
+      "start_ms": 12337,
+      "end_ms": 17136
+    },
+    {
+      "speaker": "B",
+      "text": "That helps. Could you also include the data retention policy? Legal keeps asking about it.",
+      "start_ms": 17536,
+      "end_ms": 23111
+    },
+    {
+      "speaker": "A",
+      "text": "I'll try to get the retention policy over this week, but it depends on our compliance team.",
+      "start_ms": 23511,
+      "end_ms": 28054
+    },
+    {
+      "speaker": "B",
+      "text": "Okay. And if legal signs off on both documents, we can sign the renewal before the end of the month.",
+      "start_ms": 28454,
+      "end_ms": 34082
+    },
+    {
+      "speaker": "A",
+      "text": "Great. Our engineers mentioned they could probably look at the single sign-on issue at some point.",
+      "start_ms": 34482,
+      "end_ms": 39244
+    },
+    {
+      "speaker": "B",
+      "text": "I can't promise we'll expand to the second region this year, though. Budget is tight.",
+      "start_ms": 39644,
+      "end_ms": 44566
+    },
+    {
+      "speaker": "A",
+      "text": "No problem. Sarah said she would send you the revised pricing tomorrow morning.",
+      "start_ms": 44966,
+      "end_ms": 49083
+    },
+    {
+      "speaker": "B",
+      "text": "Perfect. Let's reconnect next Tuesday once I have everything.",
+      "start_ms": 49483,
+      "end_ms": 53197
+    },
+    {
+      "speaker": "A",
+      "text": "Sounds good. I'll put thirty minutes on the calendar for Tuesday at ten and send you the invite today.",
+      "start_ms": 53597,
+      "end_ms": 58593
+    }
+  ]
+}
