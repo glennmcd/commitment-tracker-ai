@@ -15,7 +15,7 @@ claim comes from.
 | Decision | Choice |
 | --- | --- |
 | Call granularity | One Messages API request per transcript; the model returns one span or more for every turn |
-| JSON mechanism | Structured outputs: `client.messages.parse(..., output_format=ModelOutput)` on `AsyncAnthropic` |
+| JSON mechanism | Structured outputs: `output_config.format` with the schema of `ModelOutput` on `AsyncAnthropic`; the extractor validates the returned text |
 | Context rule | Each turn is judged on its own text plus the preceding turn; the prompt says so, and the eval checks it |
 | Validation | SDK schema validation, then our Pydantic validators; one retry with the error appended; then `ModelOutputInvalid` |
 | Post-pass (code, not model) | Quote substring check, date resolution, ledger flags |
@@ -101,10 +101,13 @@ Haiku 5.5, so all three comparison models share one code path.
 
 ## Structured outputs: behaviour we rely on
 
-- `client.messages.parse()` sends the schema as `output_config.format`, validates the reply against the
-  original Pydantic model and returns it as `parsed_output` (Structured outputs, "Usage").
-- Unsupported constraints (`minimum`/`maximum` on `confidence`) are removed from the API schema, written into
-  the field description, and still enforced by the SDK's validation ("How SDK transformation works").
+- The adapter sends the schema of `ModelOutput` as `output_config.format`, transformed with the SDK's
+  `transform_schema()`, and returns the reply's text; the extractor validates it with
+  `ModelOutput.model_validate_json`. This replaces `client.messages.parse()` (Structured outputs, "Usage"),
+  which validates inside the SDK: keeping validation in the extractor means a failed reply's own content is
+  still in hand for the retry, and the fake adapter can exercise every validation path.
+- Unsupported constraints (`minimum`/`maximum` on `confidence`) are removed from the API schema and written
+  into the field description ("How SDK transformation works"); Pydantic still enforces them on our side.
 - Enum casing may drift ("Commitment" for "COMMITMENT") with no error ("Invalid outputs"), so `Label` parses
   case-insensitively.
 - A new schema costs a one-time grammar compilation; compiled grammars are cached for 24 hours from last use,
@@ -121,10 +124,10 @@ Haiku 5.5, so all three comparison models share one code path.
 ## Validation, retry and errors
 
 ```text
-response = parse(...)
+reply = adapter.complete(...)
 ├─ stop_reason == "refusal"     → ModelRefused (no retry; category logged, not text)
 ├─ stop_reason == "max_tokens"  → counts as invalid → retry once
-├─ SDK validation error         → invalid → retry once
+├─ ModelOutput validation error → invalid → retry once
 └─ parsed ModelOutput → our checks:
      - turn_index within the transcript
      - condition present when label == CONDITIONAL
@@ -218,4 +221,4 @@ when a different model answered. Haiku 5.5 has no server-side fallback; a refusa
 | Cache minimum 512 tokens, multipliers, TTL, render order, usage fields | [Prompt caching](https://platform.claude.com/docs/en/build-with-claude/prompt-caching), "How prompt caching works", "Pricing", "Tracking cache performance" |
 | Model prices, cache-hit prices, Batch API at 50% | [Pricing](https://platform.claude.com/docs/en/about-claude/pricing), "Model pricing", "Batch processing" |
 | Ask for an explanation, not reasoning | Define tools, "Best practices for tool definitions" |
-| Async client, timeouts, retries | [Python SDK](https://github.com/anthropics/anthropic-sdk-python) README; the async form of `messages.parse()` gets confirmed against the installed SDK in commit 6 |
+| Async client, timeouts, retries | [Python SDK](https://github.com/anthropics/anthropic-sdk-python) README; `transform_schema()` and the async `messages.create` call get confirmed against the installed SDK in commit 6 |
