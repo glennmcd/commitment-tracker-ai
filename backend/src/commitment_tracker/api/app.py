@@ -8,7 +8,6 @@ transcript text, and validation errors drop the input values FastAPI would other
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from importlib.metadata import version
 from typing import Literal
 
 from fastapi import FastAPI, Request
@@ -28,6 +27,11 @@ from commitment_tracker.schemas import AnalyzeRequest, AnalyzeResponse
 from commitment_tracker.settings import Settings
 
 logger = logging.getLogger(__name__)
+
+# The API contract version, published as info.version in openapi.json. Bump it by hand when the
+# request or response shape changes; it is separate from the release version (commitment_tracker
+# .__version__), so releases don't change openapi.json or the frontend client generated from it.
+API_VERSION = "0.1.0"
 
 
 class HealthResponse(BaseModel):
@@ -97,7 +101,7 @@ def create_app(*, extractor: Extractor | None = None, settings: Settings | None 
 
     app = FastAPI(
         title="Commitment Tracker AI",
-        version=version("commitment-tracker"),
+        version=API_VERSION,
         description="Extracts commitments from conversation transcripts.",
         lifespan=lifespan,
     )

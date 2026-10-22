@@ -181,3 +181,12 @@ def test_production_startup_makes_app_logs_visible(monkeypatch: pytest.MonkeyPat
     with TestClient(create_app(settings=s)):
         assert package.handlers
         assert package.getEffectiveLevel() == logging.INFO
+
+
+def test_openapi_version_is_the_api_contract_version_not_the_release() -> None:
+    # Releases bump commitment_tracker.__version__; the contract version changes only with the
+    # request or response shape, so openapi.json (and the frontend client) stay put across releases.
+    from commitment_tracker.api.app import API_VERSION
+
+    spec = client_for().get("/openapi.json").json()
+    assert spec["info"]["version"] == API_VERSION
