@@ -1,0 +1,56 @@
+/* Colours are tokens so the dark theme is a second set of values, not a second stylesheet. */
+:root {
+  --bg: #fbfaf7;
+  --surface: #ffffff;
+  --text: #1c1b19;
+  --muted: #5e5a52;
+  --line: #ddd8cd;
+  --accent: #1f5f4a;
+  --focus: #1a56c4;
+  --radius: 10px;
+  --gutter: 16px;
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141412;
+    --surface: #1d1c19;
+    --text: #efece4;
+    --muted: #a8a397;
+    --line: #36342e;
+    --accent: #6fcfae;
+    --focus: #8ab4ff;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+main {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 2rem var(--gutter);
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}

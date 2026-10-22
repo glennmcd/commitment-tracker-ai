@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "incremental": true,
+    "allowJs": false,
+    "plugins": [{ "name": "next" }],
+    "paths": { "@/*": ["./src/*"] }
+  },
+  "include": ["next-env.d.ts", "src", "vitest.config.ts", "next.config.ts", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", "out"]
+}

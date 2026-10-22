@@ -8,6 +8,7 @@
       "!.claude",
       "!docs",
       "!openapi.json",
+      "!frontend/src/api/schema.d.ts",
       "!release-please-config.json",
       "!.release-please-manifest.json",
       "!**/.next",

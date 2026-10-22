@@ -29,3 +29,7 @@ node_modules/
 # Part 2 infra build output
 infra/dist/
 infra/cdk.out/
+
+# Part 2 frontend build output
+frontend/out/
+frontend/tsconfig.tsbuildinfo
