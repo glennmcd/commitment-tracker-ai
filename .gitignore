@@ -33,3 +33,5 @@ infra/cdk.out/
 # Part 2 frontend build output
 frontend/out/
 frontend/tsconfig.tsbuildinfo
+frontend/test-results/
+frontend/playwright-report/

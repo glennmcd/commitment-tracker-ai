@@ -134,4 +134,33 @@ describe("Demo", () => {
     release(failure("rate_limited", 429));
     await screen.findByRole("alert");
   });
+
+  it("fills the conversation from a prompt chip, which can then be sent", async () => {
+    client.POST.mockResolvedValue(ok(job([], { status: "uploaded", analysis: null }), 202));
+    client.GET.mockResolvedValue(ok(job([span({ turn_index: 1 })])));
+    const user = userEvent.setup();
+    render(<Demo />);
+    await waitFor(() => expect(screen.getByLabelText("Call date")).not.toHaveValue(""));
+
+    await user.click(screen.getByRole("button", { name: "Try a hedge" }));
+
+    expect((screen.getByLabelText("Conversation") as HTMLTextAreaElement).value).toContain("no promises");
+    await user.click(screen.getByRole("button", { name: "Find commitments" }));
+    await screen.findByRole("region", { name: "Commitments" });
+    expect(client.POST).toHaveBeenCalledWith("/jobs", {
+      body: expect.objectContaining({
+        transcript: expect.arrayContaining([expect.objectContaining({ speaker: "Ben" })]),
+      }),
+    });
+  });
+
+  it("offers the chips only in text mode", async () => {
+    const user = userEvent.setup();
+    render(<Demo />);
+    expect(screen.getByRole("group", { name: "Try to trick it" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("radio", { name: "Record" }));
+
+    expect(screen.queryByRole("group", { name: "Try to trick it" })).not.toBeInTheDocument();
+  });
 });

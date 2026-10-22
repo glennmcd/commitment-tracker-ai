@@ -604,3 +604,36 @@ button.secondary {
   height: 1.1rem;
   accent-color: var(--accent);
 }
+
+/* ---- Prompt chips ---- */
+
+.chips {
+  border: 0;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.chips legend {
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: 0.4rem;
+}
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip {
+  color: var(--text);
+  background: transparent;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  font-weight: 500;
+  padding: 0.3rem 0.9rem;
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--accent);
+}

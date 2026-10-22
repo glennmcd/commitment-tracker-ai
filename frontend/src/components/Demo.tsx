@@ -8,6 +8,7 @@ import { fetchSamples, type Sample, startSampleJob } from "@/lib/samples";
 import { parseTranscript } from "@/lib/transcript";
 import { startUploadJob, uploadRecording } from "@/lib/upload";
 import { JobStatus } from "./JobStatus";
+import { PromptChips } from "./PromptChips";
 import { type RecordedClip, Recorder } from "./Recorder";
 import { Results } from "./Results";
 import { SamplePicker } from "./SamplePicker";
@@ -162,6 +163,8 @@ export function Demo() {
             </label>
           ))}
         </fieldset>
+
+        {mode === "text" ? <PromptChips disabled={busy} onPick={(prompt) => setText(prompt.text)} /> : null}
 
         {mode === "text" ? (
           <div className="field">
