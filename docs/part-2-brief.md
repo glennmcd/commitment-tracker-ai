@@ -103,7 +103,7 @@ Record each accepted decision as an ADR in `docs/decisions/`.
 
 ## Done when
 
-- [ ] The design doc and its ADRs are accepted.
+- [x] The design doc and its ADRs are accepted.
 - [ ] `commitmentai.g26work.com` is live: recording, sample clips and text mode all return results.
 - [ ] Each job records per-stage latency, and the README states the measured p50 and p95 for a sample clip against
       the 10-second target, whether or not it's met.

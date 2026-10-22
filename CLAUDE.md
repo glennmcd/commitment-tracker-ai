@@ -49,8 +49,6 @@ uv run eval --model <id> --prompt v1
   model they used. Tune prompts on development data only.
 - **Ask before adding a dependency** outside the stack in `docs/part-1-brief.md` (FastAPI, Pydantic v2,
   pydantic-settings, anthropic, python-dateutil, scikit-learn, pytest, Ruff, mypy).
-- Agent commits are allowed here; keep them small and Conventional. The commit type sets the next version
-  (`feat:` minor, `fix:` patch, others none); see `docs/releasing.md`.
 - **Never bump versions by hand.** release-please owns `commitment_tracker.__version__` and
   `.release-please-manifest.json`. The API contract version (`API_VERSION` in `api/app.py`) is separate: bump it
   only when the request or response shape changes, then run `uv run export-openapi`.
