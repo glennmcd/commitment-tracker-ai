@@ -22,7 +22,7 @@ the text says so, and the measurement step confirms the claim against the real s
 | Packaging | **Zip** for arm64 and Python 3.12, built with `uv export` and `uv pip install --target`. scikit-learn moves to an `eval` dependency group so it stays out of the bundle |
 | Infrastructure | **AWS CDK in TypeScript** under `infra/`, adapted from FlakeHunter's stacks and tests |
 | Frontend hosting | Next.js 16 as a **static export** on Amplify Hosting; the browser calls the API directly |
-| Sample clips | **Amazon Polly**, two voices, 16 kHz PCM written as WAV with the standard library; dialogues and labels are committed as ground truth |
+| Sample clips | **Amazon Polly** standard voices in us-east-2, two voices, 16 kHz PCM written as WAV with the standard library; dialogues and labels are committed as ground truth |
 | AWS account | A **new member account** for this project, with its own guardrail SCP, budget and hosted zone for `commitmentai.g26work.com` |
 | Demo model | `claude-haiku-5-5` on the deployed stack; the settings default stays `claude-opus-5-5` |
 | Budget | A **$5 daily** spend cap enforced by the API (Claude and Transcribe costs), backed by a **$30 monthly** AWS budget kill switch |
@@ -234,16 +234,16 @@ The agent synthesizes and tests; you run `cdk deploy`, the account setup and the
 **Confirmed: Amazon Polly, two voices.** `scripts/make_samples.py` reads `backend/samples/dialogues.jsonl`. Each
 dialogue lists turns with a speaker and text, the expected spans in the dev-set format, and two voice ids.
 
-- It calls `SynthesizeSpeech` per turn with `OutputFormat: pcm` and `SampleRate: 16000` (signed 16-bit mono
-  little-endian).
+- It calls `SynthesizeSpeech` per turn with `Engine: standard`, `OutputFormat: pcm` and `SampleRate: 16000`
+  (signed 16-bit mono little-endian). Only the standard engine has voices in us-east-2, the account's one Region.
 - It joins the turns with 400 ms of silence and writes one WAV with the `wave` module. This is our upload format,
   so a sample goes through exactly the pipeline a recording does.
 - Turn timestamps come from sample counts, so each clip has an exact ground-truth transcript with `start_ms` and
   `end_ms`.
 - Four clips of 30–60 s, each covering several labels: a firm promise with a date, a hedge, a conditional, a
   request, and a refusal or a reported promise.
-- Neural voices cost $16 per million characters and generative voices $30. Four clips of about 900 characters
-  cost under $0.15 either way. The script runs once, with the new account's profile. The WAVs are committed under
+- Standard voices cost $4 per million characters, so four clips of about 900 characters cost under $0.02. The
+  script runs once, with the new account's profile. The WAVs are committed under
   `frontend/public/samples/` for playback and deployed to `samples/` in the bucket.
 
 The dialogues are new text, not the dev-set utterances, so they don't tune the prompt on its own data. They can
@@ -520,4 +520,4 @@ Settled one by one before acceptance:
 | Amplify SSR compute supports Next.js 12–15; platform values `WEB` and `WEB_COMPUTE` | [Amplify support for Next.js](https://docs.aws.amazon.com/amplify/latest/userguide/ssr-amplify-support.html) |
 | Next.js 16.4.0 released 7 October 2026 | [Wikipedia: Next.js](https://en.wikipedia.org/wiki/Next.js) (secondary; confirmed against npm when scaffolding) |
 | Polly PCM at 8000 or 16000 Hz, signed 16-bit mono little-endian | [AWS CLI `polly synthesize-speech`](https://docs.aws.amazon.com/cli/latest/reference/polly/synthesize-speech.html) |
-| Polly prices: neural $16, generative $30 per million characters | [Amazon Polly pricing](https://aws.amazon.com/polly/pricing/) |
+| Polly prices: standard $4, neural $16, generative $30 per million characters | [Amazon Polly pricing](https://aws.amazon.com/polly/pricing/) |
