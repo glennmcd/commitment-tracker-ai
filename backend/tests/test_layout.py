@@ -14,8 +14,9 @@ FIRST_PARTY = "commitment_tracker"
 
 # module or package under commitment_tracker -> first-party modules it must not import
 RULES: dict[str, set[str]] = {
-    "schemas": {"settings", "extractor", "api", "evaluation"},
+    "schemas": {"settings", "extractor", "transcription", "api", "evaluation"},
     "extractor": {"api", "evaluation"},
+    "transcription": {"extractor", "jobs", "api", "evaluation"},
     "evaluation": {"api"},
 }
 
