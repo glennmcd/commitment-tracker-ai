@@ -15,6 +15,7 @@ from collections.abc import Callable, Sequence
 from datetime import date
 from typing import Protocol
 
+from commitment_tracker.guardrails.spend import SpendCap, transcribe_cost_usd
 from commitment_tracker.jobs.audio import AudioInvalid, AudioTooLong, validate_wav
 from commitment_tracker.jobs.audio_store import AudioStore
 from commitment_tracker.jobs.record import (
@@ -80,7 +81,9 @@ class JobService:
         dispatcher: WorkerDispatcher | None,
         *,
         clock: Callable[[], float] = time.time,
+        spend: SpendCap | None = None,
     ) -> None:
+        self._spend = spend
         self._store = store
         self._audio = audio
         self._transcriber = transcriber
@@ -121,7 +124,7 @@ class JobService:
             stored = self._audio.read(key)
             if stored is None:
                 raise UploadNotFound(upload_id)
-            validate_wav(stored.data)
+            info = validate_wav(stored.data)
         except (AudioInvalid, AudioTooLong):
             self._audio.delete(key)
             raise
@@ -136,7 +139,7 @@ class JobService:
             upload_started_at=stored.uploaded_at_ms,
             transcribing_at=self._now_ms(),
         )
-        result = self._start_audio_job(job)
+        result = self._start_audio_job(job, info.duration_ms)
         if result.audio_key != key:
             self._audio.delete(key)  # the same audio was uploaded before
         elif result.status is JobStatus.FAILED:
@@ -158,9 +161,9 @@ class JobService:
             speaker_names=list(speaker_names),
             transcribing_at=self._now_ms(),
         )
-        return self._start_audio_job(job)
+        return self._start_audio_job(job, clip.duration_ms)
 
-    def _start_audio_job(self, job: JobRecord) -> JobRecord:
+    def _start_audio_job(self, job: JobRecord, duration_ms: int) -> JobRecord:
         assert job.audio_key is not None
         stored = self._store.create(job)
         if stored is not job:
@@ -173,6 +176,8 @@ class JobService:
                 "transcription not started job_id=%s error=%s", job.id, type(error).__name__
             )
             return self._fail(job, JobStatus.TRANSCRIBING, TRANSCRIPTION_FAILED)
+        if self._spend is not None:
+            self._spend.record(transcribe_cost_usd(duration_ms))
         logger.info("job started job_id=%s source=%s", job.id, job.source.value)
         return job
 

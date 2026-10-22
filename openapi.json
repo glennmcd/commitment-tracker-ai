@@ -69,6 +69,16 @@
               }
             }
           },
+          "503": {
+            "description": "The day's spending cap is reached; see Retry-After (seconds to UTC midnight)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "502": {
             "description": "The model failed or its output was invalid",
             "content": {
@@ -176,7 +186,7 @@
             }
           },
           "503": {
-            "description": "Jobs are not configured",
+            "description": "Jobs are not configured, or the day's spending cap is reached",
             "content": {
               "application/json": {
                 "schema": {
@@ -246,7 +256,7 @@
             }
           },
           "503": {
-            "description": "Jobs are not configured",
+            "description": "Jobs are not configured, or the day's spending cap is reached",
             "content": {
               "application/json": {
                 "schema": {
@@ -308,7 +318,7 @@
             }
           },
           "503": {
-            "description": "Jobs are not configured",
+            "description": "Jobs are not configured, or the day's spending cap is reached",
             "content": {
               "application/json": {
                 "schema": {

@@ -30,6 +30,7 @@ from commitment_tracker.guardrails.ratelimit import (
     RateLimiter,
     client_ip,
 )
+from commitment_tracker.guardrails.spend import DailyBudgetExhausted, DynamoSpendStore, SpendCap
 from commitment_tracker.jobs.audio import MAX_AUDIO_BYTES, AudioInvalid, AudioTooLong
 from commitment_tracker.jobs.audio_store import S3AudioStore
 from commitment_tracker.jobs.dynamo import DynamoJobStore
@@ -109,6 +110,12 @@ class RateLimited(Exception):
         self.retry_after = retry_after
 
 
+BUDGET_EXHAUSTED: dict[str, object] = {
+    "model": ErrorResponse,
+    "description": "The day's spending cap is reached; see Retry-After (seconds to UTC midnight)",
+}
+
+
 # Each extraction failure: HTTP status, error code and the fixed message clients see.
 EXTRACTION_ERRORS: dict[type[ExtractionError], tuple[int, str, str]] = {
     ModelUnavailable: (502, "model_unavailable", "The model is unavailable. Try again later."),
@@ -122,6 +129,7 @@ EXTRACTION_ERRORS: dict[type[ExtractionError], tuple[int, str, str]] = {
 ERROR_RESPONSES: dict[int | str, dict[str, object]] = {
     422: {"model": ErrorResponse, "description": "Invalid request, or the model refused it"},
     429: RATE_LIMITED,
+    503: BUDGET_EXHAUSTED,
     502: {"model": ErrorResponse, "description": "The model failed or its output was invalid"},
 }
 UPLOAD_RESPONSES: dict[int | str, dict[str, object]] = {
@@ -132,7 +140,10 @@ JOB_RESPONSES: dict[int | str, dict[str, object]] = {
     404: {"model": ErrorResponse, "description": "The upload, sample or job does not exist"},
     429: RATE_LIMITED,
     422: {"model": ErrorResponse, "description": "Invalid request, or the audio is not accepted"},
-    503: {"model": ErrorResponse, "description": "Jobs are not configured"},
+    503: {
+        "model": ErrorResponse,
+        "description": "Jobs are not configured, or the day's spending cap is reached",
+    },
 }
 # Domain errors raised by the job service: HTTP status, error code and the fixed message.
 JOB_ERRORS: dict[type[Exception], tuple[int, str, str]] = {
@@ -154,6 +165,13 @@ def _error(
 ) -> JSONResponse:
     body = ErrorResponse(error=ErrorBody(code=code, message=message, details=details or []))
     return JSONResponse(status_code=status, content=body.model_dump(), headers=headers)
+
+
+async def within_budget(request: Request) -> None:
+    """Refuse new work once the day's spending cap is reached. Runs before the body is read."""
+    spend: SpendCap | None = request.app.state.spend
+    if spend is not None:
+        await run_in_threadpool(spend.check)
 
 
 def limited(rule: str) -> Any:
@@ -191,7 +209,7 @@ def build_upload_signer(settings: Settings) -> UploadSigner | None:
     return S3UploadSigner(s3, settings.audio_bucket, expires_in=settings.upload_url_ttl_seconds)
 
 
-def build_job_service(settings: Settings) -> JobService | None:
+def build_job_service(settings: Settings, spend: SpendCap | None = None) -> JobService | None:
     """Wired to AWS when the bucket and table are configured. The worker dispatcher joins in with
     the Lambda handlers, so text jobs answer 503 until then."""
     if settings.audio_bucket is None or settings.jobs_table is None:
@@ -203,7 +221,15 @@ def build_job_service(settings: Settings) -> JobService | None:
         AwsBatchTranscriber(boto3.client("transcribe"), s3, settings.audio_bucket),
         load_catalog(),
         None,
+        spend=spend,
     )
+
+
+def build_spend_cap(settings: Settings) -> SpendCap | None:
+    if settings.guardrails_table is None:
+        return None
+    store = DynamoSpendStore(boto3.client("dynamodb"), settings.guardrails_table)
+    return SpendCap(store, settings.daily_budget_usd)
 
 
 def build_limiter(settings: Settings) -> RateLimiter | None:
@@ -230,6 +256,7 @@ def create_app(
     uploads: UploadSigner | None = None,
     jobs: JobService | None = None,
     limiter: RateLimiter | None = None,
+    spend: SpendCap | None = None,
 ) -> FastAPI:
     """With no extractor, the lifespan builds the Anthropic one, and the upload signer when an
     audio bucket is configured, from settings at startup."""
@@ -241,8 +268,10 @@ def create_app(
             active_settings = settings or Settings()
             app.state.extractor = build_extractor(active_settings)
             app.state.uploads = uploads or build_upload_signer(active_settings)
-            app.state.jobs = jobs or build_job_service(active_settings)
+            spend_cap = spend or build_spend_cap(active_settings)
+            app.state.jobs = jobs or build_job_service(active_settings, spend_cap)
             app.state.limiter = limiter or build_limiter(active_settings)
+            app.state.spend = spend_cap
         yield
 
     app = FastAPI(
@@ -254,6 +283,7 @@ def create_app(
     app.state.uploads = uploads
     app.state.jobs = jobs
     app.state.limiter = limiter
+    app.state.spend = spend
     if extractor is not None:
         app.state.extractor = extractor
 
@@ -272,6 +302,16 @@ def create_app(
             429,
             "rate_limited",
             f"Too many requests. Try again in {exc.retry_after} seconds.",
+            headers={"Retry-After": str(exc.retry_after)},
+        )
+
+    @app.exception_handler(DailyBudgetExhausted)
+    async def _budget_exhausted(request: Request, exc: DailyBudgetExhausted) -> JSONResponse:
+        logger.info("daily_budget_exhausted path=%s", request.url.path)
+        return _error(
+            503,
+            "daily_budget_exhausted",
+            "The demo has reached its daily spending limit. Try again after midnight UTC.",
             headers={"Retry-After": str(exc.retry_after)},
         )
 
@@ -304,10 +344,17 @@ def create_app(
             status="ok", model=active.adapter.model, prompt_version=active.prompt.version
         )
 
-    @app.post("/analyze", responses=ERROR_RESPONSES, dependencies=[limited("analyze")])
+    @app.post(
+        "/analyze",
+        responses=ERROR_RESPONSES,
+        dependencies=[limited("analyze"), Depends(within_budget)],
+    )
     async def analyze(body: AnalyzeRequest, request: Request) -> AnalyzeResponse:
         active: Extractor = request.app.state.extractor
         result = await active.analyze(body)
+        spend: SpendCap | None = request.app.state.spend
+        if spend is not None and result.metadata.cost_usd is not None:
+            await run_in_threadpool(spend.record, result.metadata.cost_usd)
         meta = result.metadata
         logger.info(
             "analyze turns=%d spans=%d dropped_quotes=%d attempts=%d latency_ms=%d served_by=%s",
@@ -350,7 +397,7 @@ def create_app(
         status_code=202,
         response_model=JobResponse,
         responses=JOB_RESPONSES,
-        dependencies=[limited("jobs")],
+        dependencies=[limited("jobs"), Depends(within_budget)],
     )
     async def create_job(body: JobRequest, request: Request) -> JobResponse:
         service = _jobs(request)

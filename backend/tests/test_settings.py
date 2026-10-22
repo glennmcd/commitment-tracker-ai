@@ -82,3 +82,14 @@ def test_table_names_default_to_unset_and_come_from_the_environment(
 def test_upload_ttl_must_be_positive() -> None:
     with pytest.raises(ValidationError):
         settings(upload_url_ttl_seconds=0)
+
+
+def test_daily_budget_defaults_to_five_dollars_and_must_be_positive(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("DAILY_BUDGET_USD", raising=False)
+    assert settings().daily_budget_usd == 5.0
+    monkeypatch.setenv("DAILY_BUDGET_USD", "2.5")
+    assert settings().daily_budget_usd == 2.5
+    with pytest.raises(ValidationError):
+        settings(daily_budget_usd=0)

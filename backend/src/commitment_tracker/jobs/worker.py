@@ -17,6 +17,7 @@ from typing import Any
 
 from commitment_tracker.extractor.errors import ExtractionError
 from commitment_tracker.extractor.extractor import Extractor
+from commitment_tracker.guardrails.spend import SpendCap
 from commitment_tracker.jobs.audio_store import AudioStore
 from commitment_tracker.jobs.record import JobRecord, JobSource, JobStatus, JobUpdate
 from commitment_tracker.jobs.service import TRANSCRIPTION_FAILED
@@ -60,7 +61,9 @@ class JobWorker:
         extractor: Extractor,
         *,
         clock: Callable[[], float] = time.time,
+        spend: SpendCap | None = None,
     ) -> None:
+        self._spend = spend
         self._store = store
         self._audio = audio
         self._transcriber = transcriber
@@ -137,6 +140,8 @@ class JobWorker:
             logger.warning("analysis failed job_id=%s error=%s", job.id, type(error).__name__)
             self._finish(job, JobUpdate(status=JobStatus.FAILED, error_code=ANALYSIS_FAILED))
             return
+        if self._spend is not None and result.metadata.cost_usd is not None:
+            self._spend.record(result.metadata.cost_usd)
         self._finish(job, JobUpdate(status=JobStatus.DONE, analysis=result))
         logger.info(
             "job done job_id=%s spans=%d latency_ms=%d",
