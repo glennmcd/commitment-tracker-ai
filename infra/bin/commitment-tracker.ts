@@ -1,6 +1,7 @@
 import { App } from "aws-cdk-lib";
 import { ApiStack } from "../lib/api-stack.js";
 import { positiveNumberContext, REGION } from "../lib/config.js";
+import { WebStack } from "../lib/web-stack.js";
 
 const app = new App();
 
@@ -24,7 +25,7 @@ const throttle =
   throttleRate === undefined ? undefined : { rateLimit: throttleRate, burstLimit: throttleBurst ?? throttleRate * 2 };
 
 // The stack id is fixed: the guardrail SCP protects "CommitmentTrackerApi-BudgetStopFunction*" by name.
-new ApiStack(app, "CommitmentTrackerApi", {
+const api = new ApiStack(app, "CommitmentTrackerApi", {
   env,
   description: "Commitment Tracker AI API: Lambda behind an API Gateway HTTP API, Transcribe, S3 and DynamoDB",
   dailyBudgetUsd,
@@ -34,4 +35,23 @@ new ApiStack(app, "CommitmentTrackerApi", {
   reservedConcurrency: positiveNumberContext(app.node, "reservedConcurrency"),
 });
 
-// The Amplify web stack is added by a later commit.
+// The site's custom domain lives in cdk.json's context, so every deploy carries it (a deploy without it would delete
+// the domain association). A -c override arrives as a JSON string.
+const rawDomain = app.node.tryGetContext("customDomain");
+const customDomain = typeof rawDomain === "string" ? JSON.parse(rawDomain) : rawDomain;
+
+// The site on Amplify Hosting, built from GitHub as a static export:
+//   cdk deploy CommitmentTrackerWeb -c repository=https://github.com/<owner>/<repo> -c githubTokenSecretName=<secret>
+const text = (name: string): string | undefined => {
+  const value: unknown = app.node.tryGetContext(name);
+  return typeof value === "string" ? value : undefined;
+};
+new WebStack(app, "CommitmentTrackerWeb", {
+  env,
+  description: "Commitment Tracker AI site: a Next.js static export on Amplify Hosting",
+  apiUrl: api.httpApiUrl,
+  repository: text("repository"),
+  githubTokenSecretName: text("githubTokenSecretName"),
+  branch: text("branch"),
+  customDomain,
+});

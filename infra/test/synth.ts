@@ -2,6 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Template } from "aws-cdk-lib/assertions";
 import type { ApiStackProps } from "../lib/api-stack.js";
+import type { WebStackProps } from "../lib/web-stack.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const infraRoot = path.join(here, "..");
@@ -9,7 +10,8 @@ const infraRoot = path.join(here, "..");
 export const ACCOUNT = "123456789012";
 export const REGION = "us-east-2";
 
-const api = (props: ApiStackProps = {}) => ({ props });
+const api = (props: ApiStackProps = {}) => ({ stack: "api" as const, props });
+const web = (props: Partial<WebStackProps> = {}, withApi = false) => ({ stack: "web" as const, props, withApi });
 
 /** Every stack the tests need, synthesized together in one Node process (see synth-worker.ts for why not in Bun). */
 export const SCENARIOS = {
@@ -31,7 +33,22 @@ export const SCENARIOS = {
   badThrottleFraction: api({ throttle: { rateLimit: 5, burstLimit: 7.5 } }),
   badConcurrency: api({ reservedConcurrency: 0 }),
   badBudget: api({ dailyBudgetUsd: 0 }),
-} satisfies Record<string, { props: ApiStackProps }>;
+  webDefaults: web(),
+  webWithApi: web({}, true),
+  webConnected: web({
+    repository: "https://github.com/glennmcd/commitment-tracker-ai",
+    githubTokenSecretName: "commitment-tracker/github-token",
+  }),
+  webDomain: web({ customDomain: { domainName: "example.com", subDomains: ["", "www", "app.dev"] } }),
+  webBranch: web({ branch: "release", customDomain: { domainName: "example.com", subDomains: ["www"] } }),
+  badDomainName: web({ customDomain: { domainName: "Example.com", subDomains: [""] } }),
+  badDomainNoSubDomains: web({ customDomain: { domainName: "example.com", subDomains: [] } }),
+  badDomainPrefix: web({ customDomain: { domainName: "example.com", subDomains: ["-www"] } }),
+  badDomainDuplicate: web({ customDomain: { domainName: "example.com", subDomains: ["www", "www"] } }),
+  badRepository: web({ repository: "https://example.com/not-github" }),
+  badBranch: web({ branch: "-bad branch" }),
+  badApiUrl: web({ apiUrl: "http://api.example.com/path" }),
+} satisfies Record<string, { stack: "api" | "web"; props: object }>;
 
 export interface Scenario {
   template: Template;
