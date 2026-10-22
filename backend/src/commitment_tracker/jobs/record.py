@@ -7,6 +7,7 @@ errors never include the transcript text.
 
 from datetime import date
 from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -73,8 +74,16 @@ class JobRecord(_Model):
 
     def apply(self, update: JobUpdate) -> "JobRecord":
         """The record with the fields `update` sets; the result is validated again."""
-        data = self.model_dump() | {name: getattr(update, name) for name in update.model_fields_set}
+        data = self._data() | {name: getattr(update, name) for name in update.model_fields_set}
         return JobRecord.model_validate(data)
+
+    def _data(self) -> dict[str, Any]:
+        # Spans dump computed fields (in_ledger, soft) that their own validation forbids as input.
+        return self.model_dump(exclude_computed_fields=True)
+
+    def to_json(self) -> str:
+        """The form stored in a job store; `model_validate_json` reads it back."""
+        return self.model_dump_json(exclude_computed_fields=True)
 
     def latency(self) -> Latency:
         return Latency(

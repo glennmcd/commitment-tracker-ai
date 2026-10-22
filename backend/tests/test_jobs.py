@@ -67,6 +67,48 @@ def test_record_round_trips_through_json() -> None:
     assert JobRecord.model_validate_json(job.model_dump_json()) == job
 
 
+def finished_job() -> JobRecord:
+    """A done job whose analysis has a real span (spans carry computed fields in their dumps)."""
+    from tests.test_feedback import analysed
+
+    return make_job(status=JobStatus.DONE, analysis=analysed(), turns=analysed_turns())
+
+
+def analysed_turns() -> list[Turn]:
+    from tests.test_feedback import TURNS
+
+    return TURNS
+
+
+def test_a_record_with_spans_round_trips_through_its_stored_json() -> None:
+    job = finished_job()
+    assert job.analysis is not None and job.analysis.spans
+
+    assert JobRecord.model_validate_json(job.to_json()) == job
+
+
+def test_the_stored_json_leaves_out_computed_span_fields() -> None:
+    assert "in_ledger" not in finished_job().to_json()
+
+
+def test_a_finished_record_can_take_another_update() -> None:
+    job = finished_job()
+
+    updated = job.apply(JobUpdate(status=JobStatus.FAILED, error_code="x"))
+
+    assert updated.status is JobStatus.FAILED
+    assert updated.analysis == job.analysis
+
+
+def test_the_memory_store_can_move_a_finished_job() -> None:
+    store = MemoryJobStore(clock=lambda: NOW)
+    store.create(finished_job())
+
+    moved = store.transition("abc", JobStatus.DONE, JobUpdate(status=JobStatus.FAILED))
+
+    assert moved is not None
+
+
 def test_record_rejects_unknown_status() -> None:
     with pytest.raises(ValidationError):
         make_job(status="stuck")
@@ -245,7 +287,7 @@ def item(job: JobRecord) -> dict[str, Any]:
         "id": {"S": job.id},
         "status": {"S": job.status.value},
         "expires_at": {"N": str(job.expires_at)},
-        "record": {"S": job.model_dump_json()},
+        "record": {"S": job.to_json()},
     }
 
 
@@ -289,6 +331,29 @@ def test_dynamo_get_reads_consistently(rig: Rig) -> None:
     rig.stub.add_response("get_item", {"Item": item(job)}, get_params())
 
     assert rig.store.get("abc") == job
+
+
+def test_dynamo_get_reads_back_a_finished_job_with_spans(rig: Rig) -> None:
+    job = finished_job()
+    rig.stub.add_response("get_item", {"Item": item(job)}, get_params())
+
+    assert rig.store.get("abc") == job
+
+
+def test_dynamo_stores_exactly_what_to_json_gives(rig: Rig) -> None:
+    job = finished_job()
+    rig.stub.add_response(
+        "put_item",
+        {},
+        {
+            "TableName": TABLE,
+            "Item": item(job),
+            "ConditionExpression": "attribute_not_exists(id) OR expires_at <= :now",
+            "ExpressionAttributeValues": {":now": {"N": str(NOW)}},
+        },
+    )
+
+    assert rig.store.create(job) == job
 
 
 def test_dynamo_get_unknown_is_none(rig: Rig) -> None:

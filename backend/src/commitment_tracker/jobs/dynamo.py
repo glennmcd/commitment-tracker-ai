@@ -40,7 +40,7 @@ class DynamoJobStore:
             "id": {"S": job.id},
             "status": {"S": job.status.value},
             "expires_at": {"N": str(job.expires_at)},
-            "record": {"S": job.model_dump_json()},
+            "record": {"S": job.to_json()},
         }
 
     def _read(self, job_id: str) -> tuple[JobRecord, str] | None:
