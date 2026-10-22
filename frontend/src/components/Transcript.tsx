@@ -1,6 +1,6 @@
 import { LABELS, type Span, type Turn } from "@/lib/labels";
 
-type Piece = { text: string; span?: Span };
+type Piece = { text: string; start: number; span?: Span };
 
 /** Splits a turn's text around the quotes of its spans, in order, skipping any that overlap an earlier one. */
 export function splitTurn(text: string, spans: Span[]): Piece[] {
@@ -13,11 +13,11 @@ export function splitTurn(text: string, spans: Span[]): Piece[] {
   let cursor = 0;
   for (const { span, start } of found) {
     if (start < cursor) continue;
-    if (start > cursor) pieces.push({ text: text.slice(cursor, start) });
-    pieces.push({ text: span.quote, span });
+    if (start > cursor) pieces.push({ text: text.slice(cursor, start), start: cursor });
+    pieces.push({ text: span.quote, start, span });
     cursor = start + span.quote.length;
   }
-  if (cursor < text.length) pieces.push({ text: text.slice(cursor) });
+  if (cursor < text.length) pieces.push({ text: text.slice(cursor), start: cursor });
   return pieces;
 }
 
@@ -34,19 +34,21 @@ export function Transcript({ turns, spans }: { turns: Turn[]; spans: Span[] }) {
         {turns.map((turn, index) => {
           const own = spans.filter((span) => span.turn_index === index);
           return (
-            <li key={`${index}-${turn.speaker}`}>
+            // A finished transcript never reorders, so the position identifies a turn.
+            // biome-ignore lint/suspicious/noArrayIndexKey: fixed list, see above
+            <li key={index}>
               <span className="speaker">
                 {turn.speaker}
                 {turn.start_ms != null ? <span className="time"> {clock(turn.start_ms)}</span> : null}
               </span>{" "}
-              {splitTurn(turn.text, own).map((piece, i) =>
+              {splitTurn(turn.text, own).map((piece) =>
                 piece.span ? (
-                  <mark key={`${i}-${piece.text}`} data-label={piece.span.label}>
+                  <mark key={piece.start} data-label={piece.span.label}>
                     <span className="sr-only">{LABELS[piece.span.label].name}: </span>
                     {piece.text}
                   </mark>
                 ) : (
-                  <span key={`${i}-${piece.text}`}>{piece.text}</span>
+                  <span key={piece.start}>{piece.text}</span>
                 ),
               )}
             </li>
