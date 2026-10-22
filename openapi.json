@@ -1,0 +1,525 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Commitment Tracker AI",
+    "description": "Extracts commitments from conversation transcripts.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analyze": {
+      "post": {
+        "summary": "Analyze",
+        "operationId": "analyze_analyze_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyzeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request, or the model refused it",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The model failed or its output was invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnalyzeRequest": {
+        "properties": {
+          "transcript": {
+            "items": {
+              "$ref": "#/components/schemas/Turn"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "minItems": 1,
+            "title": "Transcript"
+          },
+          "call_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Call Date",
+            "description": "Date of the call; relative due dates resolve from it."
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone",
+            "description": "IANA time zone of the call, if known."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "transcript",
+          "call_date"
+        ],
+        "title": "AnalyzeRequest"
+      },
+      "AnalyzeResponse": {
+        "properties": {
+          "spans": {
+            "items": {
+              "$ref": "#/components/schemas/Span"
+            },
+            "type": "array",
+            "title": "Spans"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "spans",
+          "metadata"
+        ],
+        "title": "AnalyzeResponse"
+      },
+      "Due": {
+        "properties": {
+          "raw": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw",
+            "description": "The due phrase exactly as spoken, such as 'by Friday'."
+          },
+          "resolved": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved",
+            "description": "Calendar date resolved from call_date by code."
+          },
+          "precision": {
+            "$ref": "#/components/schemas/Precision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "raw",
+          "resolved",
+          "precision"
+        ],
+        "title": "Due"
+      },
+      "ErrorBody": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorDetail"
+            },
+            "type": "array",
+            "title": "Details",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorBody"
+      },
+      "ErrorDetail": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Loc"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Msg"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ErrorDetail"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorBody"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "ErrorResponse"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ok",
+            "title": "Status"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "prompt_version": {
+            "type": "string",
+            "title": "Prompt Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "model",
+          "prompt_version"
+        ],
+        "title": "HealthResponse"
+      },
+      "Label": {
+        "type": "string",
+        "enum": [
+          "COMMITMENT",
+          "HEDGED",
+          "CONDITIONAL",
+          "SUGGESTION",
+          "REQUEST",
+          "REPORTED",
+          "REFUSAL",
+          "NONE"
+        ],
+        "title": "Label"
+      },
+      "Metadata": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "description": "Model id the request asked for."
+          },
+          "served_by": {
+            "type": "string",
+            "title": "Served By",
+            "description": "Model that answered; differs after a refusal fallback."
+          },
+          "prompt_version": {
+            "type": "string",
+            "title": "Prompt Version"
+          },
+          "latency_ms": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Latency Ms"
+          },
+          "input_tokens": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Input Tokens"
+          },
+          "output_tokens": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Output Tokens"
+          },
+          "cache_creation_input_tokens": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Cache Creation Input Tokens"
+          },
+          "cache_read_input_tokens": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Cache Read Input Tokens"
+          },
+          "cost_usd": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Usd",
+            "description": "Estimated cost; null when the model has no known price."
+          },
+          "attempts": {
+            "type": "integer",
+            "maximum": 2.0,
+            "minimum": 1.0,
+            "title": "Attempts",
+            "description": "Model calls made: 2 after a validation retry."
+          },
+          "dropped_quotes": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Dropped Quotes",
+            "description": "Spans dropped because the quote was not found."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "model",
+          "served_by",
+          "prompt_version",
+          "latency_ms",
+          "input_tokens",
+          "output_tokens",
+          "cache_creation_input_tokens",
+          "cache_read_input_tokens",
+          "cost_usd",
+          "attempts",
+          "dropped_quotes"
+        ],
+        "title": "Metadata"
+      },
+      "Precision": {
+        "type": "string",
+        "enum": [
+          "day",
+          "week",
+          "event",
+          "vague",
+          "none"
+        ],
+        "title": "Precision"
+      },
+      "Span": {
+        "properties": {
+          "turn_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Turn Index",
+            "description": "Index of the transcript turn the quote comes from."
+          },
+          "label": {
+            "$ref": "#/components/schemas/Label"
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner",
+            "description": "Who is bound to act: a speaker id or a named person."
+          },
+          "recipient": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recipient",
+            "description": "Who the action is for."
+          },
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action",
+            "description": "Short verb phrase, such as 'send revised pricing'."
+          },
+          "due": {
+            "$ref": "#/components/schemas/Due"
+          },
+          "condition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Condition",
+            "description": "The stated condition; required for CONDITIONAL."
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence"
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Quote",
+            "description": "Exact text from the turn."
+          },
+          "rationale": {
+            "type": "string",
+            "title": "Rationale",
+            "description": "One-sentence explanation of the label."
+          },
+          "ambiguous": {
+            "type": "boolean",
+            "title": "Ambiguous"
+          },
+          "in_ledger": {
+            "type": "boolean",
+            "title": "In Ledger",
+            "description": "COMMITMENT, HEDGED and CONDITIONAL create a ledger entry.",
+            "readOnly": true
+          },
+          "soft": {
+            "type": "boolean",
+            "title": "Soft",
+            "description": "HEDGED entries are stored in the ledger marked soft.",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "turn_index",
+          "label",
+          "owner",
+          "recipient",
+          "action",
+          "due",
+          "condition",
+          "confidence",
+          "quote",
+          "rationale",
+          "ambiguous",
+          "in_ledger",
+          "soft"
+        ],
+        "title": "Span"
+      },
+      "Turn": {
+        "properties": {
+          "speaker": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Speaker",
+            "description": "Speaker id or name."
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text",
+            "description": "What the speaker said in this turn."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "speaker",
+          "text"
+        ],
+        "title": "Turn"
+      }
+    }
+  }
+}

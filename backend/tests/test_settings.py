@@ -1,0 +1,60 @@
+"""Configuration from the environment (and backend/.env when present)."""
+
+from typing import Any
+
+import pytest
+from pydantic import ValidationError
+
+from commitment_tracker.settings import Settings
+
+
+def settings(**overrides: Any) -> Settings:
+    # _env_file=None keeps a developer's backend/.env out of the tests.
+    return Settings(_env_file=None, **overrides)
+
+
+def test_defaults_match_the_design_note(monkeypatch: pytest.MonkeyPatch) -> None:
+    for name in ("EXTRACTOR_MODEL", "EXTRACTOR_EFFORT", "PROMPT_VERSION", "ANTHROPIC_API_KEY"):
+        monkeypatch.delenv(name, raising=False)
+    s = settings()
+    assert s.extractor_model == "claude-opus-5-5"
+    assert s.extractor_effort == "medium"
+    assert s.extractor_max_tokens == 16_000
+    assert s.prompt_version == "v1"
+    assert s.model_timeout_seconds == 60.0
+    assert s.anthropic_api_key is None
+
+
+def test_environment_overrides(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("EXTRACTOR_MODEL", "claude-haiku-5-5")
+    monkeypatch.setenv("EXTRACTOR_EFFORT", "low")
+    monkeypatch.setenv("PROMPT_VERSION", "v2")
+    s = settings()
+    assert (s.extractor_model, s.extractor_effort, s.prompt_version) == (
+        "claude-haiku-5-5",
+        "low",
+        "v2",
+    )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("extractor_effort", "extreme"),
+        ("extractor_max_tokens", 0),
+        ("model_timeout_seconds", -1),
+        ("extractor_model", ""),
+    ],
+)
+def test_invalid_values_are_rejected(field: str, value: object) -> None:
+    with pytest.raises(ValidationError):
+        settings(**{field: value})
+
+
+def test_api_key_never_appears_in_repr_or_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-not-real")
+    s = settings()
+    assert s.anthropic_api_key is not None
+    assert s.anthropic_api_key.get_secret_value() == "sk-ant-test-not-real"
+    assert "sk-ant-test-not-real" not in repr(s)
+    assert "sk-ant-test-not-real" not in str(s.model_dump())

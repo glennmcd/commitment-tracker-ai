@@ -35,15 +35,16 @@ class AnthropicAdapter:
         effort: Effort = "medium",
         max_tokens: int = 16_000,
         client: anthropic.AsyncAnthropic | None = None,
+        api_key: str | None = None,
         timeout_seconds: float = 60.0,
         max_retries: int = 2,
     ) -> None:
         self.model = model
         self.effort = effort
         self.max_tokens = max_tokens
-        # The API key comes from the environment (ANTHROPIC_API_KEY or an `ant auth` profile).
+        # Without an explicit key the SDK resolves ANTHROPIC_API_KEY or an `ant auth` profile.
         self.client = client or anthropic.AsyncAnthropic(
-            timeout=timeout_seconds, max_retries=max_retries
+            api_key=api_key, timeout=timeout_seconds, max_retries=max_retries
         )
 
     def build_params(self, request: ModelRequest) -> dict[str, Any]:
