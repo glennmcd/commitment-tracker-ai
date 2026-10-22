@@ -1,0 +1,141 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyOutsideUsEast2",
+      "Effect": "Deny",
+      "NotAction": [
+        "iam:*",
+        "sts:*",
+        "budgets:*",
+        "ce:*",
+        "organizations:*",
+        "account:*",
+        "billing:*",
+        "aws-portal:*",
+        "freetier:*",
+        "support:*",
+        "health:*",
+        "sso:*",
+        "identitystore:*",
+        "signin:*",
+        "route53:*"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringNotEquals": {
+          "aws:RequestedRegion": "us-east-2"
+        },
+        "ArnNotLike": {
+          "aws:PrincipalArn": "arn:aws:iam::*:role/managed/AWSManaged*"
+        }
+      }
+    },
+    {
+      "Sid": "DenyServicesCommitmentTrackerDoesNotUse",
+      "Effect": "Deny",
+      "NotAction": [
+        "cloudformation:*",
+        "s3:*",
+        "ecr:*",
+        "ssm:*",
+        "iam:*",
+        "sts:*",
+        "kms:*",
+        "lambda:*",
+        "apigateway:*",
+        "execute-api:*",
+        "dynamodb:*",
+        "events:*",
+        "transcribe:*",
+        "polly:*",
+        "logs:*",
+        "sns:*",
+        "budgets:*",
+        "amplify:*",
+        "secretsmanager:*",
+        "route53:*",
+        "acm:*",
+        "cloudwatch:*",
+        "ce:*",
+        "organizations:Describe*",
+        "organizations:List*",
+        "account:*",
+        "billing:*",
+        "aws-portal:*",
+        "freetier:*",
+        "tag:*",
+        "support:*",
+        "health:*",
+        "sso:*",
+        "identitystore:*",
+        "signin:*",
+        "access-analyzer:*",
+        "cloudtrail:LookupEvents",
+        "ec2:DescribeRegions"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "ArnNotLike": {
+          "aws:PrincipalArn": "arn:aws:iam::*:role/managed/AWSManaged*"
+        }
+      }
+    },
+    {
+      "Sid": "DenyMultiRegionAndEdgeFeatures",
+      "Effect": "Deny",
+      "Action": [
+        "lambda:EnableReplication*",
+        "cloudformation:CreateStackSet",
+        "cloudformation:CreateStackInstances",
+        "dynamodb:CreateGlobalTable",
+        "dynamodb:UpdateGlobalTable*",
+        "dynamodb:CreateTableReplica",
+        "s3:PutReplicationConfiguration",
+        "kms:ReplicateKey"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyLongLivedIamCredentials",
+      "Effect": "Deny",
+      "Action": [
+        "iam:CreateUser",
+        "iam:CreateAccessKey",
+        "iam:CreateLoginProfile",
+        "iam:CreateServiceSpecificCredential"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "ArnNotLike": {
+          "aws:PrincipalArn": "arn:aws:iam::*:role/managed/AWSManaged*"
+        }
+      }
+    },
+    {
+      "Sid": "ProtectBudgetKillSwitch",
+      "Effect": "Deny",
+      "Action": [
+        "budgets:ModifyBudget",
+        "lambda:DeleteFunction",
+        "lambda:UpdateFunctionCode",
+        "lambda:UpdateFunctionConfiguration",
+        "lambda:DeleteFunctionEventInvokeConfig",
+        "lambda:RemovePermission",
+        "sns:DeleteTopic",
+        "sns:SetTopicAttributes",
+        "sns:Unsubscribe"
+      ],
+      "Resource": [
+        "arn:aws:budgets::*:budget/*",
+        "arn:aws:lambda:us-east-2:*:function:CommitmentTrackerApi-BudgetStopFunction*",
+        "arn:aws:sns:us-east-2:*:CommitmentTrackerApi-BudgetStopTopic*"
+      ],
+      "Condition": {
+        "ArnNotLike": {
+          "aws:PrincipalArn": "arn:aws:iam::*:role/cdk-hnb659fds-cfn-exec-role-*"
+        }
+      }
+    }
+  ]
+}
