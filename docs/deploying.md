@@ -52,6 +52,11 @@ project account and `g26work2-mgmt` for the management account. Use your own nam
    aws ssm put-parameter --name /commitment-tracker/prod/ANTHROPIC_API_KEY --type SecureString --value "$ANTHROPIC_API_KEY" --profile g26work2
    ```
 
+   In Git Bash on Windows, put `MSYS_NO_PATHCONV=1` in front of the command. Otherwise Git Bash rewrites the leading
+   `/` into a Windows path and SSM answers "Parameter name must be a fully qualified name". PowerShell and WSL need
+   nothing. In PowerShell, set the variable with `$env:ANTHROPIC_API_KEY = "..."` and use `$env:ANTHROPIC_API_KEY` in
+   place of `"$ANTHROPIC_API_KEY"`.
+
 6. **Set a spend limit in the Anthropic console.** The app's daily cap sees only its own estimate of the model's
    cost, and the AWS budget never sees Anthropic charges, so this is the one limit that applies to the key itself.
 
