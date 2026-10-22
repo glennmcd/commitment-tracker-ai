@@ -498,3 +498,54 @@ button.secondary {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---- Sample clips ---- */
+
+.samples {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.samples legend {
+  font-weight: 600;
+  padding: 0;
+}
+
+.sample {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.sample + .sample {
+  margin-top: 0.5rem;
+}
+
+.sample[data-selected="true"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.sample-choice {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 44px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.sample-choice input {
+  accent-color: var(--accent);
+}
+
+.sample audio {
+  max-width: 100%;
+  height: 40px;
+}
