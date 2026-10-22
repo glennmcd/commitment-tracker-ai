@@ -279,6 +279,22 @@ describe("bad props", () => {
   });
 });
 
+describe("the deploy-time context", () => {
+  it("lets -c choose the model, the alert email and the spending limits", () => {
+    const app = readFileSync(path.join(here, "../bin/commitment-tracker.ts"), "utf8");
+    for (const name of [
+      "model",
+      "alertEmail",
+      "dailyBudgetUsd",
+      "monthlyBudgetUsd",
+      "throttleRate",
+      "reservedConcurrency",
+    ]) {
+      expect(app).toContain(`"${name}"`);
+    }
+  });
+});
+
 describe("the contract with the SCP", () => {
   it("names the stack CommitmentTrackerApi, as the kill-switch protection assumes", () => {
     const app = readFileSync(path.join(here, "../bin/commitment-tracker.ts"), "utf8");

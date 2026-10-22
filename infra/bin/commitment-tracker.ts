@@ -13,7 +13,10 @@ const env = { account: process.env.CDK_DEFAULT_ACCOUNT, region: REGION };
 //   cdk deploy -c dailyBudgetUsd=5 -c monthlyBudgetUsd=30 -c alertEmail=you@example.com
 const dailyBudgetUsd = positiveNumberContext(app.node, "dailyBudgetUsd");
 const monthlyBudgetUsd = positiveNumberContext(app.node, "monthlyBudgetUsd");
-const alertEmail: unknown = app.node.tryGetContext("alertEmail");
+const text = (name: string): string | undefined => {
+  const value: unknown = app.node.tryGetContext(name);
+  return typeof value === "string" ? value : undefined;
+};
 
 // -c throttleRate=N sets the API's steady requests per second (default 10); -c throttleBurst=M the burst (default 2N).
 const throttleRate = positiveNumberContext(app.node, "throttleRate");
@@ -30,7 +33,9 @@ const api = new ApiStack(app, "CommitmentTrackerApi", {
   description: "Commitment Tracker AI API: Lambda behind an API Gateway HTTP API, Transcribe, S3 and DynamoDB",
   dailyBudgetUsd,
   monthlyBudgetUsd,
-  alertEmail: typeof alertEmail === "string" ? alertEmail : undefined,
+  alertEmail: text("alertEmail"),
+  // -c model=claude-sonnet-5-5 changes the model the deployed functions use (default claude-haiku-5-5).
+  model: text("model"),
   throttle,
   reservedConcurrency: positiveNumberContext(app.node, "reservedConcurrency"),
 });
@@ -42,10 +47,6 @@ const customDomain = typeof rawDomain === "string" ? JSON.parse(rawDomain) : raw
 
 // The site on Amplify Hosting, built from GitHub as a static export:
 //   cdk deploy CommitmentTrackerWeb -c repository=https://github.com/<owner>/<repo> -c githubTokenSecretName=<secret>
-const text = (name: string): string | undefined => {
-  const value: unknown = app.node.tryGetContext(name);
-  return typeof value === "string" ? value : undefined;
-};
 new WebStack(app, "CommitmentTrackerWeb", {
   env,
   description: "Commitment Tracker AI site: a Next.js static export on Amplify Hosting",
