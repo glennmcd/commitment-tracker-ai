@@ -1,15 +1,34 @@
 import { App } from "aws-cdk-lib";
-import { positiveNumberContext } from "../lib/config.js";
+import { ApiStack } from "../lib/api-stack.js";
+import { positiveNumberContext, REGION } from "../lib/config.js";
 
 const app = new App();
 
+// Everything lives in the project's one AWS Region. The account comes from the credentials the CDK CLI runs with
+// (CDK_DEFAULT_ACCOUNT), so no account id is committed.
+const env = { account: process.env.CDK_DEFAULT_ACCOUNT, region: REGION };
+
 // Spending limits are set at deploy time:
 //   cdk deploy -c dailyBudgetUsd=5 -c monthlyBudgetUsd=30 -c alertEmail=you@example.com
-// Reading them here makes a bad value fail the synth before any stack is built.
-positiveNumberContext(app.node, "dailyBudgetUsd");
-positiveNumberContext(app.node, "monthlyBudgetUsd");
+const dailyBudgetUsd = positiveNumberContext(app.node, "dailyBudgetUsd");
+positiveNumberContext(app.node, "monthlyBudgetUsd"); // read by the budget kill switch stack (added next)
 
-// The stacks are added by the next commits: the API stack (bucket, tables, functions, EventBridge rule), the budget
-// kill switch and alarms, and the Amplify web stack. Each takes its env from the credentials the CDK CLI runs with
-// (CDK_DEFAULT_ACCOUNT) and REGION in lib/config.ts, so no account id is committed.
-app.synth();
+// -c throttleRate=N sets the API's steady requests per second (default 10); -c throttleBurst=M the burst (default 2N).
+const throttleRate = positiveNumberContext(app.node, "throttleRate");
+const throttleBurst = positiveNumberContext(app.node, "throttleBurst");
+if (throttleBurst !== undefined && throttleRate === undefined) {
+  throw new Error("context throttleBurst needs throttleRate as well");
+}
+const throttle =
+  throttleRate === undefined ? undefined : { rateLimit: throttleRate, burstLimit: throttleBurst ?? throttleRate * 2 };
+
+// The stack id is fixed: the guardrail SCP protects "CommitmentTrackerApi-BudgetStopFunction*" by name.
+new ApiStack(app, "CommitmentTrackerApi", {
+  env,
+  description: "Commitment Tracker AI API: Lambda behind an API Gateway HTTP API, Transcribe, S3 and DynamoDB",
+  dailyBudgetUsd,
+  throttle,
+  reservedConcurrency: positiveNumberContext(app.node, "reservedConcurrency"),
+});
+
+// The budget kill switch and alarms, and the Amplify web stack, are added by the next commits.

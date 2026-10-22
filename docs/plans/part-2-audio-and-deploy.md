@@ -193,15 +193,15 @@ New resources beyond FlakeHunter:
     - `transcribe:StartTranscriptionJob`
     - `s3:PutObject` on `transcripts/*`, which Transcribe needs under the caller's credentials
     - `dynamodb:GetItem`, `PutItem` and `UpdateItem` on `jobs` and `guardrails`
-    - `dynamodb:PutItem` on `feedback`
+    - `dynamodb:PutItem` and `DeleteItem` on `feedback` (voting again without consent deletes the kept transcript)
     - `lambda:InvokeFunction` on the worker, for text jobs
-    - `ssm:GetParameters` on the one parameter
+    - `ssm:GetParameter` on the one parameter
   - The worker role:
     - `s3:GetObject` and `s3:DeleteObject` on `uploads/*` and `transcripts/*`
     - `transcribe:DeleteTranscriptionJob`
-    - `dynamodb:GetItem` and `UpdateItem` on `jobs`
+    - `dynamodb:GetItem` and `PutItem` on `jobs` (a transition is a conditional put)
     - `dynamodb:UpdateItem` on `guardrails`
-    - `ssm:GetParameters`
+    - `ssm:GetParameter` on the one parameter
 
   Transcribe's job-level actions can't be scoped to a resource ARN. Where that is so, the test asserts the action
   list exactly instead.
