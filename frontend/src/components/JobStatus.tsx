@@ -26,7 +26,13 @@ export function JobStatus({
           ? TEXT[status]
           : "");
   return (
-    <p role="status" aria-live="polite" className="status" data-busy={status !== null && status !== "done"}>
+    <p
+      role="status"
+      aria-label="Progress"
+      aria-live="polite"
+      className="status"
+      data-busy={status !== null && status !== "done"}
+    >
       {text}
     </p>
   );

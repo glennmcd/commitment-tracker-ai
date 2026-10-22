@@ -53,7 +53,7 @@ describe("Demo", () => {
         call_date: (screen.getByLabelText("Call date") as HTMLInputElement).value,
       },
     });
-    expect(screen.getByRole("status")).toHaveTextContent("Done.");
+    expect(screen.getByRole("status", { name: "Progress" })).toHaveTextContent("Done.");
   });
 
   it("defaults the call date to today", async () => {
@@ -130,7 +130,7 @@ describe("Demo", () => {
 
     expect(screen.getByRole("button", { name: "Working…" })).toBeDisabled();
     expect(screen.getByLabelText("Conversation")).toBeDisabled();
-    expect(screen.getByRole("status")).toHaveTextContent("Sending…");
+    expect(screen.getByRole("status", { name: "Progress" })).toHaveTextContent("Sending…");
     release(failure("rate_limited", 429));
     await screen.findByRole("alert");
   });

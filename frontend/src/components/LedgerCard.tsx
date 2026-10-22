@@ -1,4 +1,5 @@
 import type { Span } from "@/lib/labels";
+import { FeedbackButtons } from "./Feedback";
 import { LabelBadge } from "./LabelBadge";
 
 export function dueText(due: Span["due"]): string {
@@ -7,7 +8,7 @@ export function dueText(due: Span["due"]): string {
 }
 
 /** One ledger entry: who owes what to whom, by when, and the words that say so. */
-export function LedgerCard({ span }: { span: Span }) {
+export function LedgerCard({ span, index }: { span: Span; index?: number }) {
   return (
     <li className="card" data-label={span.label}>
       <div className="card-head">
@@ -34,6 +35,7 @@ export function LedgerCard({ span }: { span: Span }) {
       </dl>
       <blockquote>“{span.quote}”</blockquote>
       <p className="rationale">{span.rationale}</p>
+      {index !== undefined ? <FeedbackButtons spanIndex={index} /> : null}
     </li>
   );
 }

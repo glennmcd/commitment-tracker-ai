@@ -78,7 +78,7 @@ describe("NearMisses", () => {
       quote: "I can't promise the 15th",
       rationale: "Declines.",
     });
-    render(<NearMisses spans={[refusal]} />);
+    render(<NearMisses spans={[{ span: refusal, index: 0 }]} />);
 
     const section = screen.getByRole("region", { name: "Not a commitment" });
     expect(within(section).getByText(/Refusal/)).toBeInTheDocument();
@@ -163,7 +163,7 @@ describe("Results", () => {
 describe("JobStatus", () => {
   it("is a polite live region that names each stage", () => {
     const { rerender } = render(<JobStatus status="submitting" />);
-    const region = screen.getByRole("status");
+    const region = screen.getByRole("status", { name: "Progress" });
     expect(region).toHaveAttribute("aria-live", "polite");
     expect(region).toHaveTextContent("Sending…");
 
@@ -172,5 +172,20 @@ describe("JobStatus", () => {
 
     rerender(<JobStatus status={null} />);
     expect(region).toBeEmptyDOMElement();
+  });
+});
+
+describe("feedback in the results", () => {
+  it("offers thumbs on every ledger entry and near miss, and one consent box", () => {
+    const near = span({ label: "REQUEST", in_ledger: false, quote: "Can you send the copy?", turn_index: 0 });
+    render(<Results job={job([span({ turn_index: 1 }), near])} />);
+
+    expect(screen.getAllByRole("group", { name: "Was this right?" })).toHaveLength(2);
+    expect(screen.getAllByRole("checkbox")).toHaveLength(1);
+  });
+
+  it("offers no consent box when there is nothing to vote on", () => {
+    render(<Results job={job([])} />);
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
   });
 });
