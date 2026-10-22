@@ -13,7 +13,7 @@ only used by `evaluation/`. A zip package is limited to 250 MB unzipped.
 - **Adapter.** Mangum wraps the ASGI app in-process (`handler = Mangum(app)`). The worker is a plain handler in
   the same package.
 - **Packaging.** One zip for arm64 and Python 3.12, built by `infra/scripts/bundle-api.ts` with
-  `uv export --frozen --no-dev` and `uv pip install --target --python-platform aarch64-manylinux2014
+  `uv export --frozen --no-dev --no-group eval` and `uv pip install --target --python-platform aarch64-manylinux2014
   --only-binary :all:`, plus the package source. Both functions use it.
 - **scikit-learn.** It moves to an `eval` dependency group, listed in `[tool.uv] default-groups` so local
   `uv sync` and `uv run eval` behave as before. The bundle leaves it out.

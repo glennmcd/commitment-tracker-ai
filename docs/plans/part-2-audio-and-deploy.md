@@ -142,7 +142,7 @@ to `/events`, which would put the worker behind an HTTP route. It also adds a pe
 the bundle script runs:
 
 ```bash
-uv export --frozen --no-dev --no-editable --no-emit-project -o requirements.txt
+uv export --frozen --no-dev --no-group eval --no-editable --no-emit-project -o requirements.txt
 uv pip install -r requirements.txt --target dist/api --python-platform aarch64-manylinux2014 \
   --python-version 3.12 --only-binary :all: --no-installer-metadata --no-compile-bytecode
 cp -r src/commitment_tracker dist/api/
