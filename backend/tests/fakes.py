@@ -20,6 +20,7 @@ def reply(
     served_by: str = "fake-model",
     usage: Usage = DEFAULT_USAGE,
     latency_ms: int = 50,
+    refusal_category: str | None = None,
 ) -> ModelReply:
     """A scripted reply; `output` is a parsed output or raw text (for invalid replies)."""
     text = output if isinstance(output, str) else output.model_dump_json()
@@ -30,6 +31,7 @@ def reply(
         usage=usage,
         latency_ms=latency_ms,
         assistant_content=({"type": "text", "text": text},),
+        refusal_category=refusal_category,
     )
 
 
