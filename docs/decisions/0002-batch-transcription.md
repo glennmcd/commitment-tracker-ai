@@ -25,9 +25,10 @@ Use batch jobs (`StartTranscriptionJob`):
 
 ## Consequences
 
-- **Latency.** We expect transcription to take 15–25 s for a 60 s clip, and the whole job about 20–30 s, which
-  likely misses the brief's 10 s target. A latency test in the new account checks this before the backend work.
-  If batch takes 40 s or more, this decision is reopened. The README reports the measured p50 and p95 either way.
+- **Latency.** The latency test on 2026-10-21 measured transcription of a 59 s clip at 15.4 s p50 and 15.8 s p95,
+  over 10 jobs with no queueing. That is well under the 40 s that would have reopened this decision. The whole job
+  should take about 17–19 s with Haiku 5.5, which misses the brief's 10 s target. The README reports the deployed
+  p50 and p95.
 - **Cleanup.** After reading the output, the worker deletes the audio, the output object and the Transcribe job.
   Nothing persists in the service-managed location, which keeps results for 90 days.
 - **Format.** Every upload is WAV, so the browser converts recordings before uploading (ADR 0003).

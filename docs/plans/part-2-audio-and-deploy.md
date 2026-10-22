@@ -16,7 +16,7 @@ the text says so, and the measurement step confirms the claim against the real s
 | Decision | Choice |
 | --- | --- |
 | Transcription mode | Amazon Transcribe **batch** jobs with speaker labels, from a 16 kHz mono WAV in our bucket. The finished-job event drives the rest of the pipeline |
-| Expected latency (sample clip, 60 s) | p50 about 20–30 s from submit to results. That likely **misses the 10 s target**; the README reports the measured number either way |
+| Expected latency (sample clip, 60 s) | Transcription **measured at 15.4 s p50, 15.8 s p95**; about 17–19 s from submit to results with Haiku. That **misses the 10 s target**; the README reports the deployed number |
 | Request flow | `POST /uploads` (presigned S3 POST) → `POST /jobs` → Transcribe → EventBridge → worker Lambda → `GET /jobs/{id}` polled by the browser |
 | FastAPI on Lambda | **Mangum**, in-process. One zip serves the API handler and the worker handler |
 | Packaging | **Zip** for arm64 and Python 3.12, built with `uv export` and `uv pip install --target`. scikit-learn moves to an `eval` dependency group so it stays out of the bundle |
@@ -43,10 +43,21 @@ the text says so, and the measurement step confirms the claim against the real s
 server we hold a finished file, and pacing it in real time makes streaming slower than batch for the same clip. The
 only GA Python client is boto3, which has no streaming support.
 
-**Expected latency.** I expect the transcription stage to take 15–25 s for a 60 s clip. Extraction takes another
-1.5–3 s on Haiku 5.5 (the Part 1 eval measured a 1.5 s p50 and a 2.6 s p95), or longer on Opus 5.5. The total
-p50 should be 20–30 s, which misses the brief's 10 s target. The first deploy step measures this (see
-[Measuring latency](#measuring-latency)), and the README states the result.
+**Measured latency.** The latency test on 2026-10-21, in us-east-2, ran 10 batch jobs one after another on a
+59.0 s two-voice clip with speaker labels:
+
+| | p50 | p95 | Range |
+| --- | --- | --- | --- |
+| Queue (`StartTime` − `CreationTime`) | 0.0 s | 0.0 s | 0.0 s |
+| Processing (`CompletionTime` − `StartTime`) | 15.4 s | 15.8 s | 15.1–15.8 s |
+| Wall clock, start call to `COMPLETED` (polled every 1 s) | 16.3 s | 16.9 s | 15.6–16.9 s |
+
+Processing is steady, at about a quarter of the clip's length, with no queueing. All 11 turns came back with the
+right speaker, and every turn boundary was within 0.65 s of the truth. Extraction adds another 1.5–3 s on Haiku 5.5
+(the Part 1 eval measured a 1.5 s p50 and a 2.6 s p95). The event delivery, the S3 reads and the browser's polling
+add a little more. That puts the expected total at about 17–19 s from submit to results, which misses the brief's
+10 s target. `measure_latency.py` measures the deployed path (see [Measuring latency](#measuring-latency)), and
+the README states the result.
 
 **What would meet 10 s.** The recording would have to be transcribed live: the browser streams PCM to Transcribe
 while the visitor speaks, so the transcript is ready about a second after they stop. That needs a relay the
