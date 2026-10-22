@@ -14,6 +14,21 @@
         "8000"
       ],
       "port": 8000
+    },
+    {
+      "name": "api-haiku",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "--directory",
+        "backend",
+        "uvicorn",
+        "commitment_tracker.api.app:app",
+        "--port",
+        "8001"
+      ],
+      "env": { "EXTRACTOR_MODEL": "claude-haiku-5-5" },
+      "port": 8001
     }
   ]
 }

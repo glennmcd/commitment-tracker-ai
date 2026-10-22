@@ -75,12 +75,23 @@ def _error(
     return JSONResponse(status_code=status, content=body.model_dump())
 
 
+def _show_app_logs() -> None:
+    """uvicorn configures only its own loggers, so ours need a handler to be seen at INFO."""
+    package = logging.getLogger("commitment_tracker")
+    if not package.handlers:
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter("%(levelname)s:     %(name)s: %(message)s"))
+        package.addHandler(handler)
+        package.setLevel(logging.INFO)
+
+
 def create_app(*, extractor: Extractor | None = None, settings: Settings | None = None) -> FastAPI:
     """With no extractor, the lifespan builds the Anthropic one from settings at startup."""
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         if extractor is None:
+            _show_app_logs()
             app.state.extractor = build_extractor(settings or Settings())
         yield
 

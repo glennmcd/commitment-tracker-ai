@@ -170,3 +170,14 @@ def test_openapi_documents_the_contract() -> None:
         spec["components"]["schemas"]
     )
     assert "/health" in spec["paths"]
+
+
+def test_production_startup_makes_app_logs_visible(monkeypatch: pytest.MonkeyPatch) -> None:
+    # uvicorn configures only its own loggers; without this the analyze lines are dropped.
+    package = logging.getLogger("commitment_tracker")
+    monkeypatch.setattr(package, "handlers", [])
+    monkeypatch.setattr(package, "level", logging.NOTSET)
+    s = Settings(_env_file=None)
+    with TestClient(create_app(settings=s)):
+        assert package.handlers
+        assert package.getEffectiveLevel() == logging.INFO
