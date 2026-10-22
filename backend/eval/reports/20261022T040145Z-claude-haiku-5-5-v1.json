@@ -1,0 +1,564 @@
+{
+  "run": {
+    "model": "claude-haiku-5-5",
+    "prompt_version": "v1",
+    "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
+    "effort": "medium",
+    "dataset": "dev.jsonl",
+    "started_at": "2026-10-22T04:01:45.187091Z",
+    "duration_seconds": 14.28528880001977,
+    "served_by": [
+      "claude-haiku-5-5"
+    ]
+  },
+  "scores": {
+    "items": 24,
+    "scored_items": 22,
+    "accuracy": 1.0,
+    "macro_f1": 1.0,
+    "labels": {
+      "COMMITMENT": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 7
+      },
+      "HEDGED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 4
+      },
+      "CONDITIONAL": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2
+      },
+      "SUGGESTION": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2
+      },
+      "REQUEST": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 3
+      },
+      "REPORTED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2
+      },
+      "REFUSAL": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2
+      },
+      "NONE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2
+      }
+    },
+    "confusion": {
+      "labels": [
+        "COMMITMENT",
+        "HEDGED",
+        "CONDITIONAL",
+        "SUGGESTION",
+        "REQUEST",
+        "REPORTED",
+        "REFUSAL",
+        "NONE"
+      ],
+      "rows": [
+        [
+          7,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          3,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2
+        ]
+      ]
+    },
+    "ledger": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "true_positives": 13,
+      "false_positives": 0,
+      "false_negatives": 0
+    },
+    "fields": {
+      "owner": {
+        "correct": 13,
+        "total": 13,
+        "accuracy": 1.0
+      },
+      "action": {
+        "correct": 11,
+        "total": 11,
+        "accuracy": 1.0
+      },
+      "due": {
+        "correct": 13,
+        "total": 13,
+        "accuracy": 1.0
+      }
+    },
+    "ambiguous": [
+      {
+        "item_id": "spec-22",
+        "expected": "NONE",
+        "predicted": "NONE"
+      },
+      {
+        "item_id": "spec-24",
+        "expected": "NONE",
+        "predicted": "NONE"
+      }
+    ],
+    "failed_items": [],
+    "quote_failures": 0,
+    "retried_items": 0,
+    "cache_hits": 0,
+    "latency_ms": {
+      "p50": 1512,
+      "p95": 2648
+    },
+    "cost_usd": 0.0046269
+  },
+  "items": [
+    {
+      "item_id": "spec-01",
+      "tags": [],
+      "expected": [
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-02",
+      "tags": [],
+      "expected": [
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-03",
+      "tags": [],
+      "expected": [
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-04",
+      "tags": [],
+      "expected": [
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-05",
+      "tags": [
+        "multi_turn"
+      ],
+      "expected": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-06",
+      "tags": [],
+      "expected": [
+        "COMMITMENT",
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "COMMITMENT",
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-07",
+      "tags": [],
+      "expected": [
+        "HEDGED"
+      ],
+      "predicted": [
+        "HEDGED"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-08",
+      "tags": [],
+      "expected": [
+        "HEDGED"
+      ],
+      "predicted": [
+        "HEDGED"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-09",
+      "tags": [],
+      "expected": [
+        "HEDGED"
+      ],
+      "predicted": [
+        "HEDGED"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-10",
+      "tags": [],
+      "expected": [
+        "HEDGED"
+      ],
+      "predicted": [
+        "HEDGED"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-11",
+      "tags": [],
+      "expected": [
+        "CONDITIONAL"
+      ],
+      "predicted": [
+        "CONDITIONAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-12",
+      "tags": [],
+      "expected": [
+        "CONDITIONAL"
+      ],
+      "predicted": [
+        "CONDITIONAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-13",
+      "tags": [],
+      "expected": [
+        "SUGGESTION"
+      ],
+      "predicted": [
+        "SUGGESTION"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-14",
+      "tags": [],
+      "expected": [
+        "SUGGESTION"
+      ],
+      "predicted": [
+        "SUGGESTION"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-15",
+      "tags": [],
+      "expected": [
+        "REQUEST"
+      ],
+      "predicted": [
+        "REQUEST"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-16",
+      "tags": [],
+      "expected": [
+        "REQUEST"
+      ],
+      "predicted": [
+        "REQUEST"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-17",
+      "tags": [],
+      "expected": [
+        "REPORTED"
+      ],
+      "predicted": [
+        "REPORTED"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-18",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "REPORTED"
+      ],
+      "predicted": [
+        "REPORTED"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-19",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "REFUSAL"
+      ],
+      "predicted": [
+        "REFUSAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-20",
+      "tags": [],
+      "expected": [
+        "REFUSAL"
+      ],
+      "predicted": [
+        "REFUSAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-21",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-22",
+      "tags": [
+        "ambiguous"
+      ],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-23",
+      "tags": [],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    },
+    {
+      "item_id": "spec-24",
+      "tags": [
+        "ambiguous"
+      ],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0
+    }
+  ]
+}
