@@ -79,6 +79,21 @@ def test_table_names_default_to_unset_and_come_from_the_environment(
     assert (settings().jobs_table, settings().guardrails_table) == ("jobs", "guardrails")
 
 
+def test_lambda_settings_default_to_unset_and_come_from_the_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for name in ("ANTHROPIC_API_KEY_PARAMETER", "WORKER_FUNCTION_NAME"):
+        monkeypatch.delenv(name, raising=False)
+    assert settings().anthropic_api_key_parameter is None
+    assert settings().worker_function_name is None
+    monkeypatch.setenv("ANTHROPIC_API_KEY_PARAMETER", "/p")
+    monkeypatch.setenv("WORKER_FUNCTION_NAME", "worker")
+    assert (settings().anthropic_api_key_parameter, settings().worker_function_name) == (
+        "/p",
+        "worker",
+    )
+
+
 def test_upload_ttl_must_be_positive() -> None:
     with pytest.raises(ValidationError):
         settings(upload_url_ttl_seconds=0)

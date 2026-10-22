@@ -40,6 +40,7 @@ from commitment_tracker.guardrails.ratelimit import (
 from commitment_tracker.guardrails.spend import DailyBudgetExhausted, DynamoSpendStore, SpendCap
 from commitment_tracker.jobs.audio import MAX_AUDIO_BYTES, AudioInvalid, AudioTooLong
 from commitment_tracker.jobs.audio_store import S3AudioStore
+from commitment_tracker.jobs.dispatch import LambdaWorkerDispatcher
 from commitment_tracker.jobs.dynamo import DynamoJobStore
 from commitment_tracker.jobs.record import JobRecord, JobStatus, Latency
 from commitment_tracker.jobs.samples import load_catalog
@@ -228,17 +229,22 @@ def build_upload_signer(settings: Settings) -> UploadSigner | None:
 
 
 def build_job_service(settings: Settings, spend: SpendCap | None = None) -> JobService | None:
-    """Wired to AWS when the bucket and table are configured. The worker dispatcher joins in with
-    the Lambda handlers, so text jobs answer 503 until then."""
+    """Wired to AWS when the bucket and table are configured. Text jobs need the worker's function
+    name too; without it they answer 503."""
     if settings.audio_bucket is None or settings.jobs_table is None:
         return None
     s3 = boto3.client("s3")
+    dispatcher = (
+        None
+        if settings.worker_function_name is None
+        else LambdaWorkerDispatcher(boto3.client("lambda"), settings.worker_function_name)
+    )
     return JobService(
         DynamoJobStore(boto3.client("dynamodb"), settings.jobs_table),
         S3AudioStore(s3, settings.audio_bucket),
         AwsBatchTranscriber(boto3.client("transcribe"), s3, settings.audio_bucket),
         load_catalog(),
-        None,
+        dispatcher,
         spend=spend,
     )
 

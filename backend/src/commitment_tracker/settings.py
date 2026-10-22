@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     prompt_version: str = "v1"
     model_timeout_seconds: float = Field(default=60.0, gt=0)
     anthropic_api_key: SecretStr | None = None
+    # On Lambda the key lives in SSM; this names its SecureString parameter (lambda_handlers).
+    anthropic_api_key_parameter: str | None = Field(default=None, min_length=1)
     # Audio storage: unset locally, where POST /uploads answers 503.
     audio_bucket: str | None = Field(default=None, min_length=1)
     upload_url_ttl_seconds: int = Field(default=300, gt=0)
@@ -26,3 +28,4 @@ class Settings(BaseSettings):
     guardrails_table: str | None = Field(default=None, min_length=1)
     feedback_table: str | None = Field(default=None, min_length=1)
     daily_budget_usd: float = Field(default=5.0, gt=0)
+    worker_function_name: str | None = Field(default=None, min_length=1)
