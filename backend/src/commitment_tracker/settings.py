@@ -22,3 +22,4 @@ class Settings(BaseSettings):
     # Audio storage: unset locally, where POST /uploads answers 503.
     audio_bucket: str | None = Field(default=None, min_length=1)
     upload_url_ttl_seconds: int = Field(default=300, gt=0)
+    jobs_table: str | None = Field(default=None, min_length=1)

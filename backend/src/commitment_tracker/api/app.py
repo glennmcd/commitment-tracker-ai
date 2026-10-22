@@ -8,10 +8,11 @@ transcript text, and validation errors drop the input values FastAPI would other
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Literal
+from typing import Annotated, Literal
 
 import boto3
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Path, Request
+from fastapi.concurrency import run_in_threadpool
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -24,10 +25,27 @@ from commitment_tracker.extractor.errors import (
 )
 from commitment_tracker.extractor.extractor import Extractor
 from commitment_tracker.extractor.factory import build_extractor
-from commitment_tracker.jobs.audio import MAX_AUDIO_BYTES
+from commitment_tracker.jobs.audio import MAX_AUDIO_BYTES, AudioInvalid, AudioTooLong
+from commitment_tracker.jobs.audio_store import S3AudioStore
+from commitment_tracker.jobs.dynamo import DynamoJobStore
+from commitment_tracker.jobs.record import JobRecord, JobStatus, Latency
+from commitment_tracker.jobs.samples import load_catalog
+from commitment_tracker.jobs.service import (
+    JobService,
+    JobsUnavailable,
+    SampleNotFound,
+    UploadNotFound,
+)
 from commitment_tracker.jobs.uploads import S3UploadSigner, UploadSigner
-from commitment_tracker.schemas import AnalyzeRequest, AnalyzeResponse, UploadResponse
+from commitment_tracker.schemas import (
+    AnalyzeRequest,
+    AnalyzeResponse,
+    JobRequest,
+    Turn,
+    UploadResponse,
+)
 from commitment_tracker.settings import Settings
+from commitment_tracker.transcription.aws import AwsBatchTranscriber
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +59,21 @@ class HealthResponse(BaseModel):
     status: Literal["ok"]
     model: str
     prompt_version: str
+
+
+class JobResponse(BaseModel):
+    job_id: str
+    status: JobStatus
+    transcript: list[Turn] | None = None
+    analysis: AnalyzeResponse | None = None
+    error_code: str | None = None
+    latency_ms: Latency
+
+
+class SampleSummary(BaseModel):
+    id: str
+    title: str
+    duration_ms: int
 
 
 class ErrorDetail(BaseModel):
@@ -76,6 +109,20 @@ ERROR_RESPONSES: dict[int | str, dict[str, object]] = {
 UPLOAD_RESPONSES: dict[int | str, dict[str, object]] = {
     503: {"model": ErrorResponse, "description": "Audio storage is not configured"},
 }
+JOB_RESPONSES: dict[int | str, dict[str, object]] = {
+    404: {"model": ErrorResponse, "description": "The upload, sample or job does not exist"},
+    422: {"model": ErrorResponse, "description": "Invalid request, or the audio is not accepted"},
+    503: {"model": ErrorResponse, "description": "Jobs are not configured"},
+}
+# Domain errors raised by the job service: HTTP status, error code and the fixed message.
+JOB_ERRORS: dict[type[Exception], tuple[int, str, str]] = {
+    UploadNotFound: (404, "upload_not_found", "No upload with that id. It may have expired."),
+    SampleNotFound: (404, "sample_not_found", "No sample clip with that id."),
+    AudioTooLong: (422, "audio_too_long", "The recording is longer than 60 seconds."),
+    AudioInvalid: (422, "audio_invalid", "The audio is not a 16 kHz mono 16-bit WAV."),
+    JobsUnavailable: (503, "jobs_unavailable", "Jobs are not available."),
+}
+JOB_ID_PATTERN = r"^[0-9a-f]{64}$"
 
 
 def _error(
@@ -102,11 +149,38 @@ def build_upload_signer(settings: Settings) -> UploadSigner | None:
     return S3UploadSigner(s3, settings.audio_bucket, expires_in=settings.upload_url_ttl_seconds)
 
 
+def build_job_service(settings: Settings) -> JobService | None:
+    """Wired to AWS when the bucket and table are configured. The worker dispatcher joins in with
+    the Lambda handlers, so text jobs answer 503 until then."""
+    if settings.audio_bucket is None or settings.jobs_table is None:
+        return None
+    s3 = boto3.client("s3")
+    return JobService(
+        DynamoJobStore(boto3.client("dynamodb"), settings.jobs_table),
+        S3AudioStore(s3, settings.audio_bucket),
+        AwsBatchTranscriber(boto3.client("transcribe"), s3, settings.audio_bucket),
+        load_catalog(),
+        None,
+    )
+
+
+def _job_response(job: JobRecord) -> JobResponse:
+    return JobResponse(
+        job_id=job.id,
+        status=job.status,
+        transcript=job.turns,
+        analysis=job.analysis,
+        error_code=job.error_code,
+        latency_ms=job.latency(),
+    )
+
+
 def create_app(
     *,
     extractor: Extractor | None = None,
     settings: Settings | None = None,
     uploads: UploadSigner | None = None,
+    jobs: JobService | None = None,
 ) -> FastAPI:
     """With no extractor, the lifespan builds the Anthropic one, and the upload signer when an
     audio bucket is configured, from settings at startup."""
@@ -118,6 +192,7 @@ def create_app(
             active_settings = settings or Settings()
             app.state.extractor = build_extractor(active_settings)
             app.state.uploads = uploads or build_upload_signer(active_settings)
+            app.state.jobs = jobs or build_job_service(active_settings)
         yield
 
     app = FastAPI(
@@ -127,6 +202,7 @@ def create_app(
         lifespan=lifespan,
     )
     app.state.uploads = uploads
+    app.state.jobs = jobs
     if extractor is not None:
         app.state.extractor = extractor
 
@@ -145,6 +221,19 @@ def create_app(
         )
         # Exception text holds field paths, SDK class names and status codes, never transcript text.
         logger.warning("analyze_failed code=%s detail=%s", code, exc)
+        return _error(status, code, message)
+
+    @app.exception_handler(UploadNotFound)
+    @app.exception_handler(SampleNotFound)
+    @app.exception_handler(AudioTooLong)
+    @app.exception_handler(AudioInvalid)
+    @app.exception_handler(JobsUnavailable)
+    async def _job_failed(request: Request, exc: Exception) -> JSONResponse:
+        # Walk the MRO so TextJobsUnavailable finds JobsUnavailable's entry.
+        status, code, message = next(
+            JOB_ERRORS[cls] for cls in type(exc).__mro__ if cls in JOB_ERRORS
+        )
+        logger.info("job_rejected path=%s code=%s", request.url.path, code)
         return _error(status, code, message)
 
     @app.get("/health")
@@ -183,6 +272,42 @@ def create_app(
             max_bytes=MAX_AUDIO_BYTES,
             expires_in=ticket.expires_in,
         )
+
+    def _jobs(request: Request) -> JobService:
+        service: JobService | None = request.app.state.jobs
+        if service is None:
+            raise JobsUnavailable("jobs are not configured")
+        return service
+
+    @app.post("/jobs", status_code=202, response_model=JobResponse, responses=JOB_RESPONSES)
+    async def create_job(body: JobRequest, request: Request) -> JobResponse:
+        service = _jobs(request)
+        if body.upload_id is not None:
+            job = await run_in_threadpool(
+                service.start_upload, body.upload_id, body.call_date, body.speaker_names
+            )
+        elif body.sample_id is not None:
+            job = await run_in_threadpool(
+                service.start_sample, body.sample_id, body.call_date, body.speaker_names
+            )
+        else:
+            assert body.transcript is not None  # JobRequest allows exactly one source
+            job = await run_in_threadpool(service.start_text, body.transcript, body.call_date)
+        return _job_response(job)
+
+    @app.get("/jobs/{job_id}", response_model=JobResponse, responses=JOB_RESPONSES)
+    async def get_job(
+        request: Request, job_id: Annotated[str, Path(pattern=JOB_ID_PATTERN)]
+    ) -> JobResponse | JSONResponse:
+        job = await run_in_threadpool(_jobs(request).get, job_id)
+        if job is None:
+            return _error(404, "job_not_found", "No job with that id. It may have expired.")
+        return _job_response(job)
+
+    @app.get("/samples", responses=JOB_RESPONSES)
+    async def list_samples(request: Request) -> list[SampleSummary]:
+        clips = _jobs(request).samples().all()
+        return [SampleSummary(id=c.id, title=c.title, duration_ms=c.duration_ms) for c in clips]
 
     return app
 

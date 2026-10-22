@@ -6,6 +6,7 @@ from collections.abc import Callable
 
 from commitment_tracker.extractor.adapter import ModelReply, ModelRequest, Usage
 from commitment_tracker.extractor.model_output import ModelOutput
+from commitment_tracker.jobs.audio_store import StoredAudio
 
 DEFAULT_USAGE = Usage(
     input_tokens=200,
@@ -88,3 +89,35 @@ class FunctionAdapter:
         if isinstance(result, Exception):
             raise result
         return result
+
+
+class FakeAudioStore:
+    """An audio store over a dict of key -> (bytes, uploaded_at_ms); records deletions."""
+
+    def __init__(self, bucket: str = "audio-bucket") -> None:
+        self.bucket = bucket
+        self.objects: dict[str, StoredAudio] = {}
+        self.deleted: list[str] = []
+
+    def put(self, key: str, data: bytes, uploaded_at_ms: int | None = None) -> None:
+        self.objects[key] = StoredAudio(data=data, uploaded_at_ms=uploaded_at_ms)
+
+    def read(self, key: str) -> StoredAudio | None:
+        return self.objects.get(key)
+
+    def delete(self, key: str) -> None:
+        self.deleted.append(key)
+        self.objects.pop(key, None)
+
+
+class FakeDispatcher:
+    """Records the jobs handed to the worker, or fails when told to."""
+
+    def __init__(self, error: Exception | None = None) -> None:
+        self.error = error
+        self.dispatched: list[str] = []
+
+    def dispatch(self, job_id: str) -> None:
+        if self.error is not None:
+            raise self.error
+        self.dispatched.append(job_id)

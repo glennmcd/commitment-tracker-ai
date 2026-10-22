@@ -1,8 +1,6 @@
 """WAV validation: the server's check that an upload is 16 kHz mono PCM of at most 60 seconds."""
 
-import io
 import struct
-import wave
 
 import pytest
 
@@ -12,18 +10,7 @@ from commitment_tracker.jobs.audio import (
     AudioTooLong,
     validate_wav,
 )
-
-
-def make_wav(
-    seconds: float = 1.0, *, rate: int = 16_000, channels: int = 1, width: int = 2
-) -> bytes:
-    buffer = io.BytesIO()
-    with wave.open(buffer, "wb") as out:
-        out.setnchannels(channels)
-        out.setsampwidth(width)
-        out.setframerate(rate)
-        out.writeframes(b"\x00" * int(seconds * rate) * channels * width)
-    return buffer.getvalue()
+from tests.wav import make_wav
 
 
 def test_a_one_second_clip_reports_its_duration() -> None:

@@ -7,7 +7,8 @@ from commitment_tracker.jobs.record import JobRecord, JobStatus, JobUpdate
 
 class JobStore(Protocol):
     def create(self, job: JobRecord) -> JobRecord:
-        """Store `job`, or return the stored record when its id already exists (deduplication)."""
+        """Store `job` and return that same object, or, when its id already exists, return the
+        stored record (deduplication). Callers tell the two apart with `is`."""
         ...
 
     def get(self, job_id: str) -> JobRecord | None: ...

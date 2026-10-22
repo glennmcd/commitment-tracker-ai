@@ -1,11 +1,14 @@
 """Presigned S3 POSTs for browser uploads, so audio never passes through API Gateway.
 
 The POST policy pins the object key and content type and caps the size at MAX_AUDIO_BYTES, which
-is 60 s of the accepted WAV format. Signing happens locally in botocore; nothing here calls AWS.
+is 60 s of the accepted WAV format. The time of signing is pinned as object metadata, so the
+job can time its upload stage. Signing happens locally in botocore; nothing here calls AWS.
 """
 
 import logging
+import time
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
@@ -18,6 +21,9 @@ logger = logging.getLogger(__name__)
 
 UPLOAD_PREFIX = "uploads"
 CONTENT_TYPE = "audio/wav"
+# S3 stores `x-amz-meta-presigned-at` as object metadata `presigned-at`.
+PRESIGNED_AT_METADATA = "presigned-at"
+_PRESIGNED_AT_FIELD = f"x-amz-meta-{PRESIGNED_AT_METADATA}"
 
 
 @dataclass(frozen=True)
@@ -34,23 +40,33 @@ class UploadSigner(Protocol):
 
 
 class S3UploadSigner:
-    def __init__(self, s3: "S3Client", bucket: str, *, expires_in: int = 300) -> None:
+    def __init__(
+        self,
+        s3: "S3Client",
+        bucket: str,
+        *,
+        expires_in: int = 300,
+        clock: Callable[[], float] = time.time,
+    ) -> None:
         if expires_in <= 0:
             raise ValueError("expires_in must be positive")
         self._s3 = s3
         self._bucket = bucket
         self._expires_in = expires_in
+        self._clock = clock
 
     def presign(self) -> UploadTicket:
         upload_id = uuid.uuid4().hex
         key = f"{UPLOAD_PREFIX}/{upload_id}.wav"
+        presigned_at = str(int(self._clock() * 1000))
         post = self._s3.generate_presigned_post(
             self._bucket,
             key,
-            Fields={"Content-Type": CONTENT_TYPE},
+            Fields={"Content-Type": CONTENT_TYPE, _PRESIGNED_AT_FIELD: presigned_at},
             Conditions=[
                 ["content-length-range", 1, MAX_AUDIO_BYTES],
                 ["eq", "$Content-Type", CONTENT_TYPE],
+                ["eq", f"${_PRESIGNED_AT_FIELD}", presigned_at],
             ],
             ExpiresIn=self._expires_in,
         )

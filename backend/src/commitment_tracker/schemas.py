@@ -82,6 +82,43 @@ class UploadResponse(Contract):
     expires_in: int = Field(description="Seconds the form stays valid.")
 
 
+class JobRequest(Contract):
+    """Starts a job from exactly one source: an upload, a sample clip or a typed transcript."""
+
+    upload_id: str | None = Field(
+        default=None, pattern=r"^[0-9a-f]{32}$", description="From POST /uploads."
+    )
+    sample_id: str | None = Field(
+        default=None, pattern=r"^[a-z0-9][a-z0-9-]{0,63}$", description="From GET /samples."
+    )
+    transcript: list[Turn] | None = Field(default=None, min_length=1, max_length=MAX_TURNS)
+    call_date: date = Field(description="Date of the call; relative due dates resolve from it.")
+    speaker_names: list[str] = Field(
+        default_factory=list,
+        max_length=2,
+        description="Names for the first and second voice heard; audio sources only.",
+    )
+
+    @field_validator("speaker_names")
+    @classmethod
+    def _names_not_blank(cls, names: list[str]) -> list[str]:
+        if any(_blank(name) or len(name) > 100 for name in names):
+            raise ValueError("speaker names must be 1 to 100 characters")
+        return names
+
+    @model_validator(mode="after")
+    def _one_source(self) -> Self:
+        sources = [self.upload_id, self.sample_id, self.transcript]
+        if sum(source is not None for source in sources) != 1:
+            raise ValueError("give exactly one of upload_id, sample_id and transcript")
+        if self.transcript is not None:
+            if self.speaker_names:
+                raise ValueError("speaker_names applies to audio; a transcript names its speakers")
+            if sum(len(turn.text) for turn in self.transcript) > MAX_TRANSCRIPT_CHARS:
+                raise ValueError(f"transcript must be at most {MAX_TRANSCRIPT_CHARS} characters")
+        return self
+
+
 class AnalyzeRequest(Contract):
     transcript: list[Turn] = Field(min_length=1, max_length=MAX_TURNS)
     call_date: date = Field(description="Date of the call; relative due dates resolve from it.")

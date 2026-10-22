@@ -13,14 +13,14 @@ from commitment_tracker.jobs.uploads import S3UploadSigner, UploadSigner
 BUCKET = "audio-bucket"
 
 
-def signer(ttl: int = 300) -> S3UploadSigner:
+def signer(ttl: int = 300, now: float = 1_761_000_000.5) -> S3UploadSigner:
     s3 = boto3.client(
         "s3",
         region_name="us-east-2",
         aws_access_key_id="test",
         aws_secret_access_key="test",
     )
-    return S3UploadSigner(s3, BUCKET, expires_in=ttl)
+    return S3UploadSigner(s3, BUCKET, expires_in=ttl, clock=lambda: now)
 
 
 def policy_of(fields: dict[str, str]) -> dict[str, Any]:
@@ -75,3 +75,12 @@ def test_it_carries_the_signature_fields_the_browser_must_echo() -> None:
 def test_a_non_positive_ttl_is_rejected(ttl: int) -> None:
     with pytest.raises(ValueError, match="expires_in"):
         signer(ttl=ttl)
+
+
+def test_the_presign_time_is_pinned_as_object_metadata() -> None:
+    """The upload stage is timed from this value, so the client must not be able to change it."""
+    ticket = signer().presign()
+    assert ticket.fields["x-amz-meta-presigned-at"] == "1761000000500"
+    assert ["eq", "$x-amz-meta-presigned-at", "1761000000500"] in policy_of(ticket.fields)[
+        "conditions"
+    ]
