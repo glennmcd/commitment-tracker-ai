@@ -6,6 +6,7 @@ SDK. No request leaves the machine.
 
 import asyncio
 import json
+from pathlib import Path
 from typing import Any, cast
 
 import anthropic
@@ -278,11 +279,19 @@ def test_real_client_sends_the_beta_header_and_parses_the_reply() -> None:
 
 
 def test_missing_credentials_fail_cleanly_before_any_request(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     # Without this check the SDK raises a bare TypeError at request time.
-    for name in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_PROFILE"):
+    for name in (
+        "ANTHROPIC_API_KEY",
+        "ANTHROPIC_AUTH_TOKEN",
+        "ANTHROPIC_PROFILE",
+        "ANTHROPIC_CONFIG_DIR",
+    ):
         monkeypatch.delenv(name, raising=False)
+    # Hide any `ant auth login` profile on this machine: the SDK looks for it under these folders.
+    for name in ("APPDATA", "HOME", "USERPROFILE", "XDG_CONFIG_HOME"):
+        monkeypatch.setenv(name, str(tmp_path))
     adapter = AnthropicAdapter("claude-opus-5-5")
     with pytest.raises(ModelUnavailable, match="no Anthropic credentials"):
         complete(adapter)
