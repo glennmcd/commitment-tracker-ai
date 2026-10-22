@@ -18,6 +18,7 @@ plugin, configured in `.claude/cc-practices.json`. This file covers only what is
   - `eval/`: `data/dev.jsonl` and `reports/` (committed); `.cache/` holds cached model responses (ignored).
   - `tests/test_layout.py`: enforces the import layering below.
 - `docs/plans/`: build plans; `part-1-extraction-call.md` is the accepted design for the model call.
+- `docs/decisions/`: numbered ADRs. `docs/releasing.md`: how versions and releases work.
 - `frontend/`: reserved for the Part 2 Next.js app; empty in Part 1.
 - `openapi.json`: exported from FastAPI and committed; the frontend generates its client from it.
 
@@ -48,4 +49,8 @@ uv run eval --model <id> --prompt v1
   model they used. Tune prompts on development data only.
 - **Ask before adding a dependency** outside the stack in `docs/part-1-brief.md` (FastAPI, Pydantic v2,
   pydantic-settings, anthropic, python-dateutil, scikit-learn, pytest, Ruff, mypy).
-- Agent commits are allowed here; keep them small and Conventional.
+- Agent commits are allowed here; keep them small and Conventional. The commit type sets the next version
+  (`feat:` minor, `fix:` patch, others none); see `docs/releasing.md`.
+- **Never bump versions by hand.** release-please owns `commitment_tracker.__version__` and
+  `.release-please-manifest.json`. The API contract version (`API_VERSION` in `api/app.py`) is separate: bump it
+  only when the request or response shape changes, then run `uv run export-openapi`.

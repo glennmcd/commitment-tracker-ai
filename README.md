@@ -164,6 +164,9 @@ The code lives in `backend/src/commitment_tracker/`:
 A test enforces the import rules between them. Conventions for contributors and coding agents are in
 [CLAUDE.md](CLAUDE.md).
 
+Versions and the changelog come from release-please, driven by Conventional Commit types; never bump a version by
+hand. See [docs/releasing.md](docs/releasing.md).
+
 ## License
 
 MIT; see [LICENSE](LICENSE).
