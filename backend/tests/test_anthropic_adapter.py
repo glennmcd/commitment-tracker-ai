@@ -275,3 +275,14 @@ def test_real_client_sends_the_beta_header_and_parses_the_reply() -> None:
     assert "betas" not in body  # sent as a header, not in the body
     assert reply.text == JSON_TEXT
     assert reply.served_by == "claude-sonnet-5-5"
+
+
+def test_missing_credentials_fail_cleanly_before_any_request(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Without this check the SDK raises a bare TypeError at request time.
+    for name in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_PROFILE"):
+        monkeypatch.delenv(name, raising=False)
+    adapter = AnthropicAdapter("claude-opus-5-5")
+    with pytest.raises(ModelUnavailable, match="no Anthropic credentials"):
+        complete(adapter)

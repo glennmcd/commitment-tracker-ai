@@ -46,6 +46,12 @@ class AnthropicAdapter:
         self.client = client or anthropic.AsyncAnthropic(
             api_key=api_key, timeout=timeout_seconds, max_retries=max_retries
         )
+        # The SDK only notices missing credentials at request time, with a bare TypeError. An
+        # injected client is trusted; one built here is checked once.
+        self._credentials_missing = client is None and all(
+            getattr(self.client, name, None) is None
+            for name in ("api_key", "auth_token", "credentials")
+        )
 
     def build_params(self, request: ModelRequest) -> dict[str, Any]:
         params: dict[str, Any] = {
@@ -69,6 +75,11 @@ class AnthropicAdapter:
         return params
 
     async def complete(self, request: ModelRequest) -> ModelReply:
+        if self._credentials_missing:
+            raise ModelUnavailable(
+                "no Anthropic credentials: set ANTHROPIC_API_KEY (or backend/.env), "
+                "or run `ant auth login`"
+            )
         params = self.build_params(request)
         started = time.perf_counter()
         try:

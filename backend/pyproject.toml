@@ -4,15 +4,17 @@ version = "0.1.0"
 description = "Extracts commitments from conversation transcripts and measures how well it does"
 requires-python = ">=3.12"
 dependencies = [
-    "anthropic>=1.0",
+    "anthropic>=2.1",
     "fastapi>=0.115",
     "pydantic>=2.9",
     "pydantic-settings>=2.6",
     "python-dateutil>=2.9",
+    "scikit-learn>=1.5",
     "uvicorn>=0.32",
 ]
 
 [project.scripts]
+eval = "commitment_tracker.evaluation.cli:main"
 export-openapi = "commitment_tracker.api.export_openapi:main"
 
 [dependency-groups]
@@ -48,6 +50,11 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 strict = true
 files = ["src", "tests"]
 plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+# scikit-learn ships without type information.
+module = ["sklearn", "sklearn.*"]
+ignore_missing_imports = true
 
 [tool.pydantic-mypy]
 init_forbid_extra = true
