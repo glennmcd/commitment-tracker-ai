@@ -3,8 +3,9 @@
 The model only returns the phrase (`due.raw`); every date is computed here so each rule is tested.
 Conventions: weeks start on Monday; a bare weekday is the next one after the call date; "next
 <weekday>" is that weekday in the next calendar week; "the Nth" is the next Nth after the call date;
-a week-precision date is the Monday of that week. Phrases no rule recognises resolve to nothing and
-keep the model's precision hint, limited to event or vague.
+a week-precision date is the Monday of that week; "before <date>" is the day before that date.
+Phrases no rule recognises resolve to nothing and keep the model's precision hint, limited to event
+or vague.
 """
 
 import calendar
@@ -198,18 +199,33 @@ RULES: list[Rule] = [
 ]
 
 
-def resolve_due(raw: str | None, call_date: date, hint: Precision | None = None) -> ResolvedDue:
-    """Resolve a spoken due phrase against the call date."""
-    if raw is None or not raw.strip():
-        return ResolvedDue(None, Precision.NONE)
-    text = _normalise(raw)
-    if text in VAGUE:
-        return ResolvedDue(None, Precision.VAGUE)
+def _apply_rules(text: str, call_date: date) -> ResolvedDue | None:
+    """The first rule that matches the whole phrase decides; None if none resolves it."""
     for pattern, precision, fn in RULES:
         match = pattern.fullmatch(text)
         if match:
             resolved = fn(match, call_date)
-            if resolved is not None:
-                return ResolvedDue(resolved, precision)
-            break
-    return ResolvedDue(None, hint if hint in HINTABLE else Precision.VAGUE)
+            return ResolvedDue(resolved, precision) if resolved is not None else None
+    return None
+
+
+def _day_before(target: ResolvedDue) -> ResolvedDue:
+    """'before Thursday' is due Wednesday; 'before next week' is due the Sunday before it."""
+    assert target.resolved is not None
+    return ResolvedDue(target.resolved - timedelta(days=1), Precision.DAY)
+
+
+def resolve_due(raw: str | None, call_date: date, hint: Precision | None = None) -> ResolvedDue:
+    """Resolve a spoken due phrase against the call date."""
+    if raw is None or not raw.strip():
+        return ResolvedDue(None, Precision.NONE)
+    fallback = ResolvedDue(None, hint if hint in HINTABLE else Precision.VAGUE)
+    text = _normalise(raw)
+    if text.startswith("before "):
+        # A date after "before" is due the day before it; anything else ("before your board
+        # meeting") is an event or vague deadline, so the hint decides.
+        target = _apply_rules(text.removeprefix("before "), call_date)
+        return _day_before(target) if target is not None else fallback
+    if text in VAGUE:
+        return ResolvedDue(None, Precision.VAGUE)
+    return _apply_rules(text, call_date) or fallback

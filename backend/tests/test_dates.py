@@ -173,3 +173,39 @@ def test_impossible_dates_do_not_resolve(raw: str) -> None:
 
 def test_a_resolved_phrase_ignores_the_hint() -> None:
     assert resolve_due("by Friday", WED, E) == ResolvedDue(d(10, 23), D)
+
+
+# --- "before <date>": the day before it ----------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("raw", "call_date", "resolved"),
+    [
+        ("before Thursday", WED, d(10, 21)),  # Thursday is the 22nd, so it's due today
+        ("before Friday", WED, d(10, 22)),
+        ("by before Friday", WED, d(10, 22)),
+        ("before next Friday", WED, d(10, 29)),
+        ("before tomorrow", WED, d(10, 21)),
+        ("before the 1st", WED, d(10, 31)),
+        ("before November 3", WED, d(11, 2)),
+        ("before next week", WED, d(10, 25)),  # the Sunday before Monday the 26th
+        ("before the 1st", date(2026, 12, 20), d(12, 31)),  # across the year end
+    ],
+)
+def test_before_a_date_is_the_day_before(raw: str, call_date: date, resolved: date) -> None:
+    assert resolve_due(raw, call_date) == ResolvedDue(resolved, D)
+
+
+@pytest.mark.parametrize(
+    ("raw", "hint", "precision"),
+    [
+        ("before your board meeting", E, E),  # spec #4 stays an event
+        ("before the renewal call", E, E),
+        ("before it ships", None, V),
+        ("before soon", E, E),
+    ],
+)
+def test_before_an_event_keeps_the_hint(
+    raw: str, hint: Precision | None, precision: Precision
+) -> None:
+    assert resolve_due(raw, WED, hint) == ResolvedDue(None, precision)
