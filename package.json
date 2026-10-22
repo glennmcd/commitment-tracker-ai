@@ -1,0 +1,19 @@
+{
+  "name": "commitment-tracker-ai",
+  "private": true,
+  "license": "MIT",
+  "workspaces": [
+    "infra"
+  ],
+  "scripts": {
+    "lint": "biome ci .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit -p infra/tsconfig.json",
+    "test": "bun --cwd infra test",
+    "synth:infra": "cd infra && node node_modules/aws-cdk/bin/cdk synth --quiet"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.14",
+    "typescript": "^5.7.2"
+  }
+}

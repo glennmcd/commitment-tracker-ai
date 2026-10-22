@@ -25,3 +25,7 @@ node_modules/
 
 # Claude Code: personal settings (shared ones go in .claude/settings.json)
 .claude/settings.local.json
+
+# Part 2 infra build output
+infra/dist/
+infra/cdk.out/
