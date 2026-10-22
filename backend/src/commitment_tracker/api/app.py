@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 # The API contract version, published as info.version in openapi.json. Bump it by hand when the
 # request or response shape changes; it is separate from the release version (commitment_tracker
 # .__version__), so releases don't change openapi.json or the frontend client generated from it.
-API_VERSION = "0.1.0"
+API_VERSION = "0.2.0"
 
 
 class HealthResponse(BaseModel):

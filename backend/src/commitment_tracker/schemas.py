@@ -51,6 +51,12 @@ def _blank(value: str | None) -> bool:
 class Turn(Contract):
     speaker: str = Field(min_length=1, max_length=100, description="Speaker id or name.")
     text: str = Field(min_length=1, description="What the speaker said in this turn.")
+    start_ms: int | None = Field(
+        default=None, ge=0, description="Start of the turn in the audio; set for audio jobs."
+    )
+    end_ms: int | None = Field(
+        default=None, ge=0, description="End of the turn in the audio; set for audio jobs."
+    )
 
     @field_validator("text")
     @classmethod
@@ -58,6 +64,12 @@ class Turn(Contract):
         if not value.strip():
             raise ValueError("turn text must not be blank")
         return value
+
+    @model_validator(mode="after")
+    def _times_in_order(self) -> Self:
+        if self.start_ms is not None and self.end_ms is not None and self.end_ms < self.start_ms:
+            raise ValueError("end_ms must not be before start_ms")
+        return self
 
 
 class AnalyzeRequest(Contract):

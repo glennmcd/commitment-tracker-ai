@@ -38,6 +38,18 @@ def test_key_changes_with_each_input() -> None:
     assert len(keys) == 6
 
 
+def test_key_ignores_turn_timestamps() -> None:
+    # The model never sees timestamps, so cached responses stay valid for timed transcripts.
+    timed = REQUEST.model_copy(
+        update={
+            "transcript": [
+                Turn(speaker="seller", text="I'll send it Friday.", start_ms=0, end_ms=1_800)
+            ]
+        }
+    )
+    assert key(timed) == key()
+
+
 def test_round_trip(tmp_path: Path) -> None:
     cache = ResponseCache(tmp_path / "cache")
     stored = response(pred(0, "HEDGED", "I'll send it Friday."))

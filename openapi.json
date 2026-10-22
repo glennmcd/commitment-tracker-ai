@@ -3,7 +3,7 @@
   "info": {
     "title": "Commitment Tracker AI",
     "description": "Extracts commitments from conversation transcripts.",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "paths": {
     "/health": {
@@ -510,6 +510,32 @@
             "minLength": 1,
             "title": "Text",
             "description": "What the speaker said in this turn."
+          },
+          "start_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Ms",
+            "description": "Start of the turn in the audio; set for audio jobs."
+          },
+          "end_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Ms",
+            "description": "End of the turn in the audio; set for audio jobs."
           }
         },
         "additionalProperties": false,

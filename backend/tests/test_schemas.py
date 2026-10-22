@@ -217,6 +217,37 @@ def test_invalid_request_is_rejected(overrides: dict[str, Any], message: str) ->
         AnalyzeRequest.model_validate(request_data(**overrides))
 
 
+def test_turn_timestamps_are_optional() -> None:
+    turn = AnalyzeRequest.model_validate(request_data()).transcript[0]
+    assert turn.start_ms is None
+    assert turn.end_ms is None
+
+
+@pytest.mark.parametrize(
+    ("start_ms", "end_ms"),
+    [(0, 0), (0, 4_200), (1_500, 61_000), (None, 4_200), (1_500, None)],
+)
+def test_turn_timestamps_parse(start_ms: int | None, end_ms: int | None) -> None:
+    turn = {"speaker": "seller", "text": "I'll send it.", "start_ms": start_ms, "end_ms": end_ms}
+    parsed = AnalyzeRequest.model_validate(request_data(transcript=[turn])).transcript[0]
+    assert (parsed.start_ms, parsed.end_ms) == (start_ms, end_ms)
+
+
+@pytest.mark.parametrize(
+    ("timestamps", "message"),
+    [
+        ({"start_ms": -1}, "greater than or equal to 0"),
+        ({"end_ms": -1}, "greater than or equal to 0"),
+        ({"start_ms": 4_200, "end_ms": 4_199}, "end_ms must not be before start_ms"),
+        ({"start_ms": 1.5}, "valid integer"),
+    ],
+)
+def test_invalid_turn_timestamps_are_rejected(timestamps: dict[str, Any], message: str) -> None:
+    turn = {"speaker": "seller", "text": "I'll send it.", **timestamps}
+    with pytest.raises(ValidationError, match=message):
+        AnalyzeRequest.model_validate(request_data(transcript=[turn]))
+
+
 SECRET = "pricing-is-42"
 
 
