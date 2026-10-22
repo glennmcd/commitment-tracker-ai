@@ -17,6 +17,7 @@ RULES: dict[str, set[str]] = {
     "schemas": {"settings", "extractor", "transcription", "api", "evaluation"},
     "extractor": {"api", "evaluation"},
     "transcription": {"extractor", "jobs", "api", "evaluation"},
+    "jobs": {"api", "evaluation"},
     "evaluation": {"api"},
 }
 

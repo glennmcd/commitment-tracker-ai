@@ -10,6 +10,6 @@
     "format": "uv run --directory backend ruff format --check .",
     "typecheck": "uv run --directory backend mypy"    
   },
-  "allowAgentCommits": false,
+  "allowAgentCommits": true,
   "compactOutput": false
 }
