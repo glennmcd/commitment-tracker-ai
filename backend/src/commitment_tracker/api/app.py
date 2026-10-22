@@ -8,10 +8,10 @@ transcript text, and validation errors drop the input values FastAPI would other
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 import boto3
-from fastapi import FastAPI, Path, Request
+from fastapi import Depends, FastAPI, Path, Request, Response
 from fastapi.concurrency import run_in_threadpool
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -25,6 +25,11 @@ from commitment_tracker.extractor.errors import (
 )
 from commitment_tracker.extractor.extractor import Extractor
 from commitment_tracker.extractor.factory import build_extractor
+from commitment_tracker.guardrails.ratelimit import (
+    DynamoRateLimitStore,
+    RateLimiter,
+    client_ip,
+)
 from commitment_tracker.jobs.audio import MAX_AUDIO_BYTES, AudioInvalid, AudioTooLong
 from commitment_tracker.jobs.audio_store import S3AudioStore
 from commitment_tracker.jobs.dynamo import DynamoJobStore
@@ -92,6 +97,18 @@ class ErrorResponse(BaseModel):
     error: ErrorBody
 
 
+RATE_LIMITED: dict[str, object] = {
+    "model": ErrorResponse,
+    "description": "Too many requests from this client; see Retry-After",
+}
+
+
+class RateLimited(Exception):
+    def __init__(self, retry_after: int) -> None:
+        super().__init__("rate limited")
+        self.retry_after = retry_after
+
+
 # Each extraction failure: HTTP status, error code and the fixed message clients see.
 EXTRACTION_ERRORS: dict[type[ExtractionError], tuple[int, str, str]] = {
     ModelUnavailable: (502, "model_unavailable", "The model is unavailable. Try again later."),
@@ -104,13 +121,16 @@ EXTRACTION_ERRORS: dict[type[ExtractionError], tuple[int, str, str]] = {
 }
 ERROR_RESPONSES: dict[int | str, dict[str, object]] = {
     422: {"model": ErrorResponse, "description": "Invalid request, or the model refused it"},
+    429: RATE_LIMITED,
     502: {"model": ErrorResponse, "description": "The model failed or its output was invalid"},
 }
 UPLOAD_RESPONSES: dict[int | str, dict[str, object]] = {
+    429: RATE_LIMITED,
     503: {"model": ErrorResponse, "description": "Audio storage is not configured"},
 }
 JOB_RESPONSES: dict[int | str, dict[str, object]] = {
     404: {"model": ErrorResponse, "description": "The upload, sample or job does not exist"},
+    429: RATE_LIMITED,
     422: {"model": ErrorResponse, "description": "Invalid request, or the audio is not accepted"},
     503: {"model": ErrorResponse, "description": "Jobs are not configured"},
 }
@@ -126,10 +146,32 @@ JOB_ID_PATTERN = r"^[0-9a-f]{64}$"
 
 
 def _error(
-    status: int, code: str, message: str, details: list[ErrorDetail] | None = None
+    status: int,
+    code: str,
+    message: str,
+    details: list[ErrorDetail] | None = None,
+    headers: dict[str, str] | None = None,
 ) -> JSONResponse:
     body = ErrorResponse(error=ErrorBody(code=code, message=message, details=details or []))
-    return JSONResponse(status_code=status, content=body.model_dump())
+    return JSONResponse(status_code=status, content=body.model_dump(), headers=headers)
+
+
+def limited(rule: str) -> Any:
+    """A dependency that counts the request under `rule` and refuses it past the limit. It runs
+    before the body is validated, so malformed requests use up the budget too."""
+
+    async def check(request: Request, response: Response) -> None:
+        limiter: RateLimiter | None = request.app.state.limiter
+        if limiter is None:
+            return
+        decision = await run_in_threadpool(limiter.check, rule, client_ip(request))
+        response.headers["ratelimit-limit"] = str(decision.limit)
+        response.headers["ratelimit-remaining"] = str(decision.remaining)
+        response.headers["ratelimit-reset"] = str(decision.retry_after)
+        if not decision.allowed:
+            raise RateLimited(decision.retry_after)
+
+    return Depends(check)
 
 
 def _show_app_logs() -> None:
@@ -164,6 +206,12 @@ def build_job_service(settings: Settings) -> JobService | None:
     )
 
 
+def build_limiter(settings: Settings) -> RateLimiter | None:
+    if settings.guardrails_table is None:
+        return None
+    return RateLimiter(DynamoRateLimitStore(boto3.client("dynamodb"), settings.guardrails_table))
+
+
 def _job_response(job: JobRecord) -> JobResponse:
     return JobResponse(
         job_id=job.id,
@@ -181,6 +229,7 @@ def create_app(
     settings: Settings | None = None,
     uploads: UploadSigner | None = None,
     jobs: JobService | None = None,
+    limiter: RateLimiter | None = None,
 ) -> FastAPI:
     """With no extractor, the lifespan builds the Anthropic one, and the upload signer when an
     audio bucket is configured, from settings at startup."""
@@ -193,6 +242,7 @@ def create_app(
             app.state.extractor = build_extractor(active_settings)
             app.state.uploads = uploads or build_upload_signer(active_settings)
             app.state.jobs = jobs or build_job_service(active_settings)
+            app.state.limiter = limiter or build_limiter(active_settings)
         yield
 
     app = FastAPI(
@@ -203,6 +253,7 @@ def create_app(
     )
     app.state.uploads = uploads
     app.state.jobs = jobs
+    app.state.limiter = limiter
     if extractor is not None:
         app.state.extractor = extractor
 
@@ -213,6 +264,16 @@ def create_app(
         ]
         logger.info("analyze_rejected path=%s errors=%d", request.url.path, len(details))
         return _error(422, "validation_error", "The request is invalid.", details)
+
+    @app.exception_handler(RateLimited)
+    async def _rate_limited(request: Request, exc: RateLimited) -> JSONResponse:
+        logger.info("rate_limited path=%s", request.url.path)
+        return _error(
+            429,
+            "rate_limited",
+            f"Too many requests. Try again in {exc.retry_after} seconds.",
+            headers={"Retry-After": str(exc.retry_after)},
+        )
 
     @app.exception_handler(ExtractionError)
     async def _extraction_failed(request: Request, exc: ExtractionError) -> JSONResponse:
@@ -243,7 +304,7 @@ def create_app(
             status="ok", model=active.adapter.model, prompt_version=active.prompt.version
         )
 
-    @app.post("/analyze", responses=ERROR_RESPONSES)
+    @app.post("/analyze", responses=ERROR_RESPONSES, dependencies=[limited("analyze")])
     async def analyze(body: AnalyzeRequest, request: Request) -> AnalyzeResponse:
         active: Extractor = request.app.state.extractor
         result = await active.analyze(body)
@@ -259,7 +320,12 @@ def create_app(
         )
         return result
 
-    @app.post("/uploads", response_model=UploadResponse, responses=UPLOAD_RESPONSES)
+    @app.post(
+        "/uploads",
+        response_model=UploadResponse,
+        responses=UPLOAD_RESPONSES,
+        dependencies=[limited("uploads")],
+    )
     async def create_upload(request: Request) -> UploadResponse | JSONResponse:
         signer: UploadSigner | None = request.app.state.uploads
         if signer is None:
@@ -279,7 +345,13 @@ def create_app(
             raise JobsUnavailable("jobs are not configured")
         return service
 
-    @app.post("/jobs", status_code=202, response_model=JobResponse, responses=JOB_RESPONSES)
+    @app.post(
+        "/jobs",
+        status_code=202,
+        response_model=JobResponse,
+        responses=JOB_RESPONSES,
+        dependencies=[limited("jobs")],
+    )
     async def create_job(body: JobRequest, request: Request) -> JobResponse:
         service = _jobs(request)
         if body.upload_id is not None:
@@ -295,7 +367,12 @@ def create_app(
             job = await run_in_threadpool(service.start_text, body.transcript, body.call_date)
         return _job_response(job)
 
-    @app.get("/jobs/{job_id}", response_model=JobResponse, responses=JOB_RESPONSES)
+    @app.get(
+        "/jobs/{job_id}",
+        response_model=JobResponse,
+        responses=JOB_RESPONSES,
+        dependencies=[limited("job_status")],
+    )
     async def get_job(
         request: Request, job_id: Annotated[str, Path(pattern=JOB_ID_PATTERN)]
     ) -> JobResponse | JSONResponse:

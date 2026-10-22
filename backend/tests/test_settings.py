@@ -68,6 +68,17 @@ def test_upload_storage_defaults_and_overrides(monkeypatch: pytest.MonkeyPatch) 
     assert settings().audio_bucket == "audio-bucket"
 
 
+def test_table_names_default_to_unset_and_come_from_the_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for name in ("JOBS_TABLE", "GUARDRAILS_TABLE"):
+        monkeypatch.delenv(name, raising=False)
+    assert (settings().jobs_table, settings().guardrails_table) == (None, None)
+    monkeypatch.setenv("JOBS_TABLE", "jobs")
+    monkeypatch.setenv("GUARDRAILS_TABLE", "guardrails")
+    assert (settings().jobs_table, settings().guardrails_table) == ("jobs", "guardrails")
+
+
 def test_upload_ttl_must_be_positive() -> None:
     with pytest.raises(ValidationError):
         settings(upload_url_ttl_seconds=0)

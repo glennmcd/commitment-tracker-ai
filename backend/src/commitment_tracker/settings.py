@@ -23,3 +23,4 @@ class Settings(BaseSettings):
     audio_bucket: str | None = Field(default=None, min_length=1)
     upload_url_ttl_seconds: int = Field(default=300, gt=0)
     jobs_table: str | None = Field(default=None, min_length=1)
+    guardrails_table: str | None = Field(default=None, min_length=1)

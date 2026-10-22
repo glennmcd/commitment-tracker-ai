@@ -59,6 +59,16 @@
               }
             }
           },
+          "429": {
+            "description": "Too many requests from this client; see Retry-After",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "502": {
             "description": "The model failed or its output was invalid",
             "content": {
@@ -83,6 +93,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UploadResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests from this client; see Retry-After",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -127,6 +147,16 @@
           },
           "404": {
             "description": "The upload, sample or job does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests from this client; see Retry-After",
             "content": {
               "application/json": {
                 "schema": {
@@ -195,6 +225,16 @@
               }
             }
           },
+          "429": {
+            "description": "Too many requests from this client; see Retry-After",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Invalid request, or the audio is not accepted",
             "content": {
@@ -239,6 +279,16 @@
           },
           "404": {
             "description": "The upload, sample or job does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests from this client; see Retry-After",
             "content": {
               "application/json": {
                 "schema": {
