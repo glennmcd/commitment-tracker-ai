@@ -10,7 +10,7 @@
     "lint": "biome ci .",
     "lint:fix": "biome check --write .",
     "typecheck": "tsc --noEmit -p infra/tsconfig.json && bun run --cwd frontend typecheck",
-    "test": "bun --cwd infra test && bun run --cwd frontend test",
+    "test": "bun --cwd infra test && bun run --cwd frontend test && bun test scripts",
     "synth:infra": "cd infra && node node_modules/aws-cdk/bin/cdk synth --quiet"
   },
   "devDependencies": {

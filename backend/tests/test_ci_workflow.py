@@ -80,6 +80,7 @@ def test_frontend_lints_types_tests_checks_the_client_and_runs_the_browser_test(
         "bunx biome ci .",
         "bun run --cwd frontend typecheck",
         "bun run --cwd frontend test",
+        "bun test scripts",
         "bun run --cwd frontend gen:api",
         "git diff --exit-code",
         "playwright install --with-deps chromium",
