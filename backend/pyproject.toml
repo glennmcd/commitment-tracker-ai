@@ -3,7 +3,9 @@ name = "commitment-tracker"
 version = "0.1.0"
 description = "Extracts commitments from conversation transcripts and measures how well it does"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pydantic>=2.9",
+]
 
 [dependency-groups]
 dev = [
@@ -35,3 +37,9 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 [tool.mypy]
 strict = true
 files = ["src", "tests"]
+plugins = ["pydantic.mypy"]
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
