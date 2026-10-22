@@ -9,7 +9,7 @@ export type JobResult = { ok: true; job: Job } | { ok: false; message: string; c
 const GENERIC = "Something went wrong. Try again.";
 
 /** What the visitor reads for each failure the API can report (error codes: backend api/app.py and worker.py). */
-function explain(code: string | null | undefined, retryAfter: string | null): string {
+export function explain(code: string | null | undefined, retryAfter: string | null): string {
   switch (code) {
     case "rate_limited":
       return retryAfter
@@ -19,6 +19,16 @@ function explain(code: string | null | undefined, retryAfter: string | null): st
       return "The demo has reached its daily limit. Try again tomorrow.";
     case "jobs_unavailable":
       return "The demo is not available right now.";
+    case "audio_too_long":
+      return "That recording is longer than 60 seconds.";
+    case "audio_invalid":
+      return "That recording could not be read. Try recording again.";
+    case "upload_not_found":
+      return "The upload expired. Record again.";
+    case "sample_not_found":
+      return "That sample clip is not available.";
+    case "uploads_unavailable":
+      return "Recording is not available right now.";
     case "validation_error":
       return "The API did not accept that request.";
     case "job_not_found":
@@ -38,9 +48,9 @@ function explain(code: string | null | undefined, retryAfter: string | null): st
   }
 }
 
-const NETWORK = "Could not reach the API. Check your connection and try again.";
+export const NETWORK = "Could not reach the API. Check your connection and try again.";
 
-function codeOf(error: unknown): string | undefined {
+export function codeOf(error: unknown): string | undefined {
   return (error as { error?: { code?: string } } | undefined)?.error?.code;
 }
 
