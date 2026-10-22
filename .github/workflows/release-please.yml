@@ -1,0 +1,34 @@
+name: release-please
+
+# Keeps one "release PR" open on main. It bumps the version from the Conventional Commit messages since
+# the last release and writes CHANGELOG.md; merging it tags vX.Y.Z and creates the GitHub Release.
+# See docs/releasing.md.
+on:
+  push:
+    branches: [main]
+
+# The Action labels the release PR (issues), opens it (pull requests) and pushes the tag (contents).
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+# Runs queue behind each other instead of racing to update the same release PR.
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Pinned to a commit, not a tag, because a tag can be moved. Update with
+      # `gh api repos/googleapis/release-please-action/git/ref/tags/<tag> --jq .object.sha`.
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          # Pull requests made with the built-in token don't start other workflows. A fine-grained
+          # token in RELEASE_PLEASE_TOKEN fixes that (docs/releasing.md); without it this still works.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
