@@ -20,6 +20,7 @@ from pydantic import SecretStr
 
 from commitment_tracker.api.app import build_spend_cap, create_app
 from commitment_tracker.extractor.factory import build_extractor
+from commitment_tracker.guardrails.metrics import enable_emf_output
 from commitment_tracker.jobs.audio_store import S3AudioStore
 from commitment_tracker.jobs.dispatch import ANALYZE_TEXT
 from commitment_tracker.jobs.dynamo import DynamoJobStore
@@ -62,6 +63,7 @@ def make_api_handler(app: Any) -> Mangum:
 
 @functools.cache
 def _api() -> Mangum:
+    enable_emf_output()
     return make_api_handler(create_app(settings=load_settings()))
 
 
@@ -123,6 +125,7 @@ def build_worker(settings: Settings) -> JobWorker:
 
 @functools.cache
 def _worker_handler() -> Callable[[Any, Any], None]:
+    enable_emf_output()
     return make_worker_handler(build_worker(load_settings()))
 
 

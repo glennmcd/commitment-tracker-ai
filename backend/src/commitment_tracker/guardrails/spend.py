@@ -97,6 +97,7 @@ class SpendCap:
         daily_budget_usd: float,
         *,
         clock: Callable[[], float] = time.time,
+        on_total: Callable[[float], None] | None = None,
     ) -> None:
         if not daily_budget_usd > 0:
             raise ValueError("the daily budget must be positive")
@@ -104,6 +105,7 @@ class SpendCap:
         self._budget_micros = round(daily_budget_usd * _MICROS)
         self._budget_usd = daily_budget_usd
         self._clock = clock
+        self._on_total = on_total  # told the day's total as a fraction of the budget
 
     def _today(self) -> datetime:
         return datetime.fromtimestamp(self._clock(), UTC)
@@ -148,3 +150,8 @@ class SpendCap:
             self._budget_usd,
             total / self._budget_micros,
         )
+        if self._on_total is not None:
+            try:
+                self._on_total(total / self._budget_micros)
+            except Exception as error:
+                logger.warning("spend report failed error=%s", type(error).__name__)

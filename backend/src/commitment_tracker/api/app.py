@@ -32,6 +32,7 @@ from commitment_tracker.feedback.service import (
     FeedbackSpanNotFound,
     JobNotFinished,
 )
+from commitment_tracker.guardrails.metrics import emit_spend_fraction
 from commitment_tracker.guardrails.ratelimit import (
     DynamoRateLimitStore,
     RateLimiter,
@@ -253,7 +254,7 @@ def build_spend_cap(settings: Settings) -> SpendCap | None:
     if settings.guardrails_table is None:
         return None
     store = DynamoSpendStore(boto3.client("dynamodb"), settings.guardrails_table)
-    return SpendCap(store, settings.daily_budget_usd)
+    return SpendCap(store, settings.daily_budget_usd, on_total=emit_spend_fraction)
 
 
 def build_feedback_service(settings: Settings) -> FeedbackService | None:
