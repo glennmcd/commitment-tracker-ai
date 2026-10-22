@@ -5,21 +5,37 @@ import { Annotations, ArnFormat, CfnOutput, Duration, RemovalPolicy, Stack, type
 import { AccessLogFormat } from "aws-cdk-lib/aws-apigateway";
 import { CorsHttpMethod, HttpApi, HttpStage, LogGroupLogDestination } from "aws-cdk-lib/aws-apigatewayv2";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
+import { CfnBudget } from "aws-cdk-lib/aws-budgets";
+import { Alarm, ComparisonOperator, MathExpression, Metric, TreatMissingData } from "aws-cdk-lib/aws-cloudwatch";
+import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
 import { AttributeType, BillingMode, Table } from "aws-cdk-lib/aws-dynamodb";
 import { Rule } from "aws-cdk-lib/aws-events";
 import { LambdaFunction as LambdaTarget } from "aws-cdk-lib/aws-events-targets";
-import { PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { PolicyStatement, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import { Architecture, Code, Function as LambdaFunction, Runtime } from "aws-cdk-lib/aws-lambda";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
 import { BlockPublicAccess, Bucket, BucketEncryption, HttpMethods } from "aws-cdk-lib/aws-s3";
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
+import { Topic } from "aws-cdk-lib/aws-sns";
+import { EmailSubscription, LambdaSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
 import type { Construct } from "constructs";
-import { API_HANDLER, API_KEY_PARAMETER, DEFAULT_DAILY_BUDGET_USD, WORKER_HANDLER } from "./config.js";
+import {
+  API_HANDLER,
+  API_KEY_PARAMETER,
+  DEFAULT_DAILY_BUDGET_USD,
+  DEFAULT_MONTHLY_BUDGET_USD,
+  METRIC_NAMESPACE,
+  SPEND_FRACTION_METRIC,
+  WORKER_HANDLER,
+} from "./config.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
 /** Where `bun run bundle` writes the Lambda code (cdk.json runs it before every synth). */
 const DEFAULT_CODE_PATH = path.resolve(here, "../dist/api");
+
+/** The budget kill switch Lambda (sets both functions' reserved concurrency to 0); see addBudget. */
+const BUDGET_STOP_CODE_PATH = path.resolve(here, "../lambda/budget-stop");
 
 /** The sample clips `backend/scripts/make_samples.py` writes; deployed to `samples/` in the bucket when present. */
 const DEFAULT_SAMPLES_PATH = path.resolve(here, "../../frontend/public/samples");
@@ -49,6 +65,14 @@ export interface ApiStackProps extends StackProps {
   model?: string;
   /** Steady and burst requests per second the HTTP API accepts across all callers; API Gateway answers 429 over it. */
   throttle?: { rateLimit: number; burstLimit: number };
+  /** Email for the alarms and the cost budget alerts. Without one neither is created and synth prints a warning. */
+  alertEmail?: string;
+  /**
+   * Monthly cost, in USD (default 30). The budget emails at 80% actual and 100% forecast, and at 100% actual it also
+   * stops the API and the worker by setting their reserved concurrency to 0. Covers the whole account, which holds
+   * only this project (ADR 0007).
+   */
+  monthlyBudgetUsd?: number;
   /** Caps the API function's concurrent executions. Unset by default: a new account's quota can't afford a reservation. */
   reservedConcurrency?: number;
 }
@@ -79,6 +103,8 @@ export class ApiStack extends Stack {
     if (props.reservedConcurrency !== undefined) positiveInteger("reservedConcurrency", props.reservedConcurrency);
     const dailyBudgetUsd = props.dailyBudgetUsd ?? DEFAULT_DAILY_BUDGET_USD;
     if (!(dailyBudgetUsd > 0)) throw new Error("dailyBudgetUsd must be positive");
+    const monthlyBudgetUsd = props.monthlyBudgetUsd ?? DEFAULT_MONTHLY_BUDGET_USD;
+    if (!(monthlyBudgetUsd > 0)) throw new Error("monthlyBudgetUsd must be positive");
 
     Tags.of(this).add("project", "commitment-tracker");
 
@@ -213,6 +239,16 @@ export class ApiStack extends Stack {
 
     this.addSamples(props.samplesPath ?? DEFAULT_SAMPLES_PATH);
 
+    if (props.alertEmail) {
+      this.addAlarms(httpApi, props.alertEmail);
+      this.addBudget(props.alertEmail, monthlyBudgetUsd);
+    } else {
+      Annotations.of(this).addWarningV2(
+        "commitment-tracker:no-budget",
+        "No alertEmail given, so no cost budget, kill switch or alarms are created. Pass -c alertEmail=you@example.com before deploying.",
+      );
+    }
+
     new CfnOutput(this, "ApiUrl", { value: httpApi.apiEndpoint, description: "NEXT_PUBLIC_API_BASE_URL for the site" });
     new CfnOutput(this, "AudioBucketName", { value: this.bucket.bucketName });
     new CfnOutput(this, "ApiFunctionName", { value: this.apiFunction.functionName });
@@ -339,6 +375,151 @@ export class ApiStack extends Stack {
         resources: [this.apiKeyParameterArn()],
       }),
     );
+  }
+
+  /**
+   * Alarms notify the alert email: any unhandled error in the worker (handled failures end as failed jobs instead),
+   * a 5xx rate over 5% of at least ten requests, and the day's spending reaching 80% of the cap. The spend metric is
+   * written by the backend as an embedded-metric-format log line (guardrails/metrics.py).
+   */
+  private addAlarms(httpApi: HttpApi, email: string): void {
+    const alerts = new Topic(this, "AlertsTopic");
+    alerts.addSubscription(new EmailSubscription(email));
+    const notify = new SnsAction(alerts);
+    const period = Duration.minutes(5);
+    const make = (alarm: Alarm) => {
+      alarm.addAlarmAction(notify);
+      return alarm;
+    };
+
+    make(
+      new Alarm(this, "WorkerErrorsAlarm", {
+        alarmDescription: "The worker raised an error it did not handle",
+        metric: this.workerFunction.metricErrors({ period, statistic: "Sum" }),
+        threshold: 1,
+        evaluationPeriods: 1,
+        comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+        treatMissingData: TreatMissingData.NOT_BREACHING,
+      }),
+    );
+
+    const errors = httpApi.metricServerError({ period, statistic: "Sum" });
+    const requests = httpApi.metricCount({ period, statistic: "Sum" });
+    make(
+      new Alarm(this, "Api5xxAlarm", {
+        alarmDescription: "More than 5% of API requests failed with a 5xx (with at least ten requests)",
+        metric: new MathExpression({
+          expression: "IF(requests >= 10, 100 * errors / requests, 0)",
+          usingMetrics: { errors, requests },
+          label: "5xx percent",
+          period,
+        }),
+        threshold: 5,
+        evaluationPeriods: 1,
+        comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+        treatMissingData: TreatMissingData.NOT_BREACHING,
+      }),
+    );
+
+    make(
+      new Alarm(this, "SpendFractionAlarm", {
+        alarmDescription: "The day's spending reached 80% of the daily cap",
+        metric: new Metric({
+          namespace: METRIC_NAMESPACE,
+          metricName: SPEND_FRACTION_METRIC,
+          statistic: "Maximum",
+          period,
+        }),
+        threshold: 0.8,
+        evaluationPeriods: 1,
+        comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+        treatMissingData: TreatMissingData.NOT_BREACHING,
+      }),
+    );
+  }
+
+  /**
+   * The monthly budget and its kill switch. At 100% actual spend the budget publishes to a topic and a small Lambda
+   * sets both functions' reserved concurrency to 0, which stops every invocation (an SCP cannot: API Gateway calls
+   * Lambda as a service principal). The topic policy lets AWS Budgets in this account publish (and no other account).
+   * Undo with `aws lambda delete-function-concurrency` on each function. The logical ids BudgetStopFunction and
+   * BudgetStopTopic are protected by name in infra/scp/commitment-tracker-guardrails.json.
+   */
+  private addBudget(email: string, monthlyUsd: number): void {
+    const subscribers = [{ subscriptionType: "EMAIL", address: email }];
+
+    const stopTopic = new Topic(this, "BudgetStopTopic");
+    stopTopic.addToResourcePolicy(
+      new PolicyStatement({
+        actions: ["sns:Publish"],
+        principals: [new ServicePrincipal("budgets.amazonaws.com")],
+        resources: [stopTopic.topicArn],
+        conditions: {
+          StringEquals: { "aws:SourceAccount": this.account },
+          ArnLike: { "aws:SourceArn": `arn:${this.partition}:budgets::${this.account}:*` },
+        },
+      }),
+    );
+    const stopFunction = new LambdaFunction(this, "BudgetStopFunction", {
+      code: Code.fromAsset(BUDGET_STOP_CODE_PATH),
+      handler: "index.handler",
+      runtime: Runtime.NODEJS_22_X,
+      architecture: Architecture.ARM_64,
+      memorySize: 128,
+      timeout: Duration.seconds(30),
+      logGroup: new LogGroup(this, "BudgetStopLogs", {
+        retention: RetentionDays.TWO_WEEKS,
+        removalPolicy: RemovalPolicy.DESTROY,
+      }),
+      environment: { FUNCTION_NAMES: [this.apiFunction.functionName, this.workerFunction.functionName].join(",") },
+    });
+    stopFunction.addToRolePolicy(
+      new PolicyStatement({
+        sid: "StopTheFunctions",
+        actions: ["lambda:PutFunctionConcurrency"],
+        resources: [this.apiFunction.functionArn, this.workerFunction.functionArn],
+      }),
+    );
+    stopTopic.addSubscription(new LambdaSubscription(stopFunction));
+
+    // No budgetName on purpose: budget names are unique per account, and CloudFormation creates a replacement before it
+    // deletes the old budget, so a fixed name makes every replacement fail. Left out, AWS generates a unique name.
+    new CfnBudget(this, "MonthlyBudget", {
+      budget: {
+        budgetType: "COST",
+        timeUnit: "MONTHLY",
+        budgetLimit: { amount: monthlyUsd, unit: "USD" },
+      },
+      notificationsWithSubscribers: [
+        {
+          notification: {
+            notificationType: "ACTUAL",
+            comparisonOperator: "GREATER_THAN",
+            threshold: 80,
+            thresholdType: "PERCENTAGE",
+          },
+          subscribers,
+        },
+        {
+          notification: {
+            notificationType: "FORECASTED",
+            comparisonOperator: "GREATER_THAN",
+            threshold: 100,
+            thresholdType: "PERCENTAGE",
+          },
+          subscribers,
+        },
+        {
+          notification: {
+            notificationType: "ACTUAL",
+            comparisonOperator: "GREATER_THAN",
+            threshold: 100,
+            thresholdType: "PERCENTAGE",
+          },
+          subscribers: [...subscribers, { subscriptionType: "SNS", address: stopTopic.topicArn }],
+        },
+      ],
+    });
   }
 
   /** Sample clips go to samples/ from the repo. They arrive after the owner runs the Polly script, so no clips is fine. */

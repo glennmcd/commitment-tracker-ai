@@ -10,6 +10,10 @@ export const API_KEY_PARAMETER = "/commitment-tracker/prod/ANTHROPIC_API_KEY";
 export const API_HANDLER = "commitment_tracker.lambda_handlers.api_handler";
 export const WORKER_HANDLER = "commitment_tracker.lambda_handlers.worker_handler";
 
+/** The custom metric the backend writes (guardrails/metrics.py): the day's spending as a fraction of the cap. */
+export const METRIC_NAMESPACE = "CommitmentTracker";
+export const SPEND_FRACTION_METRIC = "DailySpendFraction";
+
 export const DEFAULT_DAILY_BUDGET_USD = 5;
 export const DEFAULT_MONTHLY_BUDGET_USD = 30;
 

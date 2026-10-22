@@ -11,7 +11,8 @@ const env = { account: process.env.CDK_DEFAULT_ACCOUNT, region: REGION };
 // Spending limits are set at deploy time:
 //   cdk deploy -c dailyBudgetUsd=5 -c monthlyBudgetUsd=30 -c alertEmail=you@example.com
 const dailyBudgetUsd = positiveNumberContext(app.node, "dailyBudgetUsd");
-positiveNumberContext(app.node, "monthlyBudgetUsd"); // read by the budget kill switch stack (added next)
+const monthlyBudgetUsd = positiveNumberContext(app.node, "monthlyBudgetUsd");
+const alertEmail: unknown = app.node.tryGetContext("alertEmail");
 
 // -c throttleRate=N sets the API's steady requests per second (default 10); -c throttleBurst=M the burst (default 2N).
 const throttleRate = positiveNumberContext(app.node, "throttleRate");
@@ -27,8 +28,10 @@ new ApiStack(app, "CommitmentTrackerApi", {
   env,
   description: "Commitment Tracker AI API: Lambda behind an API Gateway HTTP API, Transcribe, S3 and DynamoDB",
   dailyBudgetUsd,
+  monthlyBudgetUsd,
+  alertEmail: typeof alertEmail === "string" ? alertEmail : undefined,
   throttle,
   reservedConcurrency: positiveNumberContext(app.node, "reservedConcurrency"),
 });
 
-// The budget kill switch and alarms, and the Amplify web stack, are added by the next commits.
+// The Amplify web stack is added by a later commit.

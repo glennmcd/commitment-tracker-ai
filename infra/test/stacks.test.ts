@@ -273,6 +273,7 @@ describe("bad props", () => {
     ["badThrottleFraction", "throttle.burstLimit must be a positive integer"],
     ["badConcurrency", "reservedConcurrency must be a positive integer"],
     ["badBudget", "dailyBudgetUsd must be positive"],
+    ["badMonthly", "monthlyBudgetUsd must be positive"],
   ] as const)("%s is refused", (name, message) => {
     expect(rest[name].error).toContain(message);
   });

@@ -13,9 +13,8 @@ const PARAMETER = `arn:{AWS::Partition}:ssm:${REGION}:${ACCOUNT}:parameter/commi
 /** Statements the tests don't spell out: CDK's log permissions for the function's own log group. */
 const isLogs = (actions: string[]) => actions.every((a) => a.startsWith("logs:"));
 
-function bySid(functionId: string) {
-  const { defaults } = synthAll();
-  const statements = rolePolicyStatements(defaults.template, functionId);
+function bySid(functionId: string, scenario: "defaults" | "budget" = "defaults") {
+  const statements = rolePolicyStatements(synthAll()[scenario].template, functionId);
   return {
     all: statements,
     mine: Object.fromEntries(statements.filter((s) => s.sid !== undefined).map((s) => [s.sid as string, s])),
@@ -128,5 +127,19 @@ describe("the worker function's role", () => {
     const actions = all.flatMap((s) => s.actions);
     expect(actions).not.toContain("s3:PutObject");
     expect(all.flatMap((s) => s.resources)).not.toContain(FEEDBACK);
+  });
+});
+
+describe("the budget kill switch's role", () => {
+  const { mine, rest } = bySid("BudgetStopFunction", "budget");
+
+  it("may only set the reserved concurrency of the API and the worker", () => {
+    expect(Object.keys(mine)).toEqual(["StopTheFunctions"]);
+    expect(mine.StopTheFunctions).toMatchObject({
+      effect: "Allow",
+      actions: ["lambda:PutFunctionConcurrency"],
+      resources: ["{ApiFunction.Arn}", "{WorkerFunction.Arn}"],
+    });
+    expect(rest.every((s) => isLogs(s.actions))).toBe(true);
   });
 });
