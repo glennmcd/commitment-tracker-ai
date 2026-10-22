@@ -19,3 +19,6 @@ class Settings(BaseSettings):
     prompt_version: str = "v1"
     model_timeout_seconds: float = Field(default=60.0, gt=0)
     anthropic_api_key: SecretStr | None = None
+    # Audio storage: unset locally, where POST /uploads answers 503.
+    audio_bucket: str | None = Field(default=None, min_length=1)
+    upload_url_ttl_seconds: int = Field(default=300, gt=0)

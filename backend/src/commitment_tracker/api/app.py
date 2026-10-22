@@ -10,6 +10,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Literal
 
+import boto3
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -23,7 +24,9 @@ from commitment_tracker.extractor.errors import (
 )
 from commitment_tracker.extractor.extractor import Extractor
 from commitment_tracker.extractor.factory import build_extractor
-from commitment_tracker.schemas import AnalyzeRequest, AnalyzeResponse
+from commitment_tracker.jobs.audio import MAX_AUDIO_BYTES
+from commitment_tracker.jobs.uploads import S3UploadSigner, UploadSigner
+from commitment_tracker.schemas import AnalyzeRequest, AnalyzeResponse, UploadResponse
 from commitment_tracker.settings import Settings
 
 logger = logging.getLogger(__name__)
@@ -70,6 +73,9 @@ ERROR_RESPONSES: dict[int | str, dict[str, object]] = {
     422: {"model": ErrorResponse, "description": "Invalid request, or the model refused it"},
     502: {"model": ErrorResponse, "description": "The model failed or its output was invalid"},
 }
+UPLOAD_RESPONSES: dict[int | str, dict[str, object]] = {
+    503: {"model": ErrorResponse, "description": "Audio storage is not configured"},
+}
 
 
 def _error(
@@ -89,14 +95,29 @@ def _show_app_logs() -> None:
         package.setLevel(logging.INFO)
 
 
-def create_app(*, extractor: Extractor | None = None, settings: Settings | None = None) -> FastAPI:
-    """With no extractor, the lifespan builds the Anthropic one from settings at startup."""
+def build_upload_signer(settings: Settings) -> UploadSigner | None:
+    if settings.audio_bucket is None:
+        return None
+    s3 = boto3.client("s3")
+    return S3UploadSigner(s3, settings.audio_bucket, expires_in=settings.upload_url_ttl_seconds)
+
+
+def create_app(
+    *,
+    extractor: Extractor | None = None,
+    settings: Settings | None = None,
+    uploads: UploadSigner | None = None,
+) -> FastAPI:
+    """With no extractor, the lifespan builds the Anthropic one, and the upload signer when an
+    audio bucket is configured, from settings at startup."""
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         if extractor is None:
             _show_app_logs()
-            app.state.extractor = build_extractor(settings or Settings())
+            active_settings = settings or Settings()
+            app.state.extractor = build_extractor(active_settings)
+            app.state.uploads = uploads or build_upload_signer(active_settings)
         yield
 
     app = FastAPI(
@@ -105,6 +126,7 @@ def create_app(*, extractor: Extractor | None = None, settings: Settings | None 
         description="Extracts commitments from conversation transcripts.",
         lifespan=lifespan,
     )
+    app.state.uploads = uploads
     if extractor is not None:
         app.state.extractor = extractor
 
@@ -147,6 +169,20 @@ def create_app(*, extractor: Extractor | None = None, settings: Settings | None 
             meta.served_by,
         )
         return result
+
+    @app.post("/uploads", response_model=UploadResponse, responses=UPLOAD_RESPONSES)
+    async def create_upload(request: Request) -> UploadResponse | JSONResponse:
+        signer: UploadSigner | None = request.app.state.uploads
+        if signer is None:
+            return _error(503, "uploads_unavailable", "Audio uploads are not available.")
+        ticket = signer.presign()
+        return UploadResponse(
+            upload_id=ticket.upload_id,
+            url=ticket.url,
+            fields=ticket.fields,
+            max_bytes=MAX_AUDIO_BYTES,
+            expires_in=ticket.expires_in,
+        )
 
     return app
 

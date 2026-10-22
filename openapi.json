@@ -71,6 +71,34 @@
           }
         }
       }
+    },
+    "/uploads": {
+      "post": {
+        "summary": "Create Upload",
+        "operationId": "create_upload_uploads_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Audio storage is not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -545,6 +573,48 @@
           "text"
         ],
         "title": "Turn"
+      },
+      "UploadResponse": {
+        "properties": {
+          "upload_id": {
+            "type": "string",
+            "title": "Upload Id",
+            "description": "Names the upload in POST /jobs."
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "fields": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Fields",
+            "description": "Form fields to send before the file, unchanged."
+          },
+          "max_bytes": {
+            "type": "integer",
+            "title": "Max Bytes",
+            "description": "Largest accepted file; 60 s of 16 kHz mono 16-bit WAV."
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In",
+            "description": "Seconds the form stays valid."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "upload_id",
+          "url",
+          "fields",
+          "max_bytes",
+          "expires_in"
+        ],
+        "title": "UploadResponse",
+        "description": "A presigned S3 POST: send `fields`, then the file as the last form field, to `url`."
       }
     }
   }

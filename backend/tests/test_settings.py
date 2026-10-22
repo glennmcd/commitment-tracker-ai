@@ -58,3 +58,16 @@ def test_api_key_never_appears_in_repr_or_errors(monkeypatch: pytest.MonkeyPatch
     assert s.anthropic_api_key.get_secret_value() == "sk-ant-test-not-real"
     assert "sk-ant-test-not-real" not in repr(s)
     assert "sk-ant-test-not-real" not in str(s.model_dump())
+
+
+def test_upload_storage_defaults_and_overrides(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("AUDIO_BUCKET", raising=False)
+    assert settings().audio_bucket is None
+    assert settings().upload_url_ttl_seconds == 300
+    monkeypatch.setenv("AUDIO_BUCKET", "audio-bucket")
+    assert settings().audio_bucket == "audio-bucket"
+
+
+def test_upload_ttl_must_be_positive() -> None:
+    with pytest.raises(ValidationError):
+        settings(upload_url_ttl_seconds=0)

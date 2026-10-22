@@ -72,6 +72,16 @@ class Turn(Contract):
         return self
 
 
+class UploadResponse(Contract):
+    """A presigned S3 POST: send `fields`, then the file as the last form field, to `url`."""
+
+    upload_id: str = Field(description="Names the upload in POST /jobs.")
+    url: str
+    fields: dict[str, str] = Field(description="Form fields to send before the file, unchanged.")
+    max_bytes: int = Field(description="Largest accepted file; 60 s of 16 kHz mono 16-bit WAV.")
+    expires_in: int = Field(description="Seconds the form stays valid.")
+
+
 class AnalyzeRequest(Contract):
     transcript: list[Turn] = Field(min_length=1, max_length=MAX_TURNS)
     call_date: date = Field(description="Date of the call; relative due dates resolve from it.")
