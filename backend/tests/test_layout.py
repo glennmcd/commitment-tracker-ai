@@ -18,6 +18,7 @@ RULES: dict[str, set[str]] = {
     "extractor": {"api", "evaluation"},
     "transcription": {"extractor", "jobs", "api", "evaluation"},
     "jobs": {"api", "evaluation"},
+    "feedback": {"api", "evaluation"},
     "guardrails": {
         "schemas",
         "settings",

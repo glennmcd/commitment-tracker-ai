@@ -7,7 +7,7 @@ rejected transcript or quote never reaches a log line or error message.
 
 from datetime import date
 from enum import StrEnum
-from typing import Annotated, Self
+from typing import Annotated, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
 
@@ -117,6 +117,22 @@ class JobRequest(Contract):
             if sum(len(turn.text) for turn in self.transcript) > MAX_TRANSCRIPT_CHARS:
                 raise ValueError(f"transcript must be at most {MAX_TRANSCRIPT_CHARS} characters")
         return self
+
+
+class FeedbackRequest(Contract):
+    """A vote on one span of a finished job. The label and the text come from the job record."""
+
+    job_id: str = Field(pattern=r"^[0-9a-f]{64}$")
+    span_index: int = Field(ge=0, le=999, description="Index into the job's analysis spans.")
+    vote: Literal["up", "down"]
+    consent: bool = Field(
+        default=False,
+        description="Keep the transcript and spans for up to 90 days to improve the labels.",
+    )
+
+
+class FeedbackResponse(Contract):
+    transcript_kept: bool
 
 
 class AnalyzeRequest(Contract):

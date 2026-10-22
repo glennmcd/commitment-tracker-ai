@@ -25,6 +25,13 @@ from commitment_tracker.extractor.errors import (
 )
 from commitment_tracker.extractor.extractor import Extractor
 from commitment_tracker.extractor.factory import build_extractor
+from commitment_tracker.feedback.dynamo import DynamoFeedbackStore
+from commitment_tracker.feedback.service import (
+    FeedbackJobNotFound,
+    FeedbackService,
+    FeedbackSpanNotFound,
+    JobNotFinished,
+)
 from commitment_tracker.guardrails.ratelimit import (
     DynamoRateLimitStore,
     RateLimiter,
@@ -46,6 +53,8 @@ from commitment_tracker.jobs.uploads import S3UploadSigner, UploadSigner
 from commitment_tracker.schemas import (
     AnalyzeRequest,
     AnalyzeResponse,
+    FeedbackRequest,
+    FeedbackResponse,
     JobRequest,
     Turn,
     UploadResponse,
@@ -152,6 +161,15 @@ JOB_ERRORS: dict[type[Exception], tuple[int, str, str]] = {
     AudioTooLong: (422, "audio_too_long", "The recording is longer than 60 seconds."),
     AudioInvalid: (422, "audio_invalid", "The audio is not a 16 kHz mono 16-bit WAV."),
     JobsUnavailable: (503, "jobs_unavailable", "Jobs are not available."),
+    FeedbackJobNotFound: (404, "job_not_found", "No job with that id. It may have expired."),
+    JobNotFinished: (409, "job_not_finished", "The job has no results to give feedback on."),
+    FeedbackSpanNotFound: (404, "span_not_found", "The job has no span with that index."),
+}
+FEEDBACK_RESPONSES: dict[int | str, dict[str, object]] = {
+    404: {"model": ErrorResponse, "description": "The job or the span does not exist"},
+    409: {"model": ErrorResponse, "description": "The job is not finished"},
+    429: RATE_LIMITED,
+    503: {"model": ErrorResponse, "description": "Feedback storage is not configured"},
 }
 JOB_ID_PATTERN = r"^[0-9a-f]{64}$"
 
@@ -232,6 +250,16 @@ def build_spend_cap(settings: Settings) -> SpendCap | None:
     return SpendCap(store, settings.daily_budget_usd)
 
 
+def build_feedback_service(settings: Settings) -> FeedbackService | None:
+    if settings.jobs_table is None or settings.feedback_table is None:
+        return None
+    dynamodb = boto3.client("dynamodb")
+    return FeedbackService(
+        DynamoJobStore(dynamodb, settings.jobs_table),
+        DynamoFeedbackStore(dynamodb, settings.feedback_table),
+    )
+
+
 def build_limiter(settings: Settings) -> RateLimiter | None:
     if settings.guardrails_table is None:
         return None
@@ -257,6 +285,7 @@ def create_app(
     jobs: JobService | None = None,
     limiter: RateLimiter | None = None,
     spend: SpendCap | None = None,
+    feedback: FeedbackService | None = None,
 ) -> FastAPI:
     """With no extractor, the lifespan builds the Anthropic one, and the upload signer when an
     audio bucket is configured, from settings at startup."""
@@ -272,6 +301,7 @@ def create_app(
             app.state.jobs = jobs or build_job_service(active_settings, spend_cap)
             app.state.limiter = limiter or build_limiter(active_settings)
             app.state.spend = spend_cap
+            app.state.feedback = feedback or build_feedback_service(active_settings)
         yield
 
     app = FastAPI(
@@ -284,6 +314,7 @@ def create_app(
     app.state.jobs = jobs
     app.state.limiter = limiter
     app.state.spend = spend
+    app.state.feedback = feedback
     if extractor is not None:
         app.state.extractor = extractor
 
@@ -329,6 +360,9 @@ def create_app(
     @app.exception_handler(AudioTooLong)
     @app.exception_handler(AudioInvalid)
     @app.exception_handler(JobsUnavailable)
+    @app.exception_handler(FeedbackJobNotFound)
+    @app.exception_handler(JobNotFinished)
+    @app.exception_handler(FeedbackSpanNotFound)
     async def _job_failed(request: Request, exc: Exception) -> JSONResponse:
         # Walk the MRO so TextJobsUnavailable finds JobsUnavailable's entry.
         status, code, message = next(
@@ -427,6 +461,19 @@ def create_app(
         if job is None:
             return _error(404, "job_not_found", "No job with that id. It may have expired.")
         return _job_response(job)
+
+    @app.post(
+        "/feedback",
+        response_model=FeedbackResponse,
+        responses=FEEDBACK_RESPONSES,
+        dependencies=[limited("feedback")],
+    )
+    async def create_feedback(body: FeedbackRequest, request: Request) -> FeedbackResponse:
+        service: FeedbackService | None = request.app.state.feedback
+        if service is None:
+            raise JobsUnavailable("feedback is not configured")
+        result = await run_in_threadpool(service.submit, body)
+        return FeedbackResponse(transcript_kept=result.transcript_kept)
 
     @app.get("/samples", responses=JOB_RESPONSES)
     async def list_samples(request: Request) -> list[SampleSummary]:

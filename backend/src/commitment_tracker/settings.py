@@ -24,4 +24,5 @@ class Settings(BaseSettings):
     upload_url_ttl_seconds: int = Field(default=300, gt=0)
     jobs_table: str | None = Field(default=None, min_length=1)
     guardrails_table: str | None = Field(default=None, min_length=1)
+    feedback_table: str | None = Field(default=None, min_length=1)
     daily_budget_usd: float = Field(default=5.0, gt=0)
