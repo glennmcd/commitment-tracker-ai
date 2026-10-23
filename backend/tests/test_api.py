@@ -153,7 +153,7 @@ def _source_lines(caplog: pytest.LogCaptureFixture) -> list[str]:
 def test_x_source_header_is_logged(caplog: pytest.LogCaptureFixture) -> None:
     caplog.set_level(logging.INFO)
     client_for(reply(GOOD_OUTPUT)).post("/analyze", json=BODY, headers={"X-Source": "alice-2026"})
-    assert _source_lines(caplog) == ["request method=POST path=/analyze source=alice-2026"]
+    assert _source_lines(caplog) == ["request method=POST path=/analyze pwsource=alice-2026"]
 
 
 @pytest.mark.parametrize("value", ["a b", "x" * 65, "<script>", "al/ice"])
@@ -162,7 +162,7 @@ def test_unusable_x_source_is_logged_as_invalid(
 ) -> None:
     caplog.set_level(logging.INFO)
     client_for().get("/health", headers={"X-Source": value})
-    assert _source_lines(caplog) == ["request method=GET path=/health source=invalid"]
+    assert _source_lines(caplog) == ["request method=GET path=/health pwsource=invalid"]
 
 
 def test_the_password_is_never_logged(caplog: pytest.LogCaptureFixture) -> None:

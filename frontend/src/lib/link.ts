@@ -1,8 +1,8 @@
 const PASSWORD_PARAM = "password";
-const SOURCE_PARAM = "source";
+const SOURCE_PARAM = "pwsource";
 const SOURCE_KEY = "ct-link-source";
 
-/** What a shared link carried: `?password=...` to unlock the site and `?source=...` to say whose link it was. */
+/** What a shared link carried: `?password=...` to unlock the site and `?pwsource=...` to say whose link it was. */
 export interface LinkParams {
   password: string | null;
   source: string | null;
