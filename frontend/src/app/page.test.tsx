@@ -12,6 +12,13 @@ describe("the home page", () => {
     expect(screen.getByRole("contentinfo")).toHaveTextContent("Version 1.2.3");
   });
 
+  it("keeps the demo behind the password", async () => {
+    render(<Home />);
+
+    expect(await screen.findByLabelText("Password")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Conversation")).not.toBeInTheDocument();
+  });
+
   it("names the product and says what it does", () => {
     render(<Home />);
 

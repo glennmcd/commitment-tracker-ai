@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Match } from "aws-cdk-lib/assertions";
-import { API_HANDLER, API_KEY_PARAMETER, WORKER_HANDLER } from "../lib/config.js";
+import { API_HANDLER, API_KEY_PARAMETER, PASSWORD_PARAMETER, WORKER_HANDLER } from "../lib/config.js";
 import { synthAll } from "./synth.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -213,7 +213,7 @@ describe("the HTTP API", () => {
       CorsConfiguration: {
         AllowOrigins: ["https://commitmentai.g26work.com", "http://localhost:3000"],
         AllowMethods: ["GET", "POST", "OPTIONS"],
-        AllowHeaders: ["content-type"],
+        AllowHeaders: ["content-type", "authorization"],
         ExposeHeaders: ["retry-after", "ratelimit-limit", "ratelimit-remaining", "ratelimit-reset"],
         MaxAge: 3600,
       },
@@ -251,6 +251,41 @@ describe("the HTTP API", () => {
       .map((r) => (r.Properties as { RouteKey: string }).RouteKey)
       .sort();
     expect(routeKeys).toEqual(expected);
+  });
+});
+
+describe("the site password", () => {
+  const routes = () =>
+    Object.values(defaults.template.findResources("AWS::ApiGatewayV2::Route")).map(
+      (r) => r.Properties as { RouteKey: string; AuthorizationType?: string; AuthorizerId?: unknown },
+    );
+
+  it("is checked by a cached Lambda authorizer that reads the Authorization header", () => {
+    defaults.template.hasResourceProperties("AWS::ApiGatewayV2::Authorizer", {
+      AuthorizerType: "REQUEST",
+      AuthorizerPayloadFormatVersion: "2.0",
+      EnableSimpleResponses: true,
+      IdentitySource: ["$request.header.Authorization"],
+      AuthorizerResultTtlInSeconds: 300,
+    });
+    expect(Object.keys(defaults.template.findResources("AWS::ApiGatewayV2::Authorizer"))).toHaveLength(1);
+  });
+
+  it("guards every route except GET /health", () => {
+    const guarded = routes().filter((r) => r.AuthorizationType === "CUSTOM" && r.AuthorizerId !== undefined);
+    const open = routes().filter((r) => !guarded.includes(r));
+    expect(open.map((r) => r.RouteKey)).toEqual(["GET /health"]);
+    expect(guarded).toHaveLength(routes().length - 1);
+  });
+
+  it("runs the authorizer on Node with only the parameter's name in its environment", () => {
+    expect(envOf(defaults.template, "AuthorizerFunction")).toEqual({ PASSWORD_PARAMETER });
+    defaults.template.hasResourceProperties("AWS::Lambda::Function", {
+      Handler: "index.handler",
+      Runtime: "nodejs22.x",
+      Architectures: ["arm64"],
+      Environment: { Variables: { PASSWORD_PARAMETER } },
+    });
   });
 });
 

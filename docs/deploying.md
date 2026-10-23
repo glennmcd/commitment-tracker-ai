@@ -70,6 +70,21 @@ project account and `g26work2-mgmt` for the management account. Use your own nam
 
    Without it the app is created unconnected, and you connect the repository in the Amplify console.
 
+8. **Set the site password.** Every API endpoint except `GET /health` needs it, and the page asks for it before it
+   shows the demo. A Lambda authorizer on the HTTP API compares the `Authorization` header with this SecureString
+   parameter. It never goes in the template, the bundle or a log. Create it before the first deploy, because until
+   it exists the authorizer refuses every request. Choose a long passphrase and paste it the way step 5 describes
+   (and with the same `MSYS_NO_PATHCONV=1` note for Git Bash). Use plain Latin-1 characters, since the header
+   cannot carry others:
+
+   ```bash
+   aws ssm put-parameter --name /commitment-tracker/prod/SITE_PASSWORD --type SecureString --value "$SITE_PASSWORD" --profile g26work2
+   ```
+
+   To change it, add `--overwrite`. API Gateway caches each answer for five minutes, so the old password keeps
+   working for up to that long. The password protects the API, and with it the model spend. The page itself and the
+   sample clips under `frontend/public/samples/` stay public.
+
 ## Make the sample clips
 
 The clips are synthesized once with Amazon Polly, and the WAVs are committed. `polly:*` is already on the SCP's

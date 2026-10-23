@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { Annotations, ArnFormat, CfnOutput, Duration, RemovalPolicy, Stack, type StackProps, Tags } from "aws-cdk-lib";
 import { AccessLogFormat } from "aws-cdk-lib/aws-apigateway";
 import { CorsHttpMethod, HttpApi, HttpMethod, HttpStage, LogGroupLogDestination } from "aws-cdk-lib/aws-apigatewayv2";
+import { HttpLambdaAuthorizer, HttpLambdaResponseType } from "aws-cdk-lib/aws-apigatewayv2-authorizers";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import { CfnBudget } from "aws-cdk-lib/aws-budgets";
 import { Alarm, ComparisonOperator, MathExpression, Metric, TreatMissingData } from "aws-cdk-lib/aws-cloudwatch";
@@ -25,6 +26,7 @@ import {
   DEFAULT_DAILY_BUDGET_USD,
   DEFAULT_MONTHLY_BUDGET_USD,
   METRIC_NAMESPACE,
+  PASSWORD_PARAMETER,
   SPEND_FRACTION_METRIC,
   WORKER_HANDLER,
 } from "./config.js";
@@ -36,6 +38,9 @@ const DEFAULT_CODE_PATH = path.resolve(here, "../dist/api");
 
 /** The budget kill switch Lambda (sets both functions' reserved concurrency to 0); see addBudget. */
 const BUDGET_STOP_CODE_PATH = path.resolve(here, "../lambda/budget-stop");
+
+/** The Lambda authorizer that checks the site password; plain JavaScript, so it is not part of the Python bundle. */
+const AUTHORIZER_CODE_PATH = path.resolve(here, "../lambda/authorizer");
 
 /** The sample clips `backend/scripts/make_samples.py` writes; deployed to `samples/` in the bucket when present. */
 const DEFAULT_SAMPLES_PATH = path.resolve(here, "../../frontend/public/samples");
@@ -230,7 +235,7 @@ export class ApiStack extends Stack {
       corsPreflight: {
         allowOrigins: origins,
         allowMethods: [CorsHttpMethod.GET, CorsHttpMethod.POST, CorsHttpMethod.OPTIONS],
-        allowHeaders: ["content-type"],
+        allowHeaders: ["content-type", "authorization"],
         exposeHeaders: ["retry-after", "ratelimit-limit", "ratelimit-remaining", "ratelimit-reset"],
         maxAge: Duration.hours(1),
       },
@@ -240,8 +245,11 @@ export class ApiStack extends Stack {
     // OPTIONS, API Gateway answers the preflight itself from corsPreflight. test/stacks.test.ts keeps this list equal
     // to the paths in openapi.json.
     const integration = new HttpLambdaIntegration("ApiIntegration", this.apiFunction);
+    const authorizer = this.passwordAuthorizer(logs("AuthorizerLogs"));
     for (const [method, routePath] of API_ROUTES) {
-      httpApi.addRoutes({ path: routePath, methods: [method], integration });
+      // Every endpoint needs the site password except the health check, which monitoring calls without it.
+      const open = method === HttpMethod.GET && routePath === "/health";
+      httpApi.addRoutes({ path: routePath, methods: [method], integration, ...(open ? {} : { authorizer }) });
     }
     new HttpStage(this, "DefaultStage", {
       httpApi,
@@ -281,12 +289,46 @@ export class ApiStack extends Stack {
     return prefixes.map((prefix) => `${this.bucket.bucketArn}/${prefix}`);
   }
 
-  private apiKeyParameterArn(): string {
+  private parameterArn(name: string): string {
     return this.formatArn({
       service: "ssm",
       resource: "parameter",
-      resourceName: API_KEY_PARAMETER.slice(1),
+      resourceName: name.slice(1),
       arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
+    });
+  }
+
+  private apiKeyParameterArn(): string {
+    return this.parameterArn(API_KEY_PARAMETER);
+  }
+
+  /**
+   * Checks the Authorization header against the site password in SSM. API Gateway caches each answer for five minutes
+   * per header value, so a changed password takes up to that long to apply. Until the parameter exists the function
+   * denies every request.
+   */
+  private passwordAuthorizer(logGroup: LogGroup): HttpLambdaAuthorizer {
+    const fn = new LambdaFunction(this, "AuthorizerFunction", {
+      code: Code.fromAsset(AUTHORIZER_CODE_PATH),
+      handler: "index.handler",
+      runtime: Runtime.NODEJS_22_X,
+      architecture: Architecture.ARM_64,
+      memorySize: 128,
+      timeout: Duration.seconds(5),
+      logGroup,
+      environment: { PASSWORD_PARAMETER },
+    });
+    fn.addToRolePolicy(
+      new PolicyStatement({
+        sid: "ReadPassword",
+        actions: ["ssm:GetParameter"],
+        resources: [this.parameterArn(PASSWORD_PARAMETER)],
+      }),
+    );
+    return new HttpLambdaAuthorizer("PasswordAuthorizer", fn, {
+      responseTypes: [HttpLambdaResponseType.SIMPLE],
+      identitySource: ["$request.header.Authorization"],
+      resultsCacheTtl: Duration.minutes(5),
     });
   }
 
