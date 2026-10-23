@@ -1,6 +1,6 @@
 """The CI workflow runs repository code on every push and pull request, so its permissions and its
-actions are checked as text: read-only token, actions pinned to commits, no secrets, and the three
-jobs the plan calls for with the checks each one must run. No YAML parser is needed.
+actions are checked as text: read-only token, actions pinned to commits, no secrets, and the jobs
+the plan calls for, with the checks each one must run. No YAML parser is needed.
 """
 
 import re
@@ -17,7 +17,7 @@ def read() -> str:
 def job(name: str) -> str:
     """The text of one job, from its key to the next job (or the end)."""
     body = read().split("\njobs:\n", 1)[1]
-    parts = re.split(r"^  ([a-z-]+):\n", body, flags=re.MULTILINE)
+    parts = re.split(r"^  ([a-z0-9-]+):\n", body, flags=re.MULTILINE)
     jobs = dict(zip(parts[1::2], parts[2::2], strict=True))
     return jobs[name]
 
@@ -73,7 +73,7 @@ def test_backend_runs_tests_lint_format_and_types_from_the_lockfile() -> None:
     assert "working-directory: backend" in text
 
 
-def test_frontend_lints_types_tests_checks_the_client_and_runs_the_browser_test() -> None:
+def test_frontend_lints_types_tests_and_checks_the_client() -> None:
     text = job("frontend")
     for command in (
         "bun install --frozen-lockfile",
@@ -83,10 +83,21 @@ def test_frontend_lints_types_tests_checks_the_client_and_runs_the_browser_test(
         "bun test scripts",
         "bun run --cwd frontend gen:api",
         "git diff --exit-code",
-        "playwright install --with-deps chromium",
-        "bun run --cwd frontend e2e",
     ):
         assert command in text, command
+    assert "playwright install" not in text and "frontend e2e" not in text, "e2e has its own job"
+
+
+def test_the_browser_test_runs_in_the_playwright_image_matching_the_locked_version() -> None:
+    text = job("e2e")
+    for command in ("bun install --frozen-lockfile", "bun run --cwd frontend e2e"):
+        assert command in text, command
+    # The image ships the browsers for exactly one Playwright version; a mismatch fails at launch.
+    image = re.search(r"image: mcr\.microsoft\.com/playwright:v(\d+\.\d+\.\d+)-", text)
+    assert image, "the e2e job must run in the Playwright image"
+    lock = (ROOT / "bun.lock").read_text(encoding="utf-8")
+    locked = re.search(r'"@playwright/test@(\d+\.\d+\.\d+)"', lock)
+    assert locked and image.group(1) == locked.group(1)
 
 
 def test_the_generated_client_is_compared_with_the_committed_one() -> None:
