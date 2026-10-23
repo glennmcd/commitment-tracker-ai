@@ -2,6 +2,7 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiConfigError } from "@/api/client";
+import { clearSource, getSource } from "@/lib/link";
 import { clearPassword, getPassword, passwordRejected, setPassword } from "@/lib/password";
 import { PasswordGate } from "./PasswordGate";
 
@@ -133,6 +134,67 @@ describe("PasswordGate", () => {
 
     expect(await screen.findByText("the demo")).toBeInTheDocument();
     expect(client.GET).not.toHaveBeenCalled();
+  });
+
+  describe("password in the URL", () => {
+    afterEach(() => window.history.replaceState(null, "", "/"));
+
+    it("unlocks with ?password=, checks it, and removes it from the address bar", async () => {
+      window.history.replaceState(null, "", "/?password=open%20sesame&keep=1");
+      client.GET.mockResolvedValue(answer(200));
+      renderGate();
+
+      expect(await screen.findByText("the demo")).toBeInTheDocument();
+      expect(client.GET).toHaveBeenCalledWith("/samples");
+      expect(getPassword()).toBe("open sesame");
+      expect(window.location.search).toBe("?keep=1");
+    });
+
+    it("uses the URL password in place of a stored one", async () => {
+      setPassword("old");
+      window.history.replaceState(null, "", "/?password=new");
+      client.GET.mockResolvedValue(answer(200));
+      renderGate();
+
+      await screen.findByText("the demo");
+      expect(getPassword()).toBe("new");
+    });
+
+    it("keeps ?source= for the tab, removes it from the URL, and never stores it as the password", async () => {
+      window.history.replaceState(null, "", "/?source=alice&password=open%20sesame");
+      client.GET.mockResolvedValue(answer(200));
+      renderGate();
+
+      await screen.findByText("the demo");
+      expect(getSource()).toBe("alice");
+      expect(getPassword()).toBe("open sesame");
+      expect(window.location.search).toBe("");
+      clearSource();
+    });
+
+    it("records ?source= even when there is no password in the link", async () => {
+      setPassword("open sesame");
+      window.history.replaceState(null, "", "/?source=bob");
+      renderGate();
+
+      await screen.findByText("the demo");
+      expect(getSource()).toBe("bob");
+      expect(client.GET).not.toHaveBeenCalled();
+      expect(window.location.search).toBe("");
+      clearSource();
+    });
+
+    it("falls back to the form when the URL password is refused", async () => {
+      window.history.replaceState(null, "", "/?password=wrong");
+      client.GET.mockResolvedValue(answer(401));
+      renderGate();
+
+      expect(await screen.findByRole("alert")).toHaveTextContent("That password is not right.");
+      expect(screen.getByLabelText("Password")).toBeInTheDocument();
+      expect(screen.queryByText("the demo")).not.toBeInTheDocument();
+      expect(getPassword()).toBeNull();
+      expect(window.location.search).toBe("");
+    });
   });
 
   it("closes again, with a notice, when the API later refuses the password", async () => {

@@ -146,6 +146,39 @@ def test_no_log_line_contains_transcript_text(caplog: pytest.LogCaptureFixture) 
     assert all(SECRET not in r.getMessage() for r in caplog.records)
 
 
+def _source_lines(caplog: pytest.LogCaptureFixture) -> list[str]:
+    return [r.getMessage() for r in caplog.records if r.getMessage().startswith("request ")]
+
+
+def test_x_source_header_is_logged(caplog: pytest.LogCaptureFixture) -> None:
+    caplog.set_level(logging.INFO)
+    client_for(reply(GOOD_OUTPUT)).post("/analyze", json=BODY, headers={"X-Source": "alice-2026"})
+    assert _source_lines(caplog) == ["request method=POST path=/analyze source=alice-2026"]
+
+
+@pytest.mark.parametrize("value", ["a b", "x" * 65, "<script>", "al/ice"])
+def test_unusable_x_source_is_logged_as_invalid(
+    caplog: pytest.LogCaptureFixture, value: str
+) -> None:
+    caplog.set_level(logging.INFO)
+    client_for().get("/health", headers={"X-Source": value})
+    assert _source_lines(caplog) == ["request method=GET path=/health source=invalid"]
+
+
+def test_the_password_is_never_logged(caplog: pytest.LogCaptureFixture) -> None:
+    caplog.set_level(logging.DEBUG)
+    client_for(reply(GOOD_OUTPUT)).post(
+        "/analyze", json=BODY, headers={"Authorization": "hunter2-pass", "X-Source": "alice"}
+    )
+    assert all("hunter2-pass" not in r.getMessage() for r in caplog.records)
+
+
+def test_no_x_source_means_no_source_log(caplog: pytest.LogCaptureFixture) -> None:
+    caplog.set_level(logging.INFO)
+    client_for().get("/health")
+    assert _source_lines(caplog) == []
+
+
 # --- Wiring from settings ------------------------------------------------------------------------
 
 

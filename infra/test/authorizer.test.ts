@@ -34,7 +34,17 @@ describe("authorizer handler", () => {
     expect(await handler({})).toEqual({ isAuthorized: false });
   });
 
-  it.each([undefined, ""])("denies everything when the stored password is %p", async (stored) => {
+  it.each(["alpha", "beta gamma", "delta"])("allows any one of several passwords: %p", async (given) => {
+    const handler = createHandler({ getPassword: async () => "alpha\r\nbeta gamma\n\ndelta\n" });
+    expect(await handler(withHeader(given))).toEqual({ isAuthorized: true });
+  });
+
+  it.each(["", "beta", "alpha\nbeta gamma", "gamma"])("denies %p when several passwords are stored", async (given) => {
+    const handler = createHandler({ getPassword: async () => "alpha\nbeta gamma\ndelta" });
+    expect(await handler(withHeader(given))).toEqual({ isAuthorized: false });
+  });
+
+  it.each([undefined, "", "\n\n"])("denies everything when the stored password is %p", async (stored) => {
     const handler = createHandler({ getPassword: async () => stored });
     expect(await handler(withHeader(""))).toEqual({ isAuthorized: false });
     expect(await handler(withHeader("anything"))).toEqual({ isAuthorized: false });

@@ -85,6 +85,17 @@ project account and `g26work2-mgmt` for the management account. Use your own nam
    working for up to that long. The password protects the API, and with it the model spend. The page itself and the
    sample clips under `frontend/public/samples/` stay public.
 
+   To give several people their own password, put one per line in the parameter (no blank-line or newline inside a
+   password); any of them is accepted. Remove a line and `--overwrite` to revoke one. A link can carry its password
+   as `https://<site>/?password=<value>`: the page tries it, then removes it from the address bar. Anyone holding
+   the link has the password, and the query string can land in browser history and server logs, so share such links
+   privately.
+
+   Add `&source=<label>` (letters, digits, `.`, `_`, `-`, up to 64) to tell links apart, for example
+   `/?password=<value>&source=alice`. The page keeps the label for the tab and sends it as an `X-Source` header; the
+   API logs `request method=… path=… source=<label>` (`source=invalid` for a label that doesn't fit) to its
+   CloudWatch log group. Only the label is logged, never the password or the `Authorization` header.
+
 ## Make the sample clips
 
 The clips are synthesized once with Amazon Polly, and the WAVs are committed. `polly:*` is already on the SCP's

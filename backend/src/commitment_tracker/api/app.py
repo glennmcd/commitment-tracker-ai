@@ -6,7 +6,8 @@ transcript text, and validation errors drop the input values FastAPI would other
 """
 
 import logging
-from collections.abc import AsyncIterator
+import re
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from typing import Annotated, Any, Literal
 
@@ -70,6 +71,9 @@ logger = logging.getLogger(__name__)
 # request or response shape changes; it is separate from the release version (commitment_tracker
 # .__version__), so releases don't change openapi.json or the frontend client generated from it.
 API_VERSION = "0.3.0"
+
+# A link label such as "alice" or "mailing-2026-10": short and plain, so it cannot forge a log line.
+SOURCE_LABEL = re.compile(r"[A-Za-z0-9._-]{1,64}")
 
 
 def _publish_site_password_scheme(app: FastAPI) -> None:
@@ -352,6 +356,20 @@ def create_app(
     app.state.feedback = feedback
     if extractor is not None:
         app.state.extractor = extractor
+
+    @app.middleware("http")
+    async def _log_source(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        # Who followed which link: the page sends the label from the link's `?source=`. Only that
+        # label is logged, never the Authorization header or anything else.
+        raw = request.headers.get("x-source")
+        if raw is not None:
+            source = raw if SOURCE_LABEL.fullmatch(raw) else "invalid"
+            logger.info(
+                "request method=%s path=%s source=%s", request.method, request.url.path, source
+            )
+        return await call_next(request)
 
     @app.exception_handler(RequestValidationError)
     async def _invalid_request(request: Request, exc: RequestValidationError) -> JSONResponse:

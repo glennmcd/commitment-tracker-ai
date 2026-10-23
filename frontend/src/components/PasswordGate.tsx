@@ -3,6 +3,7 @@
 import { type FormEvent, type ReactNode, useEffect, useState } from "react";
 import { ApiConfigError, getApiClient } from "@/api/client";
 import { NETWORK } from "@/lib/jobs";
+import { setSource, takeLinkParams } from "@/lib/link";
 import { clearPassword, getPassword, PASSWORD_REJECTED, setPassword } from "@/lib/password";
 
 type State = "starting" | "locked" | "open";
@@ -24,8 +25,19 @@ export function PasswordGate({ children }: { children: ReactNode }) {
   const [notice, setNotice] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
 
-  // Decided after mount: the static page can't know what this tab has stored.
-  useEffect(() => setState(getPassword() ? "open" : "locked"), []);
+  // Decided after mount: the static page can't know what this tab has stored or what the URL carries. A password in
+  // the URL (`?password=...`) wins over a stored one and goes through the same check as a typed one.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs once, on mount.
+  useEffect(() => {
+    const { password, source } = takeLinkParams();
+    if (source) setSource(source);
+    if (password !== null) {
+      setState("locked");
+      void attempt(password);
+      return;
+    }
+    setState(getPassword() ? "open" : "locked");
+  }, []);
 
   useEffect(() => {
     const closed = () => {
@@ -39,17 +51,21 @@ export function PasswordGate({ children }: { children: ReactNode }) {
 
   async function unlock(event: FormEvent) {
     event.preventDefault();
-    if (value === "") {
+    await attempt(value);
+  }
+
+  async function attempt(candidate: string) {
+    if (candidate === "") {
       setNotice("Enter the password.");
       return;
     }
-    if (!fitsInHeader(value)) {
+    if (!fitsInHeader(candidate)) {
       setNotice("That password is not right.");
       return;
     }
     setChecking(true);
     setNotice(null);
-    setPassword(value);
+    setPassword(candidate);
     try {
       const { response } = await getApiClient().GET("/samples");
       if (response.ok) {

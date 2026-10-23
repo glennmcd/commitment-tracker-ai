@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { clearSource, setSource } from "@/lib/link";
 import { clearPassword, getPassword, PASSWORD_REJECTED, setPassword } from "@/lib/password";
 import { ApiConfigError, apiBaseUrl, createApiClient } from "./client";
 
@@ -44,6 +45,21 @@ describe("createApiClient", () => {
     // These property accesses compile only because the generated schema describes the response.
     expect(data?.status).toBe("ok");
     expect(data?.prompt_version).toBe("v1");
+  });
+
+  describe("with a link source", () => {
+    afterEach(() => clearSource());
+
+    it("sends it as X-Source, and sends nothing when there is none", async () => {
+      const { requests, fetchImpl } = recordingFetch(Response.json([]));
+      const client = createApiClient("https://api.example.com", fetchImpl);
+
+      await client.GET("/samples");
+      setSource("alice");
+      await client.GET("/samples");
+
+      expect(requests.map((r) => r.headers.get("x-source"))).toEqual([null, "alice"]);
+    });
   });
 
   describe("with a site password", () => {
