@@ -1,5 +1,56 @@
 # Changelog
 
+## [0.3.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.2.0...v0.3.0) (2026-10-23)
+
+
+### Features
+
+* add Lambda handlers and SSM settings ([98300e1](https://github.com/glennmcd/commitment-tracker-ai/commit/98300e1d628e702f007cdaf021a866d2b952a8a1))
+* add the AWS batch transcriber ([cf5aa8b](https://github.com/glennmcd/commitment-tracker-ai/commit/cf5aa8b716f3a00a27314737075f578f268e10a7))
+* add the job store ([528b536](https://github.com/glennmcd/commitment-tracker-ai/commit/528b5368df7d7bccfc2d37e76be89dcc28feda38))
+* add the job worker ([b2f751d](https://github.com/glennmcd/commitment-tracker-ai/commit/b2f751da0b7f912d025ac7250cb4f0225e926225))
+* **api:** add optional turn timestamps ([30b7132](https://github.com/glennmcd/commitment-tracker-ai/commit/30b7132cf7175245dec166e6671e7a926ad56c64))
+* **api:** add per-client rate limiting ([c030bd1](https://github.com/glennmcd/commitment-tracker-ai/commit/c030bd1159e4254d8ca4701423164e915667cfba))
+* **api:** add presigned uploads and WAV validation ([162bad8](https://github.com/glennmcd/commitment-tracker-ai/commit/162bad8598397611ab3089099cdae976f6ca4286))
+* **api:** add span feedback ([407f956](https://github.com/glennmcd/commitment-tracker-ai/commit/407f9567167e0b1c3df6e8e200f2fea5518b05f8))
+* **api:** add the daily spend cap ([4785a34](https://github.com/glennmcd/commitment-tracker-ai/commit/4785a34ddc889b0efaa3f0263abe59c2b56c04a9))
+* **api:** add the job resource ([a620951](https://github.com/glennmcd/commitment-tracker-ai/commit/a6209517a7109198b0ba602dacb86e7f7326e207))
+* emit the daily spend as a CloudWatch metric ([2ccdc18](https://github.com/glennmcd/commitment-tracker-ai/commit/2ccdc18b5e1edff6b97fd4777f927639302268fa))
+* **infra:** add the Amplify web stack ([46a5166](https://github.com/glennmcd/commitment-tracker-ai/commit/46a5166f0b353c5d07c41c7220495596b1be7494))
+* **infra:** add the API stack ([adea794](https://github.com/glennmcd/commitment-tracker-ai/commit/adea794bbb29d3c8e404736a52d8ce6a4b5b0736))
+* **infra:** add the budget kill switch and alarms ([8c1f4ad](https://github.com/glennmcd/commitment-tracker-ai/commit/8c1f4ada3656acda96173e121c1c1081cf9c4dc9))
+* **infra:** let -c choose the model ([cb99868](https://github.com/glennmcd/commitment-tracker-ai/commit/cb998684b3b39f6a9c88c1678a939bc221a37212))
+* map Transcribe output to timed turns ([29e0a27](https://github.com/glennmcd/commitment-tracker-ai/commit/29e0a27957160a500268aff8ec16d0b283ed87cb))
+* **samples:** add sample data and audio files ([df96e74](https://github.com/glennmcd/commitment-tracker-ai/commit/df96e74c28b0e00e092b6632aadf9a1d418b4026))
+* **web:** add prompt chips and the Playwright test ([88fd681](https://github.com/glennmcd/commitment-tracker-ai/commit/88fd681f14321f63ee9883fa28b533707e394471))
+* **web:** add recording and upload ([3a9bd50](https://github.com/glennmcd/commitment-tracker-ai/commit/3a9bd50d23af3a9bdab7ee042820fd2742e9033a))
+* **web:** add sample clips ([251d647](https://github.com/glennmcd/commitment-tracker-ai/commit/251d6479159ad68a7279ddae1164a6f3e1c618d1))
+* **web:** add span feedback ([feb9c1c](https://github.com/glennmcd/commitment-tracker-ai/commit/feb9c1c0c014efe5f6cb8d09461aada9d693ae02))
+* **web:** add text mode and the results view ([028cafa](https://github.com/glennmcd/commitment-tracker-ai/commit/028cafa09f1cbb63b4c309598ee4464107054996))
+* **web:** scaffold the Next.js app and the typed client ([f7aa97e](https://github.com/glennmcd/commitment-tracker-ai/commit/f7aa97e57b149c144a746bd164d308792d367457))
+
+
+### Bug Fixes
+
+* **infra:** route each endpoint so CORS preflights succeed ([ff656dc](https://github.com/glennmcd/commitment-tracker-ai/commit/ff656dccb0a05c8f18e7d88addda1f68bfc76a95))
+* **infra:** wrap the Amplify custom headers in the monorepo app key ([654b87a](https://github.com/glennmcd/commitment-tracker-ai/commit/654b87ac9e5017abfac31fabf297fb2698c959d6))
+* store job records without computed span fields ([26a3413](https://github.com/glennmcd/commitment-tracker-ai/commit/26a3413f1e1023d2f07303ed51e26b551d4419f5))
+* upt lint cmd for concise output and chng allowAgentCommits ([36afc84](https://github.com/glennmcd/commitment-tracker-ai/commit/36afc8463f5164f90d2b0189fa181c2499848d53))
+* **web:** key transcript pieces by their offset ([bddb3e1](https://github.com/glennmcd/commitment-tracker-ai/commit/bddb3e1c491384efcc9c260ce4bf4a0fa7a0aab4))
+
+
+### Documentation
+
+* add ADRs 0002-0007 for Part 2 ([96a68ce](https://github.com/glennmcd/commitment-tracker-ai/commit/96a68cea9c4a25c01459acc50ad14d6f11d30a5e))
+* add the deploy guide ([b064505](https://github.com/glennmcd/commitment-tracker-ai/commit/b064505d5882b702d15e114f86cd33619bc9468c))
+* add the Part 2 brief and design ([865ca8c](https://github.com/glennmcd/commitment-tracker-ai/commit/865ca8cce5bc6c25422f621bc1bc9a9ff138940b))
+* describe the demo, architecture and deployment in the README ([6ec74dc](https://github.com/glennmcd/commitment-tracker-ai/commit/6ec74dcc922b00df010a10b97d27fb8e003b29c6))
+* exclude the eval group from the Lambda export ([9cc0d13](https://github.com/glennmcd/commitment-tracker-ai/commit/9cc0d13c2ed9876e333890932a47c880c3b96ade))
+* note the Git Bash path rewrite for the SSM parameter name ([9d5dde8](https://github.com/glennmcd/commitment-tracker-ai/commit/9d5dde8bc2f9ecb78ca509ca068c91cec6b4b364))
+* record the Transcribe latency test ([4504285](https://github.com/glennmcd/commitment-tracker-ai/commit/4504285e6459d6ba609c2e37573e42282ea4090d))
+* use Polly standard voices for the sample clips ([784cc89](https://github.com/glennmcd/commitment-tracker-ai/commit/784cc89309141185b5d89efd1601c8803c072bff))
+* use the g26work2 profile name in the SCP guide ([2baa94f](https://github.com/glennmcd/commitment-tracker-ai/commit/2baa94fd98bf5d8d21767ddd0edd82912433bd22))
+
 ## [0.2.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.1.0...v0.2.0) (2026-10-22)
 
 
