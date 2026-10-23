@@ -237,6 +237,21 @@ describe("the HTTP API", () => {
       CorsConfiguration: Match.objectLike({ AllowOrigins: ["https://example.com"] }),
     });
   });
+
+  // A catch-all ($default or ANY) route would send a browser's OPTIONS preflight to the Lambda, which answers 405,
+  // instead of letting API Gateway answer it from the CORS configuration.
+  it("routes exactly the paths in openapi.json, so API Gateway answers CORS preflights itself", () => {
+    const spec = JSON.parse(readFileSync(path.join(here, "../../openapi.json"), "utf8")) as {
+      paths: Record<string, Record<string, unknown>>;
+    };
+    const expected = Object.entries(spec.paths)
+      .flatMap(([route, methods]) => Object.keys(methods).map((method) => `${method.toUpperCase()} ${route}`))
+      .sort();
+    const routeKeys = Object.values(defaults.template.findResources("AWS::ApiGatewayV2::Route"))
+      .map((r) => (r.Properties as { RouteKey: string }).RouteKey)
+      .sort();
+    expect(routeKeys).toEqual(expected);
+  });
 });
 
 describe("the sample clips", () => {

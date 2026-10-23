@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Annotations, ArnFormat, CfnOutput, Duration, RemovalPolicy, Stack, type StackProps, Tags } from "aws-cdk-lib";
 import { AccessLogFormat } from "aws-cdk-lib/aws-apigateway";
-import { CorsHttpMethod, HttpApi, HttpStage, LogGroupLogDestination } from "aws-cdk-lib/aws-apigatewayv2";
+import { CorsHttpMethod, HttpApi, HttpMethod, HttpStage, LogGroupLogDestination } from "aws-cdk-lib/aws-apigatewayv2";
 import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import { CfnBudget } from "aws-cdk-lib/aws-budgets";
 import { Alarm, ComparisonOperator, MathExpression, Metric, TreatMissingData } from "aws-cdk-lib/aws-cloudwatch";
@@ -39,6 +39,17 @@ const BUDGET_STOP_CODE_PATH = path.resolve(here, "../lambda/budget-stop");
 
 /** The sample clips `backend/scripts/make_samples.py` writes; deployed to `samples/` in the bucket when present. */
 const DEFAULT_SAMPLES_PATH = path.resolve(here, "../../frontend/public/samples");
+
+/** The API's endpoints, as `[method, path]`; the same set as the paths in openapi.json. */
+const API_ROUTES: readonly (readonly [HttpMethod, string])[] = [
+  [HttpMethod.GET, "/health"],
+  [HttpMethod.POST, "/analyze"],
+  [HttpMethod.POST, "/uploads"],
+  [HttpMethod.POST, "/jobs"],
+  [HttpMethod.GET, "/jobs/{job_id}"],
+  [HttpMethod.POST, "/feedback"],
+  [HttpMethod.GET, "/samples"],
+];
 
 /** The site and local development: the only origins the API and the upload bucket accept from a browser. */
 export const DEFAULT_ORIGINS = ["https://commitmentai.g26work.com", "http://localhost:3000"] as const;
@@ -216,7 +227,6 @@ export class ApiStack extends Stack {
     const httpApi = new HttpApi(this, "HttpApi", {
       apiName: "commitment-tracker-api",
       createDefaultStage: false,
-      defaultIntegration: new HttpLambdaIntegration("ApiIntegration", this.apiFunction),
       corsPreflight: {
         allowOrigins: origins,
         allowMethods: [CorsHttpMethod.GET, CorsHttpMethod.POST, CorsHttpMethod.OPTIONS],
@@ -225,6 +235,14 @@ export class ApiStack extends Stack {
         maxAge: Duration.hours(1),
       },
     });
+    // One route per endpoint, never a catch-all: with a $default route API Gateway forwards a browser's OPTIONS
+    // preflight to the Lambda, which answers 405, and the browser blocks the real request. With no route matching
+    // OPTIONS, API Gateway answers the preflight itself from corsPreflight. test/stacks.test.ts keeps this list equal
+    // to the paths in openapi.json.
+    const integration = new HttpLambdaIntegration("ApiIntegration", this.apiFunction);
+    for (const [method, routePath] of API_ROUTES) {
+      httpApi.addRoutes({ path: routePath, methods: [method], integration });
+    }
     new HttpStage(this, "DefaultStage", {
       httpApi,
       stageName: "$default",
