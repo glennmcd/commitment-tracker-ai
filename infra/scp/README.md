@@ -30,7 +30,7 @@ and update the policy.
 ## Attach it
 
 Set the project account's id in the shell first; account ids are not stored in this repository. The commands use
-a `g26work-mgmt` profile for the management account and a `g26work2` profile for the new account.
+a `g26work2-mgmt` profile for the management account and a `g26work2` profile for the new account.
 
 ```bash
 export CT_ACCOUNT_ID=<commitment-tracker-account-id>
@@ -39,32 +39,32 @@ export CT_ACCOUNT_ID=<commitment-tracker-account-id>
 Check the policy (no findings expected):
 
 ```bash
-aws accessanalyzer validate-policy --policy-type SERVICE_CONTROL_POLICY --policy-document file://infra/scp/commitment-tracker-guardrails.json --profile g26work-mgmt
+aws accessanalyzer validate-policy --policy-type SERVICE_CONTROL_POLICY --policy-document file://infra/scp/commitment-tracker-guardrails.json --profile g26work2-mgmt
 ```
 
 An account, OU or root can have at most five SCPs attached, AWS-managed ones included. Check what is attached
 already:
 
 ```bash
-aws organizations list-policies-for-target --target-id "$CT_ACCOUNT_ID" --filter SERVICE_CONTROL_POLICY --profile g26work-mgmt
+aws organizations list-policies-for-target --target-id "$CT_ACCOUNT_ID" --filter SERVICE_CONTROL_POLICY --profile g26work2-mgmt
 ```
 
 Create the policy, and note the `Id` it prints:
 
 ```bash
-aws organizations create-policy --type SERVICE_CONTROL_POLICY --name commitment-tracker-guardrails --description "Region lock, service allow-list and kill-switch protection for Commitment Tracker AI" --content file://infra/scp/commitment-tracker-guardrails.json --profile g26work-mgmt
+aws organizations create-policy --type SERVICE_CONTROL_POLICY --name commitment-tracker-guardrails --description "Region lock, service allow-list and kill-switch protection for Commitment Tracker AI" --content file://infra/scp/commitment-tracker-guardrails.json --profile g26work2-mgmt
 ```
 
 Attach it to the project account:
 
 ```bash
-aws organizations attach-policy --policy-id <policy-id> --target-id "$CT_ACCOUNT_ID" --profile g26work-mgmt
+aws organizations attach-policy --policy-id <policy-id> --target-id "$CT_ACCOUNT_ID" --profile g26work2-mgmt
 ```
 
 After editing the file, update the attached policy in place:
 
 ```bash
-aws organizations update-policy --policy-id <policy-id> --content file://infra/scp/commitment-tracker-guardrails.json --profile g26work-mgmt
+aws organizations update-policy --policy-id <policy-id> --content file://infra/scp/commitment-tracker-guardrails.json --profile g26work2-mgmt
 ```
 
 Changes take effect within a few minutes.
