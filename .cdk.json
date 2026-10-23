@@ -1,0 +1,7 @@
+{
+  "context": {
+    "alertEmail": "g26work@gmail.com",
+    "monthlyBudgetUsd": 25,
+    "reservedConcurrency": 10
+  }
+}

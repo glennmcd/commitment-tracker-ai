@@ -100,9 +100,9 @@ project account and `g26work2-mgmt` for the management account. Use your own nam
    the link has the password, and the query string can land in browser history and server logs, so share such links
    privately.
 
-   Add `&source=<label>` (letters, digits, `.`, `_`, `-`, up to 64) to tell links apart, for example
-   `/?password=<value>&source=alice`. The page keeps the label for the tab and sends it as an `X-Source` header; the
-   API logs `request method=… path=… source=<label>` (`source=invalid` for a label that doesn't fit) to its
+   Add `&pwsource=<label>` (letters, digits, `.`, `_`, `-`, up to 64) to tell links apart, for example
+   `/?password=<value>&pwsource=alice`. The page keeps the label for the tab and sends it as an `X-Source` header; the
+   API logs `request method=… path=… pwsource=<label>` (`pwsource=invalid` for a label that doesn't fit) to its
    CloudWatch log group. Only the label is logged, never the password or the `Authorization` header.
 
 ## Make the sample clips

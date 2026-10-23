@@ -160,8 +160,8 @@ describe("PasswordGate", () => {
       expect(getPassword()).toBe("new");
     });
 
-    it("keeps ?source= for the tab, removes it from the URL, and never stores it as the password", async () => {
-      window.history.replaceState(null, "", "/?source=alice&password=open%20sesame");
+    it("keeps ?pwsource= for the tab, removes it from the URL, and never stores it as the password", async () => {
+      window.history.replaceState(null, "", "/?pwsource=alice&password=open%20sesame");
       client.GET.mockResolvedValue(answer(200));
       renderGate();
 
@@ -172,9 +172,9 @@ describe("PasswordGate", () => {
       clearSource();
     });
 
-    it("records ?source= even when there is no password in the link", async () => {
+    it("records ?pwsource= even when there is no password in the link", async () => {
       setPassword("open sesame");
-      window.history.replaceState(null, "", "/?source=bob");
+      window.history.replaceState(null, "", "/?pwsource=bob");
       renderGate();
 
       await screen.findByText("the demo");

@@ -361,13 +361,13 @@ def create_app(
     async def _log_source(
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
-        # Who followed which link: the page sends the label from the link's `?source=`. Only that
+        # Who followed which link: the page sends the label from the link's `?pwsource=`. Only that
         # label is logged, never the Authorization header or anything else.
         raw = request.headers.get("x-source")
         if raw is not None:
             source = raw if SOURCE_LABEL.fullmatch(raw) else "invalid"
             logger.info(
-                "request method=%s path=%s source=%s", request.method, request.url.path, source
+                "request method=%s path=%s pwsource=%s", request.method, request.url.path, source
             )
         return await call_next(request)
 
