@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.6.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.5.0...v0.6.0) (2026-10-23)
+
+
+### Features
+
+* add e2e testing job with Playwright in CI workflow ([c1e5935](https://github.com/glennmcd/commitment-tracker-ai/commit/c1e5935425f7359be9de7a915bac7567135062b0))
+* add password management script and tests ([70fc2d7](https://github.com/glennmcd/commitment-tracker-ai/commit/70fc2d7fa8e52907412bdeb8da4fdb976ef9f235))
+* add password management script and tests ([75cdb12](https://github.com/glennmcd/commitment-tracker-ai/commit/75cdb12c4f73e4eaf2e1dd2a39947182f7ad4a87))
+* add S3 upload perm for presigned POST in ApiStack ([324dbd1](https://github.com/glennmcd/commitment-tracker-ai/commit/324dbd16e1976b68d647d13fd36fc815fa84b28c))
+* add S3 upload perm for presigned POST in ApiStack ([ba0b4fa](https://github.com/glennmcd/commitment-tracker-ai/commit/ba0b4fa719e868113749460b5d9138e260556938))
+
+
+### Bug Fixes
+
+* update CI workflow to use npm for bun installation ([f6aed9f](https://github.com/glennmcd/commitment-tracker-ai/commit/f6aed9fcf1b0fc7b2eb15719868a4b0846bef5eb))
+
 ## [0.5.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.4.0...v0.5.0) (2026-10-23)
 
 
