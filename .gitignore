@@ -35,3 +35,6 @@ frontend/out/
 frontend/tsconfig.tsbuildinfo
 frontend/test-results/
 frontend/playwright-report/
+
+# Site passwords to upload (scripts/upload-passwords.mjs)
+passwords.txt
