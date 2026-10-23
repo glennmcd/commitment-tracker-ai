@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.3.0...v0.4.0) (2026-10-23)
+
+
+### Features
+
+* implement site password protection for API endpoints ([0068ba2](https://github.com/glennmcd/commitment-tracker-ai/commit/0068ba230537587067eaf286ef82bb5e5283c82d))
+* implement site password protection for API endpoints ([57f29af](https://github.com/glennmcd/commitment-tracker-ai/commit/57f29af75f29f70ed0f6818f66b6d55c8d161f15))
+* **web:** show the release version and metrics ([26f9ac0](https://github.com/glennmcd/commitment-tracker-ai/commit/26f9ac01b8d1cef12061d57ad6ad1d4d624efcb3))
+* **web:** show the release version and metrics ([1eef213](https://github.com/glennmcd/commitment-tracker-ai/commit/1eef2130bfcf0693d02e6de21edae1736e3fd319))
+
 ## [0.3.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.2.0...v0.3.0) (2026-10-23)
 
 
