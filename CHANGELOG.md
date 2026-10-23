@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.4.0...v0.5.0) (2026-10-23)
+
+
+### Features
+
+* implement link source and pw handling ([f6a2a91](https://github.com/glennmcd/commitment-tracker-ai/commit/f6a2a910959e33a90ba18d63eb522ef7195f47c2))
+* implement link source and pw handling ([e0f502f](https://github.com/glennmcd/commitment-tracker-ai/commit/e0f502f52b407ec6b5eb7612b9c70dca0191df63))
+
 ## [0.4.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.3.0...v0.4.0) (2026-10-23)
 
 
