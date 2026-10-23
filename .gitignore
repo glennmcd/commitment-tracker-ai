@@ -25,3 +25,13 @@ node_modules/
 
 # Claude Code: personal settings (shared ones go in .claude/settings.json)
 .claude/settings.local.json
+
+# Part 2 infra build output
+infra/dist/
+infra/cdk.out/
+
+# Part 2 frontend build output
+frontend/out/
+frontend/tsconfig.tsbuildinfo
+frontend/test-results/
+frontend/playwright-report/

@@ -33,8 +33,58 @@ POST /analyze
 The response is abridged; every span also carries `recipient`, `condition`, `quote`, `rationale` and
 `ambiguous`, and the metadata carries token counts and the model that answered.
 
-This is Part 1 of the project: text in, validated labels out, plus an evaluation harness. Audio, the web demo and
-deployment come later ([spec](docs/spec.md)).
+Part 1 is the text API and an evaluation harness. Part 2 adds audio, a web demo and the AWS deployment
+([spec](docs/spec.md), [Part 2 plan](docs/plans/part-2-audio-and-deploy.md)).
+
+## The demo
+
+The site at `commitmentai.g26work.com` takes a conversation three ways and shows the same result for each:
+
+- **Type or paste** one `Speaker: text` line per turn. Six prompt chips ("Try a hedge", "Try sarcasm") fill in
+  examples that invite a mistake.
+- **Record** up to 60 seconds. The notice says what happens to the audio before the browser asks for the
+  microphone, a countdown stops the recording by itself, and the optional speaker names are applied to the first
+  and second voice heard. If the voices come back matched to the wrong names, one button swaps them.
+- **Sample call**, one of four scripted two-person calls read by synthetic voices, playable before they are analysed.
+
+The result is a ledger of commitments (owner to recipient, action, the due phrase with its resolved date, the
+condition of a conditional, a soft marker on a hedged one, the quote and the reason), a "Not a commitment" panel for
+the near misses, and the transcript with each quote marked. Each result takes a thumbs-up or thumbs-down. Ticking the
+box keeps the transcript for up to 90 days to improve the labels; the votes themselves hold no text. Every label has
+a name, a symbol and a line style as well as a colour, the status line is announced to screen readers, and the
+layout works on a phone.
+
+## Architecture
+
+```text
+browser ── POST /uploads ─────────► API Lambda (FastAPI on Mangum) ── presigned form
+        ── file, straight to S3 ──► audio bucket (uploads/, deleted after transcription)
+        ── POST /jobs ────────────► API Lambda ── job in DynamoDB, Amazon Transcribe batch job started
+        ── GET /jobs/{id}, 1/s ───► API Lambda ── reads the job
+
+Transcribe finishes ── EventBridge ──► worker Lambda ── reads the output, names the speakers,
+                                       deletes the audio, the output and the Transcribe job,
+                                       runs the extractor, records the stage times
+```
+
+- **Audio never passes through the API.** It goes to S3 by a presigned form capped at 60 s of 16 kHz mono WAV, which
+  the browser writes itself, and the server checks the header again.
+- **A job is the unit of work.** Its id is a hash of the audio (or the turns), the call date and the speaker names,
+  so a retried upload returns the existing job. It lives in DynamoDB for an hour, and a transcript is kept nowhere
+  else.
+- **Text goes through the same flow** (`POST /jobs` with a `transcript`), so one status line, one results view and
+  one feedback path serve all three modes. `POST /analyze` is unchanged for API clients.
+- **The model behind the API is Claude Haiku 5.5** on the deployed stack; the backend's default stays Opus.
+- Decisions and their reasons are in [docs/decisions](docs/decisions): batch transcription, the job resource,
+  Mangum on a zip, CDK in TypeScript, Polly sample clips and a separate AWS account.
+
+### Latency
+
+Amazon Transcribe batch jobs took 15.4 s at the median (15.8 s at p95) for a 59 s two-voice clip, measured over ten
+jobs in `us-east-2` ([ADR 0002](docs/decisions/0002-batch-transcription.md)). With the model call on top, a full-length
+recording should take about 17 to 19 seconds end to end, which misses the 10 second target. A text job takes a few
+seconds. Only transcribing the recording live, while it is spoken, could meet 10 seconds for audio. The
+deployed numbers come from `backend/scripts/measure_latency.py` (see [docs/deploying.md](docs/deploying.md)).
 
 ## How it works
 
@@ -96,6 +146,23 @@ Errors share one body, `{"error": {"code", "message", "details"}}`:
 | 422 | `model_refused` | The model declined the transcript |
 | 502 | `model_unavailable` | The model API failed after retries, or no credentials are set |
 | 502 | `model_output_invalid` | The model's output failed validation twice |
+| 429 | `rate_limited` | Too many requests from this address; see `Retry-After` |
+| 503 | `daily_budget_exhausted` | The day's spending cap is reached; `Retry-After` is the time to UTC midnight |
+
+The demo's job flow adds these routes (see [openapi.json](openapi.json) for the shapes):
+
+| Route | Does |
+| --- | --- |
+| `POST /uploads` | Returns a presigned S3 form for one recording of at most 60 s |
+| `POST /jobs` | Starts a job from an `upload_id`, a `sample_id` or a `transcript`, with the call date and speaker names |
+| `GET /jobs/{id}` | The status (`uploaded`, `transcribing`, `analyzing`, `done`, `failed`), then the transcript, the analysis and the time spent in each stage |
+| `GET /samples` | The sample clips |
+| `POST /feedback` | A thumbs-up or thumbs-down on one span, with the consent to keep the transcript |
+
+Their errors add `audio_too_long` and `audio_invalid` (422), `upload_not_found`, `sample_not_found`,
+`job_not_found` and `span_not_found` (404), `job_not_finished` (409) and `jobs_unavailable` and
+`uploads_unavailable` (503). The job routes answer 503 until a bucket and tables are configured, so a local run with
+only an API key serves `/analyze` as before.
 
 The OpenAPI schema is committed as [openapi.json](openapi.json); regenerate it with `uv run export-openapi` after
 changing a model or route. A test fails when it is out of date.
@@ -110,6 +177,39 @@ Settings come from the environment or `backend/.env`:
 | `PROMPT_VERSION` | `v1` | File in `backend/src/commitment_tracker/extractor/prompts/` |
 | `MODEL_TIMEOUT_SECONDS` | `60` | Per request; the SDK retries twice on rate limits and server errors |
 | `ANTHROPIC_API_KEY` | unset | Optional when signed in with `ant auth login` |
+| `ANTHROPIC_API_KEY_PARAMETER` | unset | On Lambda: the SSM SecureString holding the key |
+| `AUDIO_BUCKET`, `JOBS_TABLE`, `GUARDRAILS_TABLE`, `FEEDBACK_TABLE` | unset | Turn on uploads, jobs, rate limits and the spend cap, and feedback |
+| `WORKER_FUNCTION_NAME` | unset | The worker Lambda that text jobs are handed to |
+| `DAILY_BUDGET_USD` | `5` | The daily spend cap the API enforces |
+
+## Run the site
+
+```bash
+bun install
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 bun run --cwd frontend dev
+```
+
+The site is a Next.js 16 static export (`bun run --cwd frontend build` writes `frontend/out`). Its client is typed
+from `openapi.json`: after an API change run `uv run export-openapi` in `backend/`, then
+`bun run --cwd frontend gen:api`; CI fails when either is stale. The API's CORS allows `http://localhost:3000`.
+
+## Deploy
+
+Two CDK stacks in `infra/` put it in its own AWS account: the API, bucket, tables, Transcribe rule, budget kill
+switch and alarms, and the Amplify site. Deploying is yours to run; the steps, the one-time account setup and the
+reset commands are in [docs/deploying.md](docs/deploying.md).
+
+### Guardrails and costs
+
+| Limit | Value |
+| --- | --- |
+| Per address | 20 uploads and 20 jobs an hour, 30 `/analyze` calls an hour, 120 votes an hour, 120 polls a minute |
+| Daily cap, enforced by the API | $5 (`-c dailyBudgetUsd`), counting Transcribe and the model |
+| Monthly AWS budget | $30 (`-c monthlyBudgetUsd`); at 100% it stops both Lambda functions |
+
+A recording costs about $0.025 (almost all of it Transcribe) and a text job about $0.001. Audio is deleted from S3
+as soon as it is transcribed, with a one-day lifecycle rule behind that, and the logs carry ids, counts and timings,
+never transcript text.
 
 ## Evaluate
 
@@ -146,7 +246,7 @@ which comes later with the comparison across models.
 
 ## Develop
 
-Run these from `backend/`. Tests make no network calls.
+Tests make no network calls. In `backend/`:
 
 ```bash
 uv run pytest
@@ -154,14 +254,31 @@ uv run ruff check . && uv run ruff format --check .
 uv run mypy
 ```
 
+At the repository root, after `bun install`:
+
+```bash
+bun run lint
+bun run typecheck
+bun run test
+```
+
+`bun run --cwd frontend e2e` also builds the site and runs the Playwright test on Chromium. CI runs all of it
+([.github/workflows/ci.yml](.github/workflows/ci.yml)).
+
 The code lives in `backend/src/commitment_tracker/`:
 
 - `schemas.py`: the request and response models
 - `extractor/`: the prompt files, the Anthropic adapter, validation and retry, and the date resolver
 - `api/`: the FastAPI app
 - `evaluation/`: the dataset loader, matching, metrics, cache and reports
+- `transcription/`: the Transcribe adapter and the mapping from its output to timed turns
+- `jobs/`: the job record and its stores, the service, the worker, uploads, WAV checks and the sample catalog
+- `guardrails/`: rate limits, the daily spend cap and the CloudWatch metric
+- `feedback/`: votes and consented transcripts
+- `lambda_handlers.py`: the Lambda entry points
 
-A test enforces the import rules between them. Conventions for contributors and coding agents are in
+`frontend/` is the site, `infra/` the CDK app, and `backend/scripts/` holds the Polly sample script and the latency
+and audio-deleted checks. A test enforces the import rules between the Python packages. Conventions for contributors and coding agents are in
 [CLAUDE.md](CLAUDE.md).
 
 Versions and the changelog come from release-please, driven by Conventional Commit types; never bump a version by

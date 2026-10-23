@@ -8,9 +8,11 @@ transcript text, and validation errors drop the input values FastAPI would other
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Literal
+from typing import Annotated, Any, Literal
 
-from fastapi import FastAPI, Request
+import boto3
+from fastapi import Depends, FastAPI, Path, Request, Response
+from fastapi.concurrency import run_in_threadpool
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -23,21 +25,72 @@ from commitment_tracker.extractor.errors import (
 )
 from commitment_tracker.extractor.extractor import Extractor
 from commitment_tracker.extractor.factory import build_extractor
-from commitment_tracker.schemas import AnalyzeRequest, AnalyzeResponse
+from commitment_tracker.feedback.dynamo import DynamoFeedbackStore
+from commitment_tracker.feedback.service import (
+    FeedbackJobNotFound,
+    FeedbackService,
+    FeedbackSpanNotFound,
+    JobNotFinished,
+)
+from commitment_tracker.guardrails.metrics import emit_spend_fraction
+from commitment_tracker.guardrails.ratelimit import (
+    DynamoRateLimitStore,
+    RateLimiter,
+    client_ip,
+)
+from commitment_tracker.guardrails.spend import DailyBudgetExhausted, DynamoSpendStore, SpendCap
+from commitment_tracker.jobs.audio import MAX_AUDIO_BYTES, AudioInvalid, AudioTooLong
+from commitment_tracker.jobs.audio_store import S3AudioStore
+from commitment_tracker.jobs.dispatch import LambdaWorkerDispatcher
+from commitment_tracker.jobs.dynamo import DynamoJobStore
+from commitment_tracker.jobs.record import JobRecord, JobStatus, Latency
+from commitment_tracker.jobs.samples import load_catalog
+from commitment_tracker.jobs.service import (
+    JobService,
+    JobsUnavailable,
+    SampleNotFound,
+    UploadNotFound,
+)
+from commitment_tracker.jobs.uploads import S3UploadSigner, UploadSigner
+from commitment_tracker.schemas import (
+    AnalyzeRequest,
+    AnalyzeResponse,
+    FeedbackRequest,
+    FeedbackResponse,
+    JobRequest,
+    Turn,
+    UploadResponse,
+)
 from commitment_tracker.settings import Settings
+from commitment_tracker.transcription.aws import AwsBatchTranscriber
 
 logger = logging.getLogger(__name__)
 
 # The API contract version, published as info.version in openapi.json. Bump it by hand when the
 # request or response shape changes; it is separate from the release version (commitment_tracker
 # .__version__), so releases don't change openapi.json or the frontend client generated from it.
-API_VERSION = "0.1.0"
+API_VERSION = "0.2.0"
 
 
 class HealthResponse(BaseModel):
     status: Literal["ok"]
     model: str
     prompt_version: str
+
+
+class JobResponse(BaseModel):
+    job_id: str
+    status: JobStatus
+    transcript: list[Turn] | None = None
+    analysis: AnalyzeResponse | None = None
+    error_code: str | None = None
+    latency_ms: Latency
+
+
+class SampleSummary(BaseModel):
+    id: str
+    title: str
+    duration_ms: int
 
 
 class ErrorDetail(BaseModel):
@@ -56,6 +109,24 @@ class ErrorResponse(BaseModel):
     error: ErrorBody
 
 
+RATE_LIMITED: dict[str, object] = {
+    "model": ErrorResponse,
+    "description": "Too many requests from this client; see Retry-After",
+}
+
+
+class RateLimited(Exception):
+    def __init__(self, retry_after: int) -> None:
+        super().__init__("rate limited")
+        self.retry_after = retry_after
+
+
+BUDGET_EXHAUSTED: dict[str, object] = {
+    "model": ErrorResponse,
+    "description": "The day's spending cap is reached; see Retry-After (seconds to UTC midnight)",
+}
+
+
 # Each extraction failure: HTTP status, error code and the fixed message clients see.
 EXTRACTION_ERRORS: dict[type[ExtractionError], tuple[int, str, str]] = {
     ModelUnavailable: (502, "model_unavailable", "The model is unavailable. Try again later."),
@@ -68,15 +139,77 @@ EXTRACTION_ERRORS: dict[type[ExtractionError], tuple[int, str, str]] = {
 }
 ERROR_RESPONSES: dict[int | str, dict[str, object]] = {
     422: {"model": ErrorResponse, "description": "Invalid request, or the model refused it"},
+    429: RATE_LIMITED,
+    503: BUDGET_EXHAUSTED,
     502: {"model": ErrorResponse, "description": "The model failed or its output was invalid"},
 }
+UPLOAD_RESPONSES: dict[int | str, dict[str, object]] = {
+    429: RATE_LIMITED,
+    503: {"model": ErrorResponse, "description": "Audio storage is not configured"},
+}
+JOB_RESPONSES: dict[int | str, dict[str, object]] = {
+    404: {"model": ErrorResponse, "description": "The upload, sample or job does not exist"},
+    429: RATE_LIMITED,
+    422: {"model": ErrorResponse, "description": "Invalid request, or the audio is not accepted"},
+    503: {
+        "model": ErrorResponse,
+        "description": "Jobs are not configured, or the day's spending cap is reached",
+    },
+}
+# Domain errors raised by the job service: HTTP status, error code and the fixed message.
+JOB_ERRORS: dict[type[Exception], tuple[int, str, str]] = {
+    UploadNotFound: (404, "upload_not_found", "No upload with that id. It may have expired."),
+    SampleNotFound: (404, "sample_not_found", "No sample clip with that id."),
+    AudioTooLong: (422, "audio_too_long", "The recording is longer than 60 seconds."),
+    AudioInvalid: (422, "audio_invalid", "The audio is not a 16 kHz mono 16-bit WAV."),
+    JobsUnavailable: (503, "jobs_unavailable", "Jobs are not available."),
+    FeedbackJobNotFound: (404, "job_not_found", "No job with that id. It may have expired."),
+    JobNotFinished: (409, "job_not_finished", "The job has no results to give feedback on."),
+    FeedbackSpanNotFound: (404, "span_not_found", "The job has no span with that index."),
+}
+FEEDBACK_RESPONSES: dict[int | str, dict[str, object]] = {
+    404: {"model": ErrorResponse, "description": "The job or the span does not exist"},
+    409: {"model": ErrorResponse, "description": "The job is not finished"},
+    429: RATE_LIMITED,
+    503: {"model": ErrorResponse, "description": "Feedback storage is not configured"},
+}
+JOB_ID_PATTERN = r"^[0-9a-f]{64}$"
 
 
 def _error(
-    status: int, code: str, message: str, details: list[ErrorDetail] | None = None
+    status: int,
+    code: str,
+    message: str,
+    details: list[ErrorDetail] | None = None,
+    headers: dict[str, str] | None = None,
 ) -> JSONResponse:
     body = ErrorResponse(error=ErrorBody(code=code, message=message, details=details or []))
-    return JSONResponse(status_code=status, content=body.model_dump())
+    return JSONResponse(status_code=status, content=body.model_dump(), headers=headers)
+
+
+async def within_budget(request: Request) -> None:
+    """Refuse new work once the day's spending cap is reached. Runs before the body is read."""
+    spend: SpendCap | None = request.app.state.spend
+    if spend is not None:
+        await run_in_threadpool(spend.check)
+
+
+def limited(rule: str) -> Any:
+    """A dependency that counts the request under `rule` and refuses it past the limit. It runs
+    before the body is validated, so malformed requests use up the budget too."""
+
+    async def check(request: Request, response: Response) -> None:
+        limiter: RateLimiter | None = request.app.state.limiter
+        if limiter is None:
+            return
+        decision = await run_in_threadpool(limiter.check, rule, client_ip(request))
+        response.headers["ratelimit-limit"] = str(decision.limit)
+        response.headers["ratelimit-remaining"] = str(decision.remaining)
+        response.headers["ratelimit-reset"] = str(decision.retry_after)
+        if not decision.allowed:
+            raise RateLimited(decision.retry_after)
+
+    return Depends(check)
 
 
 def _show_app_logs() -> None:
@@ -89,14 +222,93 @@ def _show_app_logs() -> None:
         package.setLevel(logging.INFO)
 
 
-def create_app(*, extractor: Extractor | None = None, settings: Settings | None = None) -> FastAPI:
-    """With no extractor, the lifespan builds the Anthropic one from settings at startup."""
+def build_upload_signer(settings: Settings) -> UploadSigner | None:
+    if settings.audio_bucket is None:
+        return None
+    s3 = boto3.client("s3")
+    return S3UploadSigner(s3, settings.audio_bucket, expires_in=settings.upload_url_ttl_seconds)
+
+
+def build_job_service(settings: Settings, spend: SpendCap | None = None) -> JobService | None:
+    """Wired to AWS when the bucket and table are configured. Text jobs need the worker's function
+    name too; without it they answer 503."""
+    if settings.audio_bucket is None or settings.jobs_table is None:
+        return None
+    s3 = boto3.client("s3")
+    dispatcher = (
+        None
+        if settings.worker_function_name is None
+        else LambdaWorkerDispatcher(boto3.client("lambda"), settings.worker_function_name)
+    )
+    return JobService(
+        DynamoJobStore(boto3.client("dynamodb"), settings.jobs_table),
+        S3AudioStore(s3, settings.audio_bucket),
+        AwsBatchTranscriber(boto3.client("transcribe"), s3, settings.audio_bucket),
+        load_catalog(),
+        dispatcher,
+        spend=spend,
+    )
+
+
+def build_spend_cap(settings: Settings) -> SpendCap | None:
+    if settings.guardrails_table is None:
+        return None
+    store = DynamoSpendStore(boto3.client("dynamodb"), settings.guardrails_table)
+    return SpendCap(store, settings.daily_budget_usd, on_total=emit_spend_fraction)
+
+
+def build_feedback_service(settings: Settings) -> FeedbackService | None:
+    if settings.jobs_table is None or settings.feedback_table is None:
+        return None
+    dynamodb = boto3.client("dynamodb")
+    return FeedbackService(
+        DynamoJobStore(dynamodb, settings.jobs_table),
+        DynamoFeedbackStore(dynamodb, settings.feedback_table),
+    )
+
+
+def build_limiter(settings: Settings) -> RateLimiter | None:
+    if settings.guardrails_table is None:
+        return None
+    return RateLimiter(DynamoRateLimitStore(boto3.client("dynamodb"), settings.guardrails_table))
+
+
+def _job_response(job: JobRecord) -> JobResponse:
+    return JobResponse(
+        job_id=job.id,
+        status=job.status,
+        transcript=job.turns,
+        analysis=job.analysis,
+        error_code=job.error_code,
+        latency_ms=job.latency(),
+    )
+
+
+def create_app(
+    *,
+    extractor: Extractor | None = None,
+    settings: Settings | None = None,
+    uploads: UploadSigner | None = None,
+    jobs: JobService | None = None,
+    limiter: RateLimiter | None = None,
+    spend: SpendCap | None = None,
+    feedback: FeedbackService | None = None,
+) -> FastAPI:
+    """With no extractor, the lifespan builds the Anthropic one, and the upload signer when an
+    audio bucket is configured, from settings at startup."""
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         if extractor is None:
             _show_app_logs()
-            app.state.extractor = build_extractor(settings or Settings())
+            active_settings = settings or Settings()
+            app.state.extractor = build_extractor(active_settings)
+            app.state.uploads = uploads or build_upload_signer(active_settings)
+            spend_cap = spend or build_spend_cap(active_settings)
+            app.state.jobs = jobs or build_job_service(active_settings, spend_cap)
+            app.state.limiter = limiter or build_limiter(active_settings)
+            app.state.spend = spend_cap
+            app.state.feedback = feedback or build_feedback_service(active_settings)
         yield
 
     app = FastAPI(
@@ -105,6 +317,11 @@ def create_app(*, extractor: Extractor | None = None, settings: Settings | None 
         description="Extracts commitments from conversation transcripts.",
         lifespan=lifespan,
     )
+    app.state.uploads = uploads
+    app.state.jobs = jobs
+    app.state.limiter = limiter
+    app.state.spend = spend
+    app.state.feedback = feedback
     if extractor is not None:
         app.state.extractor = extractor
 
@@ -116,6 +333,26 @@ def create_app(*, extractor: Extractor | None = None, settings: Settings | None 
         logger.info("analyze_rejected path=%s errors=%d", request.url.path, len(details))
         return _error(422, "validation_error", "The request is invalid.", details)
 
+    @app.exception_handler(RateLimited)
+    async def _rate_limited(request: Request, exc: RateLimited) -> JSONResponse:
+        logger.info("rate_limited path=%s", request.url.path)
+        return _error(
+            429,
+            "rate_limited",
+            f"Too many requests. Try again in {exc.retry_after} seconds.",
+            headers={"Retry-After": str(exc.retry_after)},
+        )
+
+    @app.exception_handler(DailyBudgetExhausted)
+    async def _budget_exhausted(request: Request, exc: DailyBudgetExhausted) -> JSONResponse:
+        logger.info("daily_budget_exhausted path=%s", request.url.path)
+        return _error(
+            503,
+            "daily_budget_exhausted",
+            "The demo has reached its daily spending limit. Try again after midnight UTC.",
+            headers={"Retry-After": str(exc.retry_after)},
+        )
+
     @app.exception_handler(ExtractionError)
     async def _extraction_failed(request: Request, exc: ExtractionError) -> JSONResponse:
         status, code, message = EXTRACTION_ERRORS.get(
@@ -125,6 +362,22 @@ def create_app(*, extractor: Extractor | None = None, settings: Settings | None 
         logger.warning("analyze_failed code=%s detail=%s", code, exc)
         return _error(status, code, message)
 
+    @app.exception_handler(UploadNotFound)
+    @app.exception_handler(SampleNotFound)
+    @app.exception_handler(AudioTooLong)
+    @app.exception_handler(AudioInvalid)
+    @app.exception_handler(JobsUnavailable)
+    @app.exception_handler(FeedbackJobNotFound)
+    @app.exception_handler(JobNotFinished)
+    @app.exception_handler(FeedbackSpanNotFound)
+    async def _job_failed(request: Request, exc: Exception) -> JSONResponse:
+        # Walk the MRO so TextJobsUnavailable finds JobsUnavailable's entry.
+        status, code, message = next(
+            JOB_ERRORS[cls] for cls in type(exc).__mro__ if cls in JOB_ERRORS
+        )
+        logger.info("job_rejected path=%s code=%s", request.url.path, code)
+        return _error(status, code, message)
+
     @app.get("/health")
     async def health(request: Request) -> HealthResponse:
         active: Extractor = request.app.state.extractor
@@ -132,10 +385,17 @@ def create_app(*, extractor: Extractor | None = None, settings: Settings | None 
             status="ok", model=active.adapter.model, prompt_version=active.prompt.version
         )
 
-    @app.post("/analyze", responses=ERROR_RESPONSES)
+    @app.post(
+        "/analyze",
+        responses=ERROR_RESPONSES,
+        dependencies=[limited("analyze"), Depends(within_budget)],
+    )
     async def analyze(body: AnalyzeRequest, request: Request) -> AnalyzeResponse:
         active: Extractor = request.app.state.extractor
         result = await active.analyze(body)
+        spend: SpendCap | None = request.app.state.spend
+        if spend is not None and result.metadata.cost_usd is not None:
+            await run_in_threadpool(spend.record, result.metadata.cost_usd)
         meta = result.metadata
         logger.info(
             "analyze turns=%d spans=%d dropped_quotes=%d attempts=%d latency_ms=%d served_by=%s",
@@ -147,6 +407,85 @@ def create_app(*, extractor: Extractor | None = None, settings: Settings | None 
             meta.served_by,
         )
         return result
+
+    @app.post(
+        "/uploads",
+        response_model=UploadResponse,
+        responses=UPLOAD_RESPONSES,
+        dependencies=[limited("uploads")],
+    )
+    async def create_upload(request: Request) -> UploadResponse | JSONResponse:
+        signer: UploadSigner | None = request.app.state.uploads
+        if signer is None:
+            return _error(503, "uploads_unavailable", "Audio uploads are not available.")
+        ticket = signer.presign()
+        return UploadResponse(
+            upload_id=ticket.upload_id,
+            url=ticket.url,
+            fields=ticket.fields,
+            max_bytes=MAX_AUDIO_BYTES,
+            expires_in=ticket.expires_in,
+        )
+
+    def _jobs(request: Request) -> JobService:
+        service: JobService | None = request.app.state.jobs
+        if service is None:
+            raise JobsUnavailable("jobs are not configured")
+        return service
+
+    @app.post(
+        "/jobs",
+        status_code=202,
+        response_model=JobResponse,
+        responses=JOB_RESPONSES,
+        dependencies=[limited("jobs"), Depends(within_budget)],
+    )
+    async def create_job(body: JobRequest, request: Request) -> JobResponse:
+        service = _jobs(request)
+        if body.upload_id is not None:
+            job = await run_in_threadpool(
+                service.start_upload, body.upload_id, body.call_date, body.speaker_names
+            )
+        elif body.sample_id is not None:
+            job = await run_in_threadpool(
+                service.start_sample, body.sample_id, body.call_date, body.speaker_names
+            )
+        else:
+            assert body.transcript is not None  # JobRequest allows exactly one source
+            job = await run_in_threadpool(service.start_text, body.transcript, body.call_date)
+        return _job_response(job)
+
+    @app.get(
+        "/jobs/{job_id}",
+        response_model=JobResponse,
+        responses=JOB_RESPONSES,
+        dependencies=[limited("job_status")],
+    )
+    async def get_job(
+        request: Request, job_id: Annotated[str, Path(pattern=JOB_ID_PATTERN)]
+    ) -> JobResponse | JSONResponse:
+        job = await run_in_threadpool(_jobs(request).get, job_id)
+        if job is None:
+            return _error(404, "job_not_found", "No job with that id. It may have expired.")
+        return _job_response(job)
+
+    @app.post(
+        "/feedback",
+        response_model=FeedbackResponse,
+        responses=FEEDBACK_RESPONSES,
+        dependencies=[limited("feedback")],
+    )
+    async def create_feedback(body: FeedbackRequest, request: Request) -> FeedbackResponse:
+        service: FeedbackService | None = request.app.state.feedback
+        if service is None:
+            raise JobsUnavailable("feedback is not configured")
+        result = await run_in_threadpool(service.submit, body)
+        return FeedbackResponse(transcript_kept=result.transcript_kept)
+
+    @app.get("/samples", responses=JOB_RESPONSES)
+    async def list_samples(request: Request) -> list[SampleSummary]:
+        clips = _jobs(request).samples().all()
+        return [SampleSummary(id=c.id, title=c.title, duration_ms=c.duration_ms) for c in clips]
 
     return app
 

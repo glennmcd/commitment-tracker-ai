@@ -1,0 +1,26 @@
+[
+  {
+    "id": "onboarding-paperwork",
+    "title": "Onboarding paperwork",
+    "duration_ms": 30258,
+    "sha256": "3962865e368a2c1d74ed35c4b8fde390d033609e1d3a3c18419482e35b39ea2a"
+  },
+  {
+    "id": "security-review",
+    "title": "Security review",
+    "duration_ms": 26931,
+    "sha256": "d4c9747772b068784cb2d65b6b9165d5cdcbbddb80e771b0d3bf9e4ab030b875"
+  },
+  {
+    "id": "export-feature-sync",
+    "title": "Export feature check-in",
+    "duration_ms": 26142,
+    "sha256": "f7f745895741d73b9a9f9a3bbcf91daad545c1bf7c3c093c8b78a1b9c5528ee9"
+  },
+  {
+    "id": "renewal-pricing",
+    "title": "Renewal pricing",
+    "duration_ms": 25229,
+    "sha256": "41df11bec5242c5dbd980ed20ba702d520a4c3d7f8ec7e47d174c3936379ef5c"
+  }
+]

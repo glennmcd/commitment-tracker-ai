@@ -7,7 +7,7 @@ rejected transcript or quote never reaches a log line or error message.
 
 from datetime import date
 from enum import StrEnum
-from typing import Annotated, Self
+from typing import Annotated, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
 
@@ -51,6 +51,12 @@ def _blank(value: str | None) -> bool:
 class Turn(Contract):
     speaker: str = Field(min_length=1, max_length=100, description="Speaker id or name.")
     text: str = Field(min_length=1, description="What the speaker said in this turn.")
+    start_ms: int | None = Field(
+        default=None, ge=0, description="Start of the turn in the audio; set for audio jobs."
+    )
+    end_ms: int | None = Field(
+        default=None, ge=0, description="End of the turn in the audio; set for audio jobs."
+    )
 
     @field_validator("text")
     @classmethod
@@ -58,6 +64,75 @@ class Turn(Contract):
         if not value.strip():
             raise ValueError("turn text must not be blank")
         return value
+
+    @model_validator(mode="after")
+    def _times_in_order(self) -> Self:
+        if self.start_ms is not None and self.end_ms is not None and self.end_ms < self.start_ms:
+            raise ValueError("end_ms must not be before start_ms")
+        return self
+
+
+class UploadResponse(Contract):
+    """A presigned S3 POST: send `fields`, then the file as the last form field, to `url`."""
+
+    upload_id: str = Field(description="Names the upload in POST /jobs.")
+    url: str
+    fields: dict[str, str] = Field(description="Form fields to send before the file, unchanged.")
+    max_bytes: int = Field(description="Largest accepted file; 60 s of 16 kHz mono 16-bit WAV.")
+    expires_in: int = Field(description="Seconds the form stays valid.")
+
+
+class JobRequest(Contract):
+    """Starts a job from exactly one source: an upload, a sample clip or a typed transcript."""
+
+    upload_id: str | None = Field(
+        default=None, pattern=r"^[0-9a-f]{32}$", description="From POST /uploads."
+    )
+    sample_id: str | None = Field(
+        default=None, pattern=r"^[a-z0-9][a-z0-9-]{0,63}$", description="From GET /samples."
+    )
+    transcript: list[Turn] | None = Field(default=None, min_length=1, max_length=MAX_TURNS)
+    call_date: date = Field(description="Date of the call; relative due dates resolve from it.")
+    speaker_names: list[str] = Field(
+        default_factory=list,
+        max_length=2,
+        description="Names for the first and second voice heard; audio sources only.",
+    )
+
+    @field_validator("speaker_names")
+    @classmethod
+    def _names_not_blank(cls, names: list[str]) -> list[str]:
+        if any(_blank(name) or len(name) > 100 for name in names):
+            raise ValueError("speaker names must be 1 to 100 characters")
+        return names
+
+    @model_validator(mode="after")
+    def _one_source(self) -> Self:
+        sources = [self.upload_id, self.sample_id, self.transcript]
+        if sum(source is not None for source in sources) != 1:
+            raise ValueError("give exactly one of upload_id, sample_id and transcript")
+        if self.transcript is not None:
+            if self.speaker_names:
+                raise ValueError("speaker_names applies to audio; a transcript names its speakers")
+            if sum(len(turn.text) for turn in self.transcript) > MAX_TRANSCRIPT_CHARS:
+                raise ValueError(f"transcript must be at most {MAX_TRANSCRIPT_CHARS} characters")
+        return self
+
+
+class FeedbackRequest(Contract):
+    """A vote on one span of a finished job. The label and the text come from the job record."""
+
+    job_id: str = Field(pattern=r"^[0-9a-f]{64}$")
+    span_index: int = Field(ge=0, le=999, description="Index into the job's analysis spans.")
+    vote: Literal["up", "down"]
+    consent: bool = Field(
+        default=False,
+        description="Keep the transcript and spans for up to 90 days to improve the labels.",
+    )
+
+
+class FeedbackResponse(Contract):
+    transcript_kept: bool
 
 
 class AnalyzeRequest(Contract):

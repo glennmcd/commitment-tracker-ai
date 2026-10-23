@@ -15,11 +15,13 @@ from commitment_tracker.schemas import AnalyzeRequest, AnalyzeResponse
 # backend/src/commitment_tracker/evaluation/cache.py -> backend/eval/.cache (git-ignored)
 DEFAULT_CACHE_DIR = Path(__file__).resolve().parents[3] / "eval" / ".cache"
 COMPUTED_FIELDS = {"spans": {"__all__": {"in_ledger", "soft"}}}
+# The model never sees turn timestamps, so they stay out of the key and existing keys stay valid.
+TIMESTAMP_FIELDS = {"transcript": {"__all__": {"start_ms", "end_ms"}}}
 
 
 def cache_key(request: AnalyzeRequest, *, model: str, prompt_sha256: str, effort: str) -> str:
     material = {
-        "request": request.model_dump(mode="json"),
+        "request": request.model_dump(mode="json", exclude=TIMESTAMP_FIELDS),
         "model": model,
         "prompt_sha256": prompt_sha256,
         "effort": effort,

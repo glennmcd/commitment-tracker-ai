@@ -155,6 +155,16 @@ def test_user_message_lists_turns_with_index_and_speaker() -> None:
     assert '<turn index="1" speaker="seller">Sure, I\'ll do it today.</turn>' in message
 
 
+def test_turn_timestamps_are_not_sent_to_the_model() -> None:
+    plain = make_request(("seller", "I'll do it today."))
+    timed = plain.model_copy(
+        update={
+            "transcript": [Turn(speaker="seller", text="I'll do it today.", start_ms=0, end_ms=900)]
+        }
+    )
+    assert build_user_message(timed) == build_user_message(plain)
+
+
 def test_turn_text_is_kept_verbatim_so_quotes_still_match() -> None:
     text = 'R&D says "5 < 6" & we\'ll ship it'
     assert f">{text}</turn>" in build_user_message(make_request(("seller", text)))

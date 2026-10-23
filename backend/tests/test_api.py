@@ -15,6 +15,8 @@ from commitment_tracker.extractor.errors import (
 from commitment_tracker.extractor.extractor import Extractor
 from commitment_tracker.extractor.model_output import ModelOutput
 from commitment_tracker.extractor.prompt import load_prompt
+from commitment_tracker.jobs.audio import MAX_AUDIO_BYTES
+from commitment_tracker.jobs.uploads import UploadTicket
 from commitment_tracker.schemas import MAX_TURNS
 from commitment_tracker.settings import Settings
 from tests.fakes import FakeAdapter, reply
@@ -190,3 +192,52 @@ def test_openapi_version_is_the_api_contract_version_not_the_release() -> None:
 
     spec = client_for().get("/openapi.json").json()
     assert spec["info"]["version"] == API_VERSION
+
+
+# --- Uploads -------------------------------------------------------------------------------------
+
+
+class FakeSigner:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def presign(self) -> UploadTicket:
+        self.calls += 1
+        return UploadTicket(
+            upload_id="a" * 32,
+            key=f"uploads/{'a' * 32}.wav",
+            url="https://audio-bucket.s3.us-east-2.amazonaws.com/",
+            fields={"key": f"uploads/{'a' * 32}.wav", "policy": "p"},
+            expires_in=300,
+        )
+
+
+def uploads_client(signer: FakeSigner | None) -> TestClient:
+    extractor = Extractor(FakeAdapter(), load_prompt("v1"))
+    return TestClient(create_app(extractor=extractor, uploads=signer))
+
+
+def test_post_uploads_returns_the_presigned_form() -> None:
+    signer = FakeSigner()
+    response = uploads_client(signer).post("/uploads")
+    assert response.status_code == 200
+    assert response.json() == {
+        "upload_id": "a" * 32,
+        "url": "https://audio-bucket.s3.us-east-2.amazonaws.com/",
+        "fields": {"key": f"uploads/{'a' * 32}.wav", "policy": "p"},
+        "max_bytes": MAX_AUDIO_BYTES,
+        "expires_in": 300,
+    }
+    assert signer.calls == 1
+
+
+def test_post_uploads_without_storage_configured_is_503() -> None:
+    response = uploads_client(None).post("/uploads")
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "uploads_unavailable"
+
+
+def test_uploads_log_only_the_id(caplog: pytest.LogCaptureFixture) -> None:
+    with caplog.at_level(logging.INFO):
+        uploads_client(FakeSigner()).post("/uploads")
+    assert "policy" not in caplog.text

@@ -1,0 +1,22 @@
+{
+  "name": "@commitment-tracker/infra",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "cdk": "node node_modules/aws-cdk/bin/cdk",
+    "synth": "node node_modules/aws-cdk/bin/cdk synth",
+    "diff": "node node_modules/aws-cdk/bin/cdk diff",
+    "bundle": "node --import tsx scripts/bundle-api.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.272.0",
+    "constructs": "^10.8.1"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.2",
+    "@types/node": "^26.6.4",
+    "aws-cdk": "^2.1144.0",
+    "tsx": "^4.23.15"
+  }
+}

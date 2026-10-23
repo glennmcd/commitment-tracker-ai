@@ -1,0 +1,14 @@
+{
+  "app": "node --import tsx bin/commitment-tracker.ts",
+  "build": "node --import tsx scripts/bundle-api.ts",
+  "watch": {
+    "include": ["**"],
+    "exclude": ["README.md", "cdk*.json", "node_modules", "dist", "test", "cdk.out"]
+  },
+  "context": {
+    "customDomain": { "domainName": "commitmentai.g26work.com", "subDomains": [""] },
+    "@aws-cdk/core:checkSecretUsage": true,
+    "@aws-cdk/aws-iam:minimizePolicies": true,
+    "@aws-cdk/core:defaultCrossStackReferences": "strong"
+  }
+}

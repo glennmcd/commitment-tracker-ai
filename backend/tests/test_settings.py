@@ -58,3 +58,53 @@ def test_api_key_never_appears_in_repr_or_errors(monkeypatch: pytest.MonkeyPatch
     assert s.anthropic_api_key.get_secret_value() == "sk-ant-test-not-real"
     assert "sk-ant-test-not-real" not in repr(s)
     assert "sk-ant-test-not-real" not in str(s.model_dump())
+
+
+def test_upload_storage_defaults_and_overrides(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("AUDIO_BUCKET", raising=False)
+    assert settings().audio_bucket is None
+    assert settings().upload_url_ttl_seconds == 300
+    monkeypatch.setenv("AUDIO_BUCKET", "audio-bucket")
+    assert settings().audio_bucket == "audio-bucket"
+
+
+def test_table_names_default_to_unset_and_come_from_the_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for name in ("JOBS_TABLE", "GUARDRAILS_TABLE"):
+        monkeypatch.delenv(name, raising=False)
+    assert (settings().jobs_table, settings().guardrails_table) == (None, None)
+    monkeypatch.setenv("JOBS_TABLE", "jobs")
+    monkeypatch.setenv("GUARDRAILS_TABLE", "guardrails")
+    assert (settings().jobs_table, settings().guardrails_table) == ("jobs", "guardrails")
+
+
+def test_lambda_settings_default_to_unset_and_come_from_the_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for name in ("ANTHROPIC_API_KEY_PARAMETER", "WORKER_FUNCTION_NAME"):
+        monkeypatch.delenv(name, raising=False)
+    assert settings().anthropic_api_key_parameter is None
+    assert settings().worker_function_name is None
+    monkeypatch.setenv("ANTHROPIC_API_KEY_PARAMETER", "/p")
+    monkeypatch.setenv("WORKER_FUNCTION_NAME", "worker")
+    assert (settings().anthropic_api_key_parameter, settings().worker_function_name) == (
+        "/p",
+        "worker",
+    )
+
+
+def test_upload_ttl_must_be_positive() -> None:
+    with pytest.raises(ValidationError):
+        settings(upload_url_ttl_seconds=0)
+
+
+def test_daily_budget_defaults_to_five_dollars_and_must_be_positive(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("DAILY_BUDGET_USD", raising=False)
+    assert settings().daily_budget_usd == 5.0
+    monkeypatch.setenv("DAILY_BUDGET_USD", "2.5")
+    assert settings().daily_budget_usd == 2.5
+    with pytest.raises(ValidationError):
+        settings(daily_budget_usd=0)

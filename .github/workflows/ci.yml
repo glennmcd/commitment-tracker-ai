@@ -1,0 +1,90 @@
+name: ci
+
+# Checks every push and pull request. No job calls AWS or Anthropic: tests use fakes and mocks, `cdk synth`
+# runs against a placeholder account, and the only network use is installing packages and the browser.
+on:
+  push:
+  pull_request:
+
+# The jobs only read the repository.
+permissions:
+  contents: read
+
+# A newer push to the same branch makes an older run pointless.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      # Actions are pinned to commits, not tags, because a tag can be moved. Update with
+      # `gh api repos/<owner>/<repo>/git/ref/tags/<tag> --jq .object.sha`.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - run: uv sync --locked
+      # Includes the test that fails when openapi.json is stale (`uv run export-openapi` regenerates it).
+      - run: uv run pytest -q
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - run: bun install --frozen-lockfile
+      # Biome lints and formats the frontend and infra together.
+      - run: bunx biome ci .
+      - run: bun run --cwd frontend typecheck
+      - run: bun run --cwd frontend test
+      # The repository's own tooling, such as the format-on-edit command.
+      - run: bun test scripts
+      # The typed client is generated from openapi.json; a stale one fails here.
+      - run: bun run --cwd frontend gen:api
+      - run: git diff --exit-code -- frontend/src/api/schema.d.ts
+      - run: bunx playwright install --with-deps chromium
+        working-directory: frontend
+      # Builds the static site against a made-up API address, then runs the browser test on it.
+      - run: bun run --cwd frontend e2e
+
+  infra:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      # The synth step builds the Lambda bundle with uv, which needs Python 3.12 (backend/.python-version).
+      - run: uv python install 3.12
+      - run: bun install --frozen-lockfile
+      - run: bun --cwd infra test
+      # A placeholder account pins the stacks, so no credentials are needed. The alert email turns on the
+      # budget kill switch and the alarms, so they are synthesized too.
+      - run: node node_modules/aws-cdk/bin/cdk synth --quiet -c alertEmail=ci@example.com
+        working-directory: infra
+        env:
+          CDK_DEFAULT_ACCOUNT: '123456789012'

@@ -1,14 +1,34 @@
 {
-  "languages": ["python"],
+  "languages": [
+    "python",
+    "typescript"
+  ],
   "format": {
-    "extensions": [".py"],
-    "command": ["uv", "run", "--directory", "backend", "ruff", "format", "{file}"]
+    "extensions": [
+      ".py",
+      ".ts",
+      ".tsx",
+      ".js",
+      ".jsx",
+      ".mjs",
+      ".json",
+      ".css"
+    ],
+    "command": [
+      "node",
+      "scripts/format-file.mjs",
+      "{file}"
+    ]
   },
   "checks": {
-    "lint": "uv run --directory backend ruff check .",
+    "lint": "uv run --directory backend ruff check --output-format concise .",
+    "test": "uv run --directory backend pytest -q --tb=short",
     "format": "uv run --directory backend ruff format --check .",
     "typecheck": "uv run --directory backend mypy",
-    "test": "uv run --directory backend pytest"
+    "lint-ts": "bun run lint",
+    "typecheck-ts": "bun run typecheck",
+    "test-ts": "bun run test"
   },
-  "allowAgentCommits": true
+  "allowAgentCommits": true,
+  "compactOutput": false
 }
