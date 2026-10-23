@@ -2,6 +2,7 @@ import type { components } from "@/api/schema";
 
 export type Label = components["schemas"]["Label"];
 export type Span = components["schemas"]["Span"];
+export type Metadata = components["schemas"]["Metadata"];
 export type Turn = components["schemas"]["Turn"];
 
 interface LabelInfo {

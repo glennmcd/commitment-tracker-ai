@@ -64,6 +64,18 @@ main {
   padding: 2rem var(--gutter);
 }
 
+.site-footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.site-footer p {
+  margin: 0;
+}
+
 :focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 2px;
@@ -554,6 +566,38 @@ button.secondary {
 
 .feedback {
   margin-top: 0.6rem;
+}
+
+/* A card's foot: the thumbs, with the AI metrics below them. */
+.card-foot {
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-metrics {
+  margin-top: 0.4rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.ai-metrics dl {
+  margin: 0;
+}
+
+.ai-metrics div {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.ai-metrics dt::after {
+  content: ":";
+}
+
+.ai-metrics dd {
+  margin: 0;
+  color: var(--text);
 }
 
 .thumbs {

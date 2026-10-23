@@ -1,5 +1,5 @@
 import type { Job } from "@/lib/jobs";
-import type { Span } from "@/lib/labels";
+import type { Metadata, Span } from "@/lib/labels";
 
 /** Test builders for API responses. */
 export function span(over: Partial<Span> = {}): Span {
@@ -17,6 +17,23 @@ export function span(over: Partial<Span> = {}): Span {
     ambiguous: false,
     in_ledger: true,
     soft: false,
+    ...over,
+  };
+}
+
+export function metadata(over: Partial<Metadata> = {}): Metadata {
+  return {
+    model: "claude-haiku-5-5",
+    served_by: "claude-haiku-5-5",
+    prompt_version: "v1",
+    latency_ms: 1500,
+    input_tokens: 1234,
+    output_tokens: 56,
+    cache_creation_input_tokens: 0,
+    cache_read_input_tokens: 0,
+    cost_usd: 0.0021,
+    attempts: 1,
+    dropped_quotes: 0,
     ...over,
   };
 }

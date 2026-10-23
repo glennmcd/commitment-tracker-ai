@@ -1,4 +1,5 @@
-import type { Span } from "@/lib/labels";
+import type { Metadata, Span } from "@/lib/labels";
+import { AiMetrics } from "./AiMetrics";
 import { FeedbackButtons } from "./Feedback";
 import { LabelBadge } from "./LabelBadge";
 
@@ -8,7 +9,7 @@ export function dueText(due: Span["due"]): string {
 }
 
 /** One ledger entry: who owes what to whom, by when, and the words that say so. */
-export function LedgerCard({ span, index }: { span: Span; index?: number }) {
+export function LedgerCard({ span, index, metrics }: { span: Span; index?: number; metrics?: Metadata }) {
   return (
     <li className="card" data-label={span.label}>
       <div className="card-head">
@@ -35,7 +36,10 @@ export function LedgerCard({ span, index }: { span: Span; index?: number }) {
       </dl>
       <blockquote>“{span.quote}”</blockquote>
       <p className="rationale">{span.rationale}</p>
-      {index !== undefined ? <FeedbackButtons spanIndex={index} /> : null}
+      <div className="card-foot">
+        {index !== undefined ? <FeedbackButtons spanIndex={index} /> : null}
+        {metrics ? <AiMetrics metadata={metrics} /> : null}
+      </div>
     </li>
   );
 }

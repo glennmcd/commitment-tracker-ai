@@ -32,7 +32,12 @@ export function Results({ job }: { job: Job }) {
           ) : (
             <ul className="plain cards">
               {ledger.map(({ span, index }) => (
-                <LedgerCard key={`${span.turn_index}-${span.quote}`} span={span} index={index} />
+                <LedgerCard
+                  key={`${span.turn_index}-${span.quote}`}
+                  span={span}
+                  index={index}
+                  metrics={job.analysis?.metadata}
+                />
               ))}
             </ul>
           )}
