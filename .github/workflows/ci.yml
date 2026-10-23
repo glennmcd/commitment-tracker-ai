@@ -58,8 +58,24 @@ jobs:
       # The typed client is generated from openapi.json; a stale one fails here.
       - run: bun run --cwd frontend gen:api
       - run: git diff --exit-code -- frontend/src/api/schema.d.ts
-      - run: bunx playwright install --with-deps chromium
-        working-directory: frontend
+
+  # The browser test runs in its own job, in parallel with the checks above, inside Microsoft's Playwright image:
+  # the browsers and their system libraries are already installed, so there is no apt step to slow it down.
+  # Keep the tag equal to the @playwright/test version in bun.lock; a mismatch fails with "Executable doesn't exist".
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      # Not setup-bun: it unzips a download, and this image has no unzip. The npm package carries the same release.
+      - run: npm install --global bun@1.4.2
+      - run: bun install --frozen-lockfile
       # Builds the static site against a made-up API address, then runs the browser test on it.
       - run: bun run --cwd frontend e2e
 

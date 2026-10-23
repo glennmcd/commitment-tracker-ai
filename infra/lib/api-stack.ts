@@ -345,6 +345,15 @@ export class ApiStack extends Stack {
         resources: this.objects("uploads/*"),
       }),
     );
+    // The presigned POST for a recording is signed with this role; S3 checks the signer's permissions when the
+    // browser uploads, so without this the upload fails with AccessDenied.
+    api.addToRolePolicy(
+      new PolicyStatement({
+        sid: "SignUploads",
+        actions: ["s3:PutObject"],
+        resources: this.objects("uploads/*"),
+      }),
+    );
     api.addToRolePolicy(
       new PolicyStatement({
         sid: "TranscribeReadsSamples",

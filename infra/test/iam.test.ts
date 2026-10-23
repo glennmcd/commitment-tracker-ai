@@ -44,6 +44,7 @@ describe("the API function's role", () => {
       "JobsAndGuardrails",
       "ReadAndDeleteUploads",
       "ReadApiKey",
+      "SignUploads",
       "StartTranscription",
       "TranscribeReadsSamples",
       "TranscribeWritesOutput",
@@ -55,6 +56,14 @@ describe("the API function's role", () => {
     expect(mine.ReadAndDeleteUploads).toMatchObject({
       effect: "Allow",
       actions: ["s3:DeleteObject", "s3:GetObject"],
+      resources: [`${BUCKET}/uploads/*`],
+    });
+  });
+
+  it("signs browser uploads under uploads/ only, because S3 checks the signer's permissions", () => {
+    expect(mine.SignUploads).toMatchObject({
+      effect: "Allow",
+      actions: ["s3:PutObject"],
       resources: [`${BUCKET}/uploads/*`],
     });
   });
