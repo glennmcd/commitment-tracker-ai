@@ -86,7 +86,16 @@ project account and `g26work2-mgmt` for the management account. Use your own nam
    sample clips under `frontend/public/samples/` stay public.
 
    To give several people their own password, put one per line in the parameter (no blank-line or newline inside a
-   password); any of them is accepted. Remove a line and `--overwrite` to revoke one. A link can carry its password
+   password); any of them is accepted. Rather than hand-building that value, keep the passwords in a file, one per
+   line (`#` comments and blank lines are ignored; `passwords.txt` is git-ignored), and upload it. Add `--dry-run` to
+   check the file without calling AWS:
+
+   ```bash
+   bun scripts/upload-passwords.mjs passwords.txt --profile g26work2
+   ```
+
+   The values go to the AWS CLI through a private temp file, never the command line or the output. Remove a line and
+   upload again to revoke one. A link can carry its password
    as `https://<site>/?password=<value>`: the page tries it, then removes it from the address bar. Anyone holding
    the link has the password, and the query string can land in browser history and server logs, so share such links
    privately.
