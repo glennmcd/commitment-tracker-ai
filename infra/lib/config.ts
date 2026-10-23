@@ -6,6 +6,9 @@ export const REGION = "us-east-2";
 /** The SecureString holding the Anthropic key; the backend reads it at cold start (lambda_handlers.py). */
 export const API_KEY_PARAMETER = "/commitment-tracker/prod/ANTHROPIC_API_KEY";
 
+/** The SecureString holding the site password; the API's Lambda authorizer reads it (lambda/authorizer). */
+export const PASSWORD_PARAMETER = "/commitment-tracker/prod/SITE_PASSWORD";
+
 /** The Python handlers in the one zip: `<module>.<function>` under the bundled package. */
 export const API_HANDLER = "commitment_tracker.lambda_handlers.api_handler";
 export const WORKER_HANDLER = "commitment_tracker.lambda_handlers.worker_handler";

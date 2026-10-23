@@ -3,7 +3,13 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { App } from "aws-cdk-lib";
-import { API_HANDLER, API_KEY_PARAMETER, positiveNumberContext, WORKER_HANDLER } from "../lib/config.js";
+import {
+  API_HANDLER,
+  API_KEY_PARAMETER,
+  PASSWORD_PARAMETER,
+  positiveNumberContext,
+  WORKER_HANDLER,
+} from "../lib/config.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const handlers = readFileSync(path.join(here, "../../backend/src/commitment_tracker/lambda_handlers.py"), "utf8");
@@ -40,5 +46,9 @@ describe("the contract with the backend", () => {
   it("names the SSM parameter the backend reads", () => {
     expect(API_KEY_PARAMETER).toBe("/commitment-tracker/prod/ANTHROPIC_API_KEY");
     expect(API_KEY_PARAMETER.startsWith("/")).toBe(true);
+  });
+
+  it("names the SSM parameter that holds the site password", () => {
+    expect(PASSWORD_PARAMETER).toBe("/commitment-tracker/prod/SITE_PASSWORD");
   });
 });

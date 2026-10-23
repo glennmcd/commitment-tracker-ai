@@ -10,6 +10,8 @@ const GUARDRAILS = "{GuardrailsTable.Arn}";
 const FEEDBACK = "{FeedbackTable.Arn}";
 const PARAMETER = `arn:{AWS::Partition}:ssm:${REGION}:${ACCOUNT}:parameter/commitment-tracker/prod/ANTHROPIC_API_KEY`;
 
+const PASSWORD = `arn:{AWS::Partition}:ssm:${REGION}:${ACCOUNT}:parameter/commitment-tracker/prod/SITE_PASSWORD`;
+
 /** Statements the tests don't spell out: CDK's log permissions for the function's own log group. */
 const isLogs = (actions: string[]) => actions.every((a) => a.startsWith("logs:"));
 
@@ -21,6 +23,16 @@ function bySid(functionId: string, scenario: "defaults" | "budget" = "defaults")
     rest: statements.filter((s) => s.sid === undefined),
   };
 }
+
+describe("the authorizer's role", () => {
+  const { mine, rest } = bySid("AuthorizerFunction");
+
+  it("reads the site password and nothing else", () => {
+    expect(Object.keys(mine)).toEqual(["ReadPassword"]);
+    expect(mine.ReadPassword).toMatchObject({ effect: "Allow", actions: ["ssm:GetParameter"], resources: [PASSWORD] });
+    expect(rest.every((s) => isLogs(s.actions))).toBe(true);
+  });
+});
 
 describe("the API function's role", () => {
   const { mine, rest } = bySid("ApiFunction");

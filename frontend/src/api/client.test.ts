@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { clearPassword, getPassword, PASSWORD_REJECTED, setPassword } from "@/lib/password";
 import { ApiConfigError, apiBaseUrl, createApiClient } from "./client";
 
 describe("apiBaseUrl", () => {
@@ -23,7 +24,8 @@ function recordingFetch(response: Response) {
   const requests: Request[] = [];
   const fetchImpl = async (input: Request | URL | string): Promise<Response> => {
     requests.push(input instanceof Request ? input : new Request(input));
-    return response;
+    // A clone, so one canned response can answer several requests.
+    return response.clone();
   };
   return { requests, fetchImpl };
 }
@@ -42,6 +44,55 @@ describe("createApiClient", () => {
     // These property accesses compile only because the generated schema describes the response.
     expect(data?.status).toBe("ok");
     expect(data?.prompt_version).toBe("v1");
+  });
+
+  describe("with a site password", () => {
+    afterEach(() => clearPassword());
+
+    it("sends it as the Authorization header on every request", async () => {
+      setPassword("open sesame");
+      const { requests, fetchImpl } = recordingFetch(Response.json([]));
+      const client = createApiClient("https://api.example.com", fetchImpl);
+
+      await client.GET("/samples");
+      await client.POST("/uploads");
+
+      expect(requests.map((r) => r.headers.get("authorization"))).toEqual(["open sesame", "open sesame"]);
+    });
+
+    it("sends no Authorization header before one is entered", async () => {
+      const { requests, fetchImpl } = recordingFetch(Response.json([]));
+
+      await createApiClient("https://api.example.com", fetchImpl).GET("/samples");
+
+      expect(requests[0]?.headers.has("authorization")).toBe(false);
+    });
+
+    it.each([401, 403])("forgets it and tells the page when the API answers %i", async (status) => {
+      setPassword("wrong");
+      const heard = vi.fn();
+      window.addEventListener(PASSWORD_REJECTED, heard);
+      const { fetchImpl } = recordingFetch(new Response(null, { status }));
+
+      await createApiClient("https://api.example.com", fetchImpl).GET("/samples");
+
+      expect(getPassword()).toBeNull();
+      expect(heard).toHaveBeenCalledTimes(1);
+      window.removeEventListener(PASSWORD_REJECTED, heard);
+    });
+
+    it.each([200, 404, 429, 500])("keeps it when the API answers %i", async (status) => {
+      setPassword("open sesame");
+      const heard = vi.fn();
+      window.addEventListener(PASSWORD_REJECTED, heard);
+      const { fetchImpl } = recordingFetch(new Response(null, { status }));
+
+      await createApiClient("https://api.example.com", fetchImpl).GET("/samples");
+
+      expect(getPassword()).toBe("open sesame");
+      expect(heard).not.toHaveBeenCalled();
+      window.removeEventListener(PASSWORD_REJECTED, heard);
+    });
   });
 
   it("returns the API's error body as data, not an exception", async () => {

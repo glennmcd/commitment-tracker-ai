@@ -456,7 +456,8 @@ mark {
   accent-color: var(--accent);
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="password"] {
   width: 100%;
   font: inherit;
   color: inherit;

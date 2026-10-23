@@ -3,7 +3,7 @@
   "info": {
     "title": "Commitment Tracker AI",
     "description": "Extracts commitments from conversation transcripts.",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "paths": {
     "/health": {
@@ -21,7 +21,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     },
     "/analyze": {
@@ -1239,6 +1240,19 @@
         ],
         "title": "ValidationError"
       }
+    },
+    "securitySchemes": {
+      "SitePassword": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "The site password, sent as the whole Authorization header value."
+      }
     }
-  }
+  },
+  "security": [
+    {
+      "SitePassword": []
+    }
+  ]
 }

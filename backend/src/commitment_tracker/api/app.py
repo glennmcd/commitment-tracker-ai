@@ -69,7 +69,34 @@ logger = logging.getLogger(__name__)
 # The API contract version, published as info.version in openapi.json. Bump it by hand when the
 # request or response shape changes; it is separate from the release version (commitment_tracker
 # .__version__), so releases don't change openapi.json or the frontend client generated from it.
-API_VERSION = "0.2.0"
+API_VERSION = "0.3.0"
+
+
+def _publish_site_password_scheme(app: FastAPI) -> None:
+    """Document the site password in the OpenAPI schema.
+
+    API Gateway's Lambda authorizer checks the Authorization header before a request reaches
+    this app (infra/lib/api-stack.ts), so the app never reads it. The scheme only tells clients
+    to send it. Every endpoint needs it except the health check.
+    """
+    build = app.openapi
+
+    def openapi() -> dict[str, Any]:
+        if app.openapi_schema is None:
+            schema = build()
+            schema.setdefault("components", {}).setdefault("securitySchemes", {})[
+                "SitePassword"
+            ] = {
+                "type": "apiKey",
+                "in": "header",
+                "name": "Authorization",
+                "description": "The site password, sent as the whole Authorization header value.",
+            }
+            schema["security"] = [{"SitePassword": []}]
+            schema["paths"]["/health"]["get"]["security"] = []
+        return app.openapi_schema or {}
+
+    app.openapi = openapi  # type: ignore[method-assign]
 
 
 class HealthResponse(BaseModel):
@@ -317,6 +344,7 @@ def create_app(
         description="Extracts commitments from conversation transcripts.",
         lifespan=lifespan,
     )
+    _publish_site_password_scheme(app)
     app.state.uploads = uploads
     app.state.jobs = jobs
     app.state.limiter = limiter

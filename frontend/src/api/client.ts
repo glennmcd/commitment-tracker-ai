@@ -1,4 +1,5 @@
 import createClient from "openapi-fetch";
+import { clearPassword, getPassword, passwordRejected } from "@/lib/password";
 import type { paths } from "./schema";
 
 /** The API address is missing or not a usable http(s) address. */
@@ -35,7 +36,24 @@ type Fetch = (input: Request) => Promise<Response>;
 
 /** A client typed from openapi.json (`bun run gen:api` regenerates ./schema.d.ts). */
 export function createApiClient(baseUrl: string, fetchImpl?: Fetch) {
-  return createClient<paths>({ baseUrl, ...(fetchImpl ? { fetch: fetchImpl } : {}) });
+  const client = createClient<paths>({ baseUrl, ...(fetchImpl ? { fetch: fetchImpl } : {}) });
+  client.use({
+    // The API's Lambda authorizer wants the site password as the whole Authorization header.
+    onRequest({ request }) {
+      const password = getPassword();
+      if (password) request.headers.set("Authorization", password);
+      return request;
+    },
+    // API Gateway answers 401 when the header is missing and 403 when the authorizer says no.
+    onResponse({ response }) {
+      if (response.status === 401 || response.status === 403) {
+        clearPassword();
+        passwordRejected();
+      }
+      return response;
+    },
+  });
+  return client;
 }
 
 export type ApiClient = ReturnType<typeof createApiClient>;

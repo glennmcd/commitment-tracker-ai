@@ -194,6 +194,30 @@ def test_openapi_version_is_the_api_contract_version_not_the_release() -> None:
     assert spec["info"]["version"] == API_VERSION
 
 
+def test_openapi_documents_the_site_password_on_every_endpoint_but_health() -> None:
+    # API Gateway's Lambda authorizer enforces the password before a request reaches the app, so the
+    # app itself never checks it; the scheme is published so clients know to send the header.
+    spec = client_for().get("/openapi.json").json()
+
+    assert spec["components"]["securitySchemes"]["SitePassword"] == {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": spec["components"]["securitySchemes"]["SitePassword"]["description"],
+    }
+    assert spec["security"] == [{"SitePassword": []}]
+    assert spec["paths"]["/health"]["get"]["security"] == []
+    for path, operations in spec["paths"].items():
+        for operation in operations.values():
+            if path != "/health":
+                assert "security" not in operation, path
+
+
+def test_openapi_is_built_once_and_stays_the_same() -> None:
+    app = create_app(extractor=Extractor(FakeAdapter(), load_prompt("v1")))
+    assert app.openapi() is app.openapi()
+
+
 # --- Uploads -------------------------------------------------------------------------------------
 
 

@@ -2,10 +2,16 @@ import { expect, type Page, type Route, test } from "@playwright/test";
 
 const API = "http://api.test";
 const JOB_ID = "a".repeat(64);
+const PASSWORD = "open sesame";
+
+/** Opens the page as a visitor who already entered the password in this tab. */
+async function unlocked(page: Page) {
+  await page.addInitScript((value) => window.sessionStorage.setItem("ct-site-password", value), PASSWORD);
+}
 
 const CORS = {
   "access-control-allow-origin": "*",
-  "access-control-allow-headers": "content-type",
+  "access-control-allow-headers": "content-type, authorization",
   "access-control-allow-methods": "GET, POST, OPTIONS",
   // As on the real API (infra/lib/api-stack.ts): without this the page cannot read Retry-After across origins.
   "access-control-expose-headers": "retry-after",
@@ -64,9 +70,12 @@ async function mockApi(page: Page) {
     const request = route.request();
     if (request.method() === "OPTIONS") return route.fulfill({ status: 204, headers: CORS });
     const path = new URL(request.url()).pathname;
-    sent.push({ method: request.method(), path, body: request.postDataJSON() });
     const json = (status: number, body: unknown) =>
       route.fulfill({ status, headers: { ...CORS, "content-type": "application/json" }, body: JSON.stringify(body) });
+    // As API Gateway's authorizer does: refuse any request without the password before the app sees it.
+    if (request.headers().authorization !== PASSWORD) return json(403, { message: "Forbidden" });
+    sent.push({ method: request.method(), path, body: request.postDataJSON() });
+    if (path === "/samples") return json(200, []);
     if (path === "/jobs" && request.method() === "POST") return json(202, { ...finished, status: "uploaded" });
     if (path === `/jobs/${JOB_ID}`) return json(200, finished);
     if (path === "/feedback") return json(200, { transcript_kept: false });
@@ -75,7 +84,28 @@ async function mockApi(page: Page) {
   return sent;
 }
 
+test("the demo stays hidden until the password is accepted", async ({ page }) => {
+  const sent = await mockApi(page);
+  await page.goto("/");
+
+  await expect(page.getByLabel("Conversation")).toHaveCount(0);
+  await page.getByLabel("Password").fill("not it");
+  await page.getByRole("button", { name: "Unlock" }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "That password is not right." })).toBeVisible();
+  await expect(page.getByLabel("Conversation")).toHaveCount(0);
+
+  await page.getByLabel("Password").fill(PASSWORD);
+  await page.getByRole("button", { name: "Unlock" }).click();
+  await expect(page.getByLabel("Conversation")).toBeVisible();
+  expect(sent.map((call) => call.path)).toEqual(["/samples"]);
+
+  // Still unlocked after a reload in the same tab.
+  await page.reload();
+  await expect(page.getByLabel("Conversation")).toBeVisible();
+});
+
 test("text mode: a prompt chip, the results, and a vote", async ({ page }) => {
+  await unlocked(page);
   const sent = await mockApi(page);
   await page.goto("/");
 
@@ -111,6 +141,7 @@ test("text mode: a prompt chip, the results, and a vote", async ({ page }) => {
 });
 
 test("an API refusal is shown as a sentence, and the form stays usable", async ({ page }) => {
+  await unlocked(page);
   await page.route(`${API}/**`, async (route) => {
     if (route.request().method() === "OPTIONS") return route.fulfill({ status: 204, headers: CORS });
     return route.fulfill({
@@ -132,6 +163,7 @@ test("an API refusal is shown as a sentence, and the form stays usable", async (
 });
 
 test("the page works by keyboard alone and has no horizontal scroll on a phone", async ({ page }) => {
+  await unlocked(page);
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/");
 
