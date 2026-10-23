@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.6.0...v0.6.1) (2026-10-23)
+
+
+### Bug Fixes
+
+* add missing newline at end of .cdk.json ([6a0e589](https://github.com/glennmcd/commitment-tracker-ai/commit/6a0e589b1b9bcf77abbada7bf78da1c566c64df0))
+
 ## [0.6.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.5.0...v0.6.0) (2026-10-23)
 
 
