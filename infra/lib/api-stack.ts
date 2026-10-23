@@ -235,7 +235,7 @@ export class ApiStack extends Stack {
       corsPreflight: {
         allowOrigins: origins,
         allowMethods: [CorsHttpMethod.GET, CorsHttpMethod.POST, CorsHttpMethod.OPTIONS],
-        allowHeaders: ["content-type", "authorization"],
+        allowHeaders: ["content-type", "authorization", "x-source"],
         exposeHeaders: ["retry-after", "ratelimit-limit", "ratelimit-remaining", "ratelimit-reset"],
         maxAge: Duration.hours(1),
       },

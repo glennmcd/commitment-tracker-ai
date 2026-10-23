@@ -213,7 +213,7 @@ describe("the HTTP API", () => {
       CorsConfiguration: {
         AllowOrigins: ["https://commitmentai.g26work.com", "http://localhost:3000"],
         AllowMethods: ["GET", "POST", "OPTIONS"],
-        AllowHeaders: ["content-type", "authorization"],
+        AllowHeaders: ["content-type", "authorization", "x-source"],
         ExposeHeaders: ["retry-after", "ratelimit-limit", "ratelimit-remaining", "ratelimit-reset"],
         MaxAge: 3600,
       },

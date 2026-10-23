@@ -1,4 +1,5 @@
 import createClient from "openapi-fetch";
+import { getSource } from "@/lib/link";
 import { clearPassword, getPassword, passwordRejected } from "@/lib/password";
 import type { paths } from "./schema";
 
@@ -42,6 +43,9 @@ export function createApiClient(baseUrl: string, fetchImpl?: Fetch) {
     onRequest({ request }) {
       const password = getPassword();
       if (password) request.headers.set("Authorization", password);
+      // Which shared link this visit came from; the API logs it.
+      const source = getSource();
+      if (source) request.headers.set("X-Source", source);
       return request;
     },
     // API Gateway answers 401 when the header is missing and 403 when the authorizer says no.
