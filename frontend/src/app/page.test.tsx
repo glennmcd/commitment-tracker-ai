@@ -1,8 +1,17 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import Home from "./page";
 
+afterEach(() => vi.unstubAllEnvs());
+
 describe("the home page", () => {
+  it("ends with the release version the build was given", () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_VERSION", "1.2.3");
+    render(<Home />);
+
+    expect(screen.getByRole("contentinfo")).toHaveTextContent("Version 1.2.3");
+  });
+
   it("names the product and says what it does", () => {
     render(<Home />);
 

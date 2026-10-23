@@ -1,6 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { job, span } from "@/test/builders";
+import { job, metadata, span } from "@/test/builders";
 import { JobStatus } from "./JobStatus";
 import { LedgerCard } from "./LedgerCard";
 import { NearMisses } from "./NearMisses";
@@ -182,6 +182,27 @@ describe("feedback in the results", () => {
 
     expect(screen.getAllByRole("group", { name: "Was this right?" })).toHaveLength(2);
     expect(screen.getAllByRole("checkbox")).toHaveLength(1);
+  });
+
+  it("shows the AI metrics below the thumbs on every ledger entry", () => {
+    const second = span({ turn_index: 1, quote: "I will also call them" });
+    const withMetrics = job([span({ turn_index: 1 }), second]);
+    if (withMetrics.analysis) withMetrics.analysis.metadata = metadata();
+    render(<Results job={withMetrics} />);
+
+    const cards = within(screen.getByRole("region", { name: "Commitments" })).getAllByRole("listitem");
+    expect(cards).toHaveLength(2);
+    for (const card of cards) {
+      const side = within(card).getByRole("complementary", { name: "AI metrics" });
+      expect(within(side).getByText("claude-haiku-5-5")).toBeInTheDocument();
+      expect(side.parentElement).toContainElement(within(card).getByRole("group", { name: "Was this right?" }));
+    }
+  });
+
+  it("shows no metrics panel when the analysis carries none", () => {
+    render(<Results job={job([span({ turn_index: 1 })])} />);
+
+    expect(screen.queryByRole("complementary", { name: "AI metrics" })).not.toBeInTheDocument();
   });
 
   it("offers no consent box when there is nothing to vote on", () => {
