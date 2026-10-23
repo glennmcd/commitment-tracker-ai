@@ -90,18 +90,22 @@ applications:
 /**
  * Response headers for every path. The microphone is allowed for the site itself (the recorder) and the camera and
  * location are not. A content security policy waits until the frontend's inline scripts are known.
+ * Like the build spec, a monorepo's headers must sit under `applications` with the app root, or Amplify refuses them
+ * ("Monorepo spec provided without applications key").
  */
-export const CUSTOM_HEADERS = `customHeaders:
-  - pattern: '**'
-    headers:
-      - key: X-Content-Type-Options
-        value: nosniff
-      - key: X-Frame-Options
-        value: DENY
-      - key: Referrer-Policy
-        value: strict-origin-when-cross-origin
-      - key: Permissions-Policy
-        value: microphone=(self), camera=(), geolocation=()
+export const CUSTOM_HEADERS = `applications:
+  - appRoot: frontend
+    customHeaders:
+      - pattern: '**'
+        headers:
+          - key: X-Content-Type-Options
+            value: nosniff
+          - key: X-Frame-Options
+            value: DENY
+          - key: Referrer-Policy
+            value: strict-origin-when-cross-origin
+          - key: Permissions-Policy
+            value: microphone=(self), camera=(), geolocation=()
 `;
 
 export class WebStack extends Stack {

@@ -57,6 +57,10 @@ describe("the Amplify app", () => {
     expect(CUSTOM_HEADERS).toContain("X-Frame-Options");
     expect(CUSTOM_HEADERS).toContain("microphone=(self), camera=(), geolocation=()");
   });
+
+  it("wraps the headers in the monorepo `applications` key, which Amplify requires for a monorepo", () => {
+    expect(CUSTOM_HEADERS.startsWith("applications:\n  - appRoot: frontend\n    customHeaders:")).toBe(true);
+  });
 });
 
 describe("the branch", () => {
