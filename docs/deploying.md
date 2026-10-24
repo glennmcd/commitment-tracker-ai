@@ -144,7 +144,9 @@ cd infra && bun run cdk deploy CommitmentTrackerApi -c alertEmail=you@example.co
 | `reservedConcurrency` | none | Caps the API function. A new account's default quota usually can't afford a reservation; check `aws lambda get-account-settings` first |
 
 Confirm the email subscription when AWS sends the message, or no alert arrives. The stack prints these outputs:
-`ApiUrl`, `AudioBucketName`, `ApiFunctionName`, `WorkerFunctionName` and `ApiKeyParameter`.
+`ApiUrl`, `AudioBucketName`, `EvalAudioBucketName`, `ApiFunctionName`, `WorkerFunctionName` and `ApiKeyParameter`.
+`EvalAudioBucketName` is the private, versioned bucket of evaluation clips; set it as `EVAL_AUDIO_BUCKET` in
+`backend/.env` for `uv run eval-audio` ([evaluation.md](evaluation.md#audio)).
 
 ## Deploy the site
 

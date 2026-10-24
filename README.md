@@ -217,17 +217,19 @@ never transcript text.
 
 ```bash
 cd backend
-uv run eval --model claude-haiku-5-5 --prompt v1
+uv run eval --set test --config opus
 ```
 
-The runner sends each item in [backend/eval/sets/dev/items.jsonl](backend/eval/sets/dev/items.jsonl) through the extractor,
-four at a time (`--concurrency`), and writes a JSON report and a markdown summary to `backend/eval/reports/`. The
-report covers:
+The runner sends each item of a named set through the extractor, four at a time (`--concurrency`), and writes a JSON
+report and a markdown summary to `backend/eval/reports/<set>/`. The `test` set is held out: reviewed drafts from
+Gemini, DeepSeek, Grok and GPT plus hand-written items, none drafted by Claude. Configurations are `haiku`, `sonnet`,
+`opus` and `two-stage` (a Haiku screen with Opus on the turns it flags). The report covers:
 
 - precision and recall per label, and a confusion matrix
 - ledger F1: the three ledger labels against everything else
 - accuracy of owner, action and resolved due date on ledger spans
 - quote-check failures, retries, p50 and p95 latency, and total cost
+- scores by who wrote the items, and, for two-stage, the escalation rate and screen misses
 
 Items tagged `ambiguous`, such as sarcasm, are listed separately and left out of the headline numbers. The command
 exits 1 if any item failed, after writing the report.
@@ -235,6 +237,10 @@ exits 1 if any item failed, after writing the report.
 Each call costs money. Responses are cached in `backend/eval/.cache/` by transcript, model, prompt text and effort,
 so a rerun only calls the model for what changed. The cache stores finished responses, including resolved dates:
 after changing the extractor or the date resolver, run with `--no-cache` or delete the cache folder.
+
+CI holds committed reports to `backend/eval/baseline.json` without calling a model, and the results are published on
+the site at [/evals](https://commitmentai.g26work.com/evals/). [docs/evaluation.md](docs/evaluation.md) covers drafting,
+importing, blind review, audio clips, the gate and costs.
 
 ### Results
 
