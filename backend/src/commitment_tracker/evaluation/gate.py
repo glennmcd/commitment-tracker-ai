@@ -22,9 +22,10 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 from commitment_tracker.evaluation.dataset import EvalItem
-from commitment_tracker.evaluation.report import DEFAULT_REPORTS_DIR, Report
+from commitment_tracker.evaluation.report import DEFAULT_REPORTS_DIR, Report, RunInfo
 from commitment_tracker.evaluation.rescore import RescoreError, rescore
 from commitment_tracker.evaluation.sets import SETS_DIR, list_sets, load_manifest, load_set
+from commitment_tracker.settings import CONFIGURATIONS
 
 # backend/src/commitment_tracker/evaluation/gate.py -> backend/eval/baseline.json
 BACKEND_DIR = Path(__file__).resolve().parents[3]
@@ -85,9 +86,17 @@ def load_baseline(path: Path = BASELINE_PATH) -> Baseline:
     return Baseline.model_validate_json(path.read_text(encoding="utf-8"))
 
 
+def stage_models(run: RunInfo) -> tuple[str, ...]:
+    """The models a run used, ordered as in CONFIGURATIONS: (screen, extract) or (model,)."""
+    return tuple(run.stages[stage] for stage in ("screen", "extract") if stage in run.stages)
+
+
 def latest_report(
     reports_dir: Path, set_name: str, set_sha256: str, configuration: str, current: Current
 ) -> tuple[Path, Report] | None:
+    """The newest report of this configuration, on this set version, with the current prompt and
+    effort, and run by the models the configuration names today: a model swap needs a new run."""
+    expected_models = CONFIGURATIONS.get(configuration)
     matches = []
     for path in (reports_dir / set_name).glob("*.json"):
         report = Report.model_validate_json(path.read_text(encoding="utf-8"))
@@ -97,6 +106,7 @@ def latest_report(
             and run.set_sha256 == set_sha256
             and run.prompt_sha256 == current.prompt_sha256
             and run.effort == current.effort
+            and (expected_models is None or stage_models(run) == expected_models)
         ):
             matches.append((run.started_at, path, report))
     if not matches:
@@ -185,9 +195,10 @@ def check(
             label = f"{name}/{configuration}"
             found = latest_report(reports_dir, name, loaded.sha256, configuration, current)
             if found is None:
+                models = ", ".join(CONFIGURATIONS.get(configuration, ())) or configuration
                 result.failures.append(
                     f"{label}: no report for prompt {current.prompt_version} "
-                    f"(sha256 {current.prompt_sha256[:12]}) on this set; run "
+                    f"(sha256 {current.prompt_sha256[:12]}) and {models} on this set; run "
                     f"{_run_command(name, configuration, current)}"
                 )
                 continue
@@ -200,9 +211,13 @@ def updated_baseline(
     configurations: tuple[str, ...] = GATED_CONFIGURATIONS,
     sets_root: Path = SETS_DIR,
     reports_dir: Path = DEFAULT_REPORTS_DIR,
+    existing: Baseline | None = None,
 ) -> Baseline:
-    """A baseline from the latest matching report of each configuration on each gated set."""
-    baseline = Baseline()
+    """The existing baseline with the given configurations refreshed from their latest matching
+    reports. Other configurations keep their entries; if a set changed, every configuration already
+    baselined on it must be refreshed too, so none silently drops out of the gate."""
+    previous = existing or Baseline()
+    baseline = Baseline(sets=dict(previous.sets))
     for name in list_sets(sets_root):
         manifest = load_manifest(name, sets_root)
         if not manifest.gated or manifest.kind != "text":
@@ -210,8 +225,13 @@ def updated_baseline(
         loaded = load_set(name, sets_root, allow_empty=True)
         if not loaded.items:
             continue
-        entries = {}
-        for configuration in configurations:
+        before = previous.sets.get(name)
+        same_set = before is not None and before.set_sha256 == loaded.sha256
+        entries = dict(before.configurations) if before is not None and same_set else {}
+        refresh = list(dict.fromkeys(configurations))
+        if before is not None and not same_set:
+            refresh += [c for c in before.configurations if c not in refresh]
+        for configuration in refresh:
             found = latest_report(reports_dir, name, loaded.sha256, configuration, current)
             if found is None:
                 raise GateError(

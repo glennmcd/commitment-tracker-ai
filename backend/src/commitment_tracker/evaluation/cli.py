@@ -400,7 +400,13 @@ def gate_main(argv: list[str] | None = None) -> int:
     if args.update_baseline:
         configurations = tuple(args.config or GATED_CONFIGURATIONS)
         try:
-            baseline = updated_baseline(current, configurations, args.sets_dir, args.reports_dir)
+            baseline = updated_baseline(
+                current,
+                configurations,
+                args.sets_dir,
+                args.reports_dir,
+                existing=load_baseline(args.baseline),
+            )
         except GateError as error:
             print(f"eval-gate: {error}", file=sys.stderr)
             return 1

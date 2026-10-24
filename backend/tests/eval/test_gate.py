@@ -70,6 +70,7 @@ class Repo:
             update={
                 "model": CONFIGURATIONS[configuration][0],
                 "configuration": configuration,
+                "stages": {"extract": CONFIGURATIONS[configuration][0]},
                 "prompt_sha256": PROMPT.sha256,
                 "set_name": "test",
                 "set_sha256": self.sha,
@@ -79,8 +80,10 @@ class Repo:
         json_path, _ = write_report(build_report(run, results(**kwargs)), self.reports / "test")
         return json_path
 
-    def baseline(self, configurations: tuple[str, ...] = ("opus",)) -> Baseline:
-        return updated_baseline(CURRENT, configurations, self.sets, self.reports)
+    def baseline(
+        self, configurations: tuple[str, ...] = ("opus",), existing: Baseline | None = None
+    ) -> Baseline:
+        return updated_baseline(CURRENT, configurations, self.sets, self.reports, existing)
 
     def check(self, baseline: Baseline, current: Current = CURRENT) -> list[str]:
         return check(baseline, current, self.sets, self.reports).failures
@@ -214,6 +217,39 @@ def test_cli_gate_and_update(
     assert cli.gate_main(common) == 0
     out = capsys.readouterr().out
     assert "PASS test/opus" in out and "PASS test/haiku" in out
+
+
+def test_updating_one_configuration_keeps_the_others(repo: Repo) -> None:
+    repo.report("opus")
+    repo.report("haiku", minute=1)
+    both = repo.baseline(("opus", "haiku"))
+    repo.report("opus", minute=2, wrong=1)
+    updated = repo.baseline(("opus",), existing=both)
+    entries = updated.sets["test"].configurations
+    assert set(entries) == {"opus", "haiku"}
+    assert entries["opus"].ledger_f1 < both.sets["test"].configurations["opus"].ledger_f1
+    assert entries["haiku"] == both.sets["test"].configurations["haiku"]
+
+
+def test_a_changed_set_needs_every_baselined_configuration_again(repo: Repo) -> None:
+    repo.report("opus")
+    repo.report("haiku", minute=1)
+    stale = repo.baseline(("opus", "haiku"))
+    stale.sets["test"].set_sha256 = "0" * 64
+    for path in (repo.reports / "test").glob("*haiku*"):
+        path.unlink()  # haiku must be re-run on the new set before the baseline can move
+    with pytest.raises(GateError, match="test/haiku: no report"):
+        repo.baseline(("opus",), existing=stale)
+
+
+def test_a_model_swap_behind_a_configuration_needs_a_new_report(
+    repo: Repo, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo.report("opus")
+    baseline = repo.baseline()
+    monkeypatch.setitem(CONFIGURATIONS, "opus", ("claude-opus-6-0",))
+    (failure,) = repo.check(baseline)
+    assert "no report" in failure and "claude-opus-6-0" in failure
 
 
 # --- the committed files -------------------------------------------------------------------------
