@@ -10,6 +10,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
+from commitment_tracker.extractor.adapter import ModelReply, ModelRequest
 from commitment_tracker.schemas import AnalyzeRequest, AnalyzeResponse
 
 # backend/src/commitment_tracker/evaluation/cache.py -> backend/eval/.cache (git-ignored)
@@ -28,6 +29,24 @@ def cache_key(request: AnalyzeRequest, *, model: str, prompt_sha256: str, effort
     }
     encoded = json.dumps(material, sort_keys=True, ensure_ascii=False).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
+
+
+class CacheMiss(Exception):
+    """An offline run needed a response the cache doesn't have."""
+
+
+class OfflineAdapter:
+    """Stands in for the model on `--offline` runs: it holds no key and any call is a cache miss.
+
+    The CLI checks every item is cached before running, so this only fires if that check and the
+    runner's keys ever disagree.
+    """
+
+    def __init__(self, model: str) -> None:
+        self.model = model
+
+    async def complete(self, request: ModelRequest) -> ModelReply:
+        raise CacheMiss(f"no cached response for model {self.model}")
 
 
 class ResponseCache:

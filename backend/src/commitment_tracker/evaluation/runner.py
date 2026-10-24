@@ -22,6 +22,20 @@ def request_for(item: EvalItem) -> AnalyzeRequest:
     return AnalyzeRequest(transcript=item.turns, call_date=item.call_date)
 
 
+def uncached_items(
+    items: list[EvalItem], cache: ResponseCache, *, model: str, prompt_sha256: str, effort: str
+) -> list[str]:
+    """Ids of the items the cache can't answer, for `--offline` to refuse before running."""
+    return [
+        item.id
+        for item in items
+        if cache.get(
+            cache_key(request_for(item), model=model, prompt_sha256=prompt_sha256, effort=effort)
+        )
+        is None
+    ]
+
+
 async def run_items(
     items: list[EvalItem],
     extractor: Extractor,

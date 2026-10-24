@@ -287,6 +287,7 @@ def write_report(report: Report, directory: Path = DEFAULT_REPORTS_DIR) -> tuple
     directory.mkdir(parents=True, exist_ok=True)
     stem = f"{report.run.started_at:%Y%m%dT%H%M%SZ}-{report.run.model}-{report.run.prompt_version}"
     json_path, md_path = directory / f"{stem}.json", directory / f"{stem}.md"
-    json_path.write_text(report.model_dump_json(indent=2) + "\n", encoding="utf-8")
-    md_path.write_text(render_markdown(report), encoding="utf-8")
+    # LF on every platform, so a report written on Windows diffs cleanly against one from CI.
+    json_path.write_bytes((report.model_dump_json(indent=2) + "\n").encode("utf-8"))
+    md_path.write_bytes(render_markdown(report).encode("utf-8"))
     return json_path, md_path

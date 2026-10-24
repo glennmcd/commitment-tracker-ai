@@ -5,6 +5,7 @@
     uv run eval import gemini.jsonl --batch gem01 --provenance gemini-3-pro
     uv run eval review --batch gem01
     uv run eval promote --batch gem01 --to test
+    uv run eval rescore --set test
     uv run eval-sets [--agreement]
 
 Calls the real model (and spends money) for every item not already in the response cache. Set runs
@@ -23,7 +24,7 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 
 from commitment_tracker.evaluation.agreement import agreement, render_agreement
-from commitment_tracker.evaluation.cache import DEFAULT_CACHE_DIR, ResponseCache
+from commitment_tracker.evaluation.cache import DEFAULT_CACHE_DIR, OfflineAdapter, ResponseCache
 from commitment_tracker.evaluation.dataset import DatasetError, EvalItem, load_dataset
 from commitment_tracker.evaluation.importer import (
     BatchError,
@@ -37,8 +38,9 @@ from commitment_tracker.evaluation.report import (
     build_report,
     write_report,
 )
+from commitment_tracker.evaluation.rescore import rescore_set
 from commitment_tracker.evaluation.review import review_batch
-from commitment_tracker.evaluation.runner import run_items
+from commitment_tracker.evaluation.runner import run_items, uncached_items
 from commitment_tracker.evaluation.sets import (
     SETS_DIR,
     SetError,
@@ -47,8 +49,9 @@ from commitment_tracker.evaluation.sets import (
     render_summary,
     summarize,
 )
+from commitment_tracker.extractor.extractor import Extractor
 from commitment_tracker.extractor.factory import build_extractor
-from commitment_tracker.extractor.prompt import UnknownPromptVersion
+from commitment_tracker.extractor.prompt import UnknownPromptVersion, load_prompt
 from commitment_tracker.settings import Settings
 
 ADHOC = "adhoc"
@@ -79,7 +82,13 @@ def _parser(settings: Settings) -> argparse.ArgumentParser:
     parser.add_argument("--concurrency", type=int, default=4)
     parser.add_argument("--reports-dir", type=Path, default=DEFAULT_REPORTS_DIR)
     parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR)
-    parser.add_argument("--no-cache", action="store_true", help="always call the model")
+    cache_mode = parser.add_mutually_exclusive_group()
+    cache_mode.add_argument("--no-cache", action="store_true", help="always call the model")
+    cache_mode.add_argument(
+        "--offline",
+        action="store_true",
+        help="answer only from the cache; fail before running if any item is missing",
+    )
     return parser
 
 
@@ -186,7 +195,26 @@ def _promote(argv: list[str]) -> int:
     return 0
 
 
-SUBCOMMANDS = {"import": _import, "review": _review, "promote": _promote}
+def _rescore(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(
+        prog="eval rescore", description="Re-score a set's reports from their stored predictions."
+    )
+    parser.add_argument("--set", dest="set_name", required=True)
+    parser.add_argument("--sets-dir", type=Path, default=SETS_DIR)
+    parser.add_argument("--reports-dir", type=Path, default=DEFAULT_REPORTS_DIR)
+    args = parser.parse_args(argv)
+    try:
+        outcomes = rescore_set(args.set_name, args.sets_dir, args.reports_dir)
+    except SetError as error:
+        print(f"eval rescore: {error}", file=sys.stderr)
+        return 1
+    for outcome in outcomes:
+        reason = f" ({outcome.reason})" if outcome.reason else ""
+        print(f"{outcome.status:<9} {outcome.path.name}{reason}")
+    return 0
+
+
+SUBCOMMANDS = {"import": _import, "review": _review, "promote": _promote, "rescore": _rescore}
 
 
 def sets_main(argv: list[str] | None = None) -> int:
@@ -220,10 +248,29 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         target = _target(args)
-        extractor = build_extractor(settings, model=args.model)
+        extractor = (
+            Extractor(OfflineAdapter(args.model), load_prompt(args.prompt))
+            if args.offline
+            else build_extractor(settings, model=args.model)
+        )
     except (DatasetError, SetError, UnknownPromptVersion) as error:
         print(f"eval: {error}", file=sys.stderr)
         return 2
+    if args.offline:
+        missing = uncached_items(
+            target.items,
+            ResponseCache(args.cache_dir),
+            model=args.model,
+            prompt_sha256=extractor.prompt.sha256,
+            effort=args.effort,
+        )
+        if missing:
+            print(
+                f"eval: --offline: {len(missing)} of {len(target.items)} items are not cached "
+                f"(first: {missing[0]}); run without --offline to fill the cache",
+                file=sys.stderr,
+            )
+            return 1
 
     reports_dir = args.reports_dir / target.reports
     if target.set_name == "test":
