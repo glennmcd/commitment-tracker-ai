@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import indexJson from "@/data/evals/index.json";
-import { compareRuns, filterItems, NO_FILTER, parseIndex, parseRun, share, signed } from "@/lib/evals";
+import { compareRuns, filterItems, NO_FILTER, pairSpans, parseIndex, parseRun, share, signed } from "@/lib/evals";
 import { row, singleRun, twoStageRun } from "@/test/evalFixtures";
 
 const RUNS = path.resolve(import.meta.dirname, "../data/evals/runs");
@@ -64,5 +64,23 @@ describe("formatting", () => {
 
   it("shares a count of its row, and an empty row as zero", () => {
     expect([share(1, [1, 3]), share(0, [0, 0])]).toEqual([0.25, 0]);
+  });
+});
+
+describe("pairing spans", () => {
+  const expectedSpan = singleRun.items[0]?.expected?.[0];
+  const predictedSpan = singleRun.items[0]?.predicted?.[0];
+  if (!expectedSpan || !predictedSpan) throw new Error("fixture");
+
+  it("pairs within a turn, one to one, best overlap first", () => {
+    const exact = { ...expectedSpan, quote: "Sure, I'll send it Friday." };
+    const partial = { ...expectedSpan, quote: "I'll send the pricing Friday." }; // 3 of 5 words: 0.6
+    const pairs = pairSpans([partial, exact], [predictedSpan]);
+    expect([...pairs]).toEqual([[1, 0]]);
+  });
+
+  it("needs the same turn and enough overlap", () => {
+    expect(pairSpans([{ ...expectedSpan, turn_index: 0 }], [predictedSpan]).size).toBe(0);
+    expect(pairSpans([{ ...expectedSpan, quote: "Friday then." }], [predictedSpan]).size).toBe(0);
   });
 });

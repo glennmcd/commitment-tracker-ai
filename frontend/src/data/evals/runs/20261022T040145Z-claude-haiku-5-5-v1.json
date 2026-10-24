@@ -7,28 +7,12 @@
   "items": [
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [
-            "send",
-            "pricing"
-          ],
-          "condition": null,
-          "due_raw": "by Friday",
-          "due_resolved": "2026-10-23",
-          "label": "COMMITMENT",
-          "owner": "seller",
-          "precision": "day",
-          "quote": "I'll send you the revised pricing by Friday.",
-          "recipient": "buyer",
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "COMMITMENT"
       ],
@@ -40,82 +24,41 @@
       "predicted_labels": [
         "COMMITMENT"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "I'll send you the revised pricing by Friday."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [
-            "security",
-            "review"
-          ],
-          "condition": null,
-          "due_raw": "by end of next week",
-          "due_resolved": "2026-10-30",
-          "label": "COMMITMENT",
-          "owner": "seller",
-          "precision": "day",
-          "quote": "We'll have the security review back to you by end of next week.",
-          "recipient": "buyer",
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "COMMITMENT"
       ],
       "flagged_turns": null,
       "id": "spec-02",
       "latency_ms": null,
-      "note": "owner is the speaker's team",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "COMMITMENT"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "We'll have the security review back to you by end of next week."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [
-            "engineer"
-          ],
-          "condition": null,
-          "due_raw": "tomorrow",
-          "due_resolved": "2026-10-22",
-          "label": "COMMITMENT",
-          "owner": "seller",
-          "precision": "day",
-          "quote": "Let me loop in our solutions engineer tomorrow.",
-          "recipient": "buyer",
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "COMMITMENT"
       ],
@@ -127,96 +70,41 @@
       "predicted_labels": [
         "COMMITMENT"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "Let me loop in our solutions engineer tomorrow."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [
-            "contract"
-          ],
-          "condition": null,
-          "due_raw": "before your board meeting",
-          "due_resolved": null,
-          "label": "COMMITMENT",
-          "owner": "seller",
-          "precision": "event",
-          "quote": "I'll get you a draft contract before your board meeting.",
-          "recipient": "buyer",
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "COMMITMENT"
       ],
       "flagged_turns": null,
       "id": "spec-04",
       "latency_ms": null,
-      "note": "due is tied to an event, so nothing resolves",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "COMMITMENT"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "I'll get you a draft contract before your board meeting."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [
-            "resend",
-            "invoice"
-          ],
-          "condition": null,
-          "due_raw": null,
-          "due_resolved": null,
-          "label": "REQUEST",
-          "owner": null,
-          "precision": "none",
-          "quote": "Can you resend the invoice?",
-          "recipient": "buyer",
-          "turn_index": 0
-        },
-        {
-          "action_keywords": [
-            "invoice"
-          ],
-          "condition": null,
-          "due_raw": "this afternoon",
-          "due_resolved": "2026-10-21",
-          "label": "COMMITMENT",
-          "owner": "seller",
-          "precision": "day",
-          "quote": "Sure, I'll do it this afternoon.",
-          "recipient": "buyer",
-          "turn_index": 1
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "REQUEST",
         "COMMITMENT"
@@ -224,65 +112,26 @@
       "flagged_turns": null,
       "id": "spec-05",
       "latency_ms": null,
-      "note": "the reply is a commitment only with the preceding turn as context",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "REQUEST",
         "COMMITMENT"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [
         "multi_turn"
       ],
-      "turns": [
-        {
-          "speaker": "buyer",
-          "text": "Can you resend the invoice?"
-        },
-        {
-          "speaker": "seller",
-          "text": "Sure, I'll do it this afternoon."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [
-            "recap"
-          ],
-          "condition": null,
-          "due_raw": null,
-          "due_resolved": null,
-          "label": "COMMITMENT",
-          "owner": "seller",
-          "precision": "none",
-          "quote": "I'll send the recap",
-          "recipient": "buyer",
-          "turn_index": 0
-        },
-        {
-          "action_keywords": [
-            "pilot",
-            "account"
-          ],
-          "condition": null,
-          "due_raw": null,
-          "due_resolved": null,
-          "label": "COMMITMENT",
-          "owner": "Priya",
-          "precision": "none",
-          "quote": "Priya will set up the pilot account",
-          "recipient": "buyer",
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "COMMITMENT",
         "COMMITMENT"
@@ -290,85 +139,47 @@
       "flagged_turns": null,
       "id": "spec-06",
       "latency_ms": null,
-      "note": "the second owner is assigned by the speaker",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "COMMITMENT",
         "COMMITMENT"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "I'll send the recap, and Priya will set up the pilot account."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [],
-          "condition": null,
-          "due_raw": "this week",
-          "due_resolved": "2026-10-19",
-          "label": "HEDGED",
-          "owner": "seller",
-          "precision": "week",
-          "quote": "I'll try to get that over to you this week.",
-          "recipient": "buyer",
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "HEDGED"
       ],
       "flagged_turns": null,
       "id": "spec-07",
       "latency_ms": null,
-      "note": "no concrete action named",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "HEDGED"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "I'll try to get that over to you this week."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [
-            "numbers"
-          ],
-          "condition": null,
-          "due_raw": "Monday",
-          "due_resolved": "2026-10-26",
-          "label": "HEDGED",
-          "owner": "seller",
-          "precision": "day",
-          "quote": "I should be able to have numbers for you Monday, fingers crossed.",
-          "recipient": "buyer",
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "HEDGED"
       ],
@@ -380,38 +191,18 @@
       "predicted_labels": [
         "HEDGED"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "I should be able to have numbers for you Monday, fingers crossed."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [
-            "demo"
-          ],
-          "condition": null,
-          "due_raw": "soon",
-          "due_resolved": null,
-          "label": "HEDGED",
-          "owner": "seller",
-          "precision": "vague",
-          "quote": "Hopefully we can get you a demo environment soon.",
-          "recipient": "buyer",
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "HEDGED"
       ],
@@ -423,80 +214,41 @@
       "predicted_labels": [
         "HEDGED"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "Hopefully we can get you a demo environment soon."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [],
-          "condition": null,
-          "due_raw": null,
-          "due_resolved": null,
-          "label": "HEDGED",
-          "owner": "seller",
-          "precision": "none",
-          "quote": "We'll circle back on that.",
-          "recipient": "buyer",
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "HEDGED"
       ],
       "flagged_turns": null,
       "id": "spec-10",
       "latency_ms": null,
-      "note": "no specific action and no due date",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "HEDGED"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "We'll circle back on that."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [
-            "ship",
-            "integration"
-          ],
-          "condition": "legal signs off",
-          "due_raw": "on the 1st",
-          "due_resolved": "2026-11-01",
-          "label": "CONDITIONAL",
-          "owner": "seller",
-          "precision": "day",
-          "quote": "If legal signs off, we'll ship the integration on the 1st.",
-          "recipient": "buyer",
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "CONDITIONAL"
       ],
@@ -508,38 +260,18 @@
       "predicted_labels": [
         "CONDITIONAL"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "If legal signs off, we'll ship the integration on the 1st."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [
-            "onboarding"
-          ],
-          "condition": "procurement approves the PO",
-          "due_raw": "next Tuesday",
-          "due_resolved": "2026-10-27",
-          "label": "CONDITIONAL",
-          "owner": "seller",
-          "precision": "day",
-          "quote": "As long as procurement approves the PO, we can start onboarding next Tuesday.",
-          "recipient": "buyer",
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "CONDITIONAL"
       ],
@@ -551,528 +283,295 @@
       "predicted_labels": [
         "CONDITIONAL"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "As long as procurement approves the PO, we can start onboarding next Tuesday."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [
-            "pricing"
-          ],
-          "condition": null,
-          "due_raw": "at some point",
-          "due_resolved": null,
-          "label": "SUGGESTION",
-          "owner": null,
-          "precision": "vague",
-          "quote": "We should probably revisit the pricing tiers at some point.",
-          "recipient": null,
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "SUGGESTION"
       ],
       "flagged_turns": null,
       "id": "spec-13",
       "latency_ms": null,
-      "note": "no owner bound",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "SUGGESTION"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "We should probably revisit the pricing tiers at some point."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [
-            "follow-up"
-          ],
-          "condition": null,
-          "due_raw": null,
-          "due_resolved": null,
-          "label": "SUGGESTION",
-          "owner": null,
-          "precision": "none",
-          "quote": "It might make sense to schedule a follow-up with your CFO.",
-          "recipient": "buyer",
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "SUGGESTION"
       ],
       "flagged_turns": null,
       "id": "spec-14",
       "latency_ms": null,
-      "note": "a proposal, not a promise",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "SUGGESTION"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "It might make sense to schedule a follow-up with your CFO."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [
-            "deck"
-          ],
-          "condition": null,
-          "due_raw": null,
-          "due_resolved": null,
-          "label": "REQUEST",
-          "owner": null,
-          "precision": "none",
-          "quote": "Can you send me the deck from today?",
-          "recipient": "seller",
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "REQUEST"
       ],
       "flagged_turns": null,
       "id": "spec-15",
       "latency_ms": null,
-      "note": "the listener would own it if they agree",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "REQUEST"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "Can you send me the deck from today?"
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [
-            "vendor"
-          ],
-          "condition": null,
-          "due_raw": null,
-          "due_resolved": null,
-          "label": "REQUEST",
-          "owner": null,
-          "precision": "none",
-          "quote": "Would you be able to share your current vendor list?",
-          "recipient": "seller",
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "REQUEST"
       ],
       "flagged_turns": null,
       "id": "spec-16",
       "latency_ms": null,
-      "note": "polite form of a request",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "REQUEST"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "Would you be able to share your current vendor list?"
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [
-            "report"
-          ],
-          "condition": null,
-          "due_raw": "last week",
-          "due_resolved": null,
-          "label": "REPORTED",
-          "owner": "Sarah",
-          "precision": "none",
-          "quote": "Sarah said she'd send the SOC 2 report last week.",
-          "recipient": null,
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "REPORTED"
       ],
       "flagged_turns": null,
       "id": "spec-17",
       "latency_ms": null,
-      "note": "third party; possibly overdue, flag for review",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "REPORTED"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "Sarah said she'd send the SOC 2 report last week."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [
-            "discount"
-          ],
-          "condition": null,
-          "due_raw": null,
-          "due_resolved": null,
-          "label": "REPORTED",
-          "owner": "CEO",
-          "precision": "none",
-          "quote": "Our CEO promised them a discount, I think.",
-          "recipient": null,
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "REPORTED"
       ],
       "flagged_turns": null,
       "id": "spec-18",
       "latency_ms": null,
-      "note": "contains 'promised'; third party and uncertain",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "REPORTED"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [
         "keyword_trap"
       ],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "Our CEO promised them a discount, I think."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [],
-          "condition": null,
-          "due_raw": null,
-          "due_resolved": null,
-          "label": "REFUSAL",
-          "owner": "seller",
-          "precision": "none",
-          "quote": "I can't promise we'll hit the 15th.",
-          "recipient": "buyer",
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "REFUSAL"
       ],
       "flagged_turns": null,
       "id": "spec-19",
       "latency_ms": null,
-      "note": "'promise' is negated",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "REFUSAL"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [
         "keyword_trap"
       ],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "I can't promise we'll hit the 15th."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [],
-          "condition": null,
-          "due_raw": null,
-          "due_resolved": null,
-          "label": "REFUSAL",
-          "owner": "seller",
-          "precision": "none",
-          "quote": "I'm not going to commit to a date until engineering scopes it.",
-          "recipient": "buyer",
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "REFUSAL"
       ],
       "flagged_turns": null,
       "id": "spec-20",
       "latency_ms": null,
-      "note": "explicit refusal with a reason",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "REFUSAL"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "I'm not going to commit to a date until engineering scopes it."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [],
-          "condition": null,
-          "due_raw": null,
-          "due_resolved": null,
-          "label": "NONE",
-          "owner": null,
-          "precision": "none",
-          "quote": "Last quarter I promised a rebate and we delivered it.",
-          "recipient": null,
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "NONE"
       ],
       "flagged_turns": null,
       "id": "spec-21",
       "latency_ms": null,
-      "note": "past and already fulfilled",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "NONE"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [
         "keyword_trap"
       ],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "Last quarter I promised a rebate and we delivered it."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [],
-          "condition": null,
-          "due_raw": null,
-          "due_resolved": null,
-          "label": "NONE",
-          "owner": null,
-          "precision": "none",
-          "quote": "Our standard SLA is a four-hour response time.",
-          "recipient": null,
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "NONE"
       ],
       "flagged_turns": null,
       "id": "spec-22",
       "latency_ms": null,
-      "note": "policy statement; arguable",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "NONE"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [
         "ambiguous"
       ],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "Our standard SLA is a four-hour response time."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [],
-          "condition": null,
-          "due_raw": null,
-          "due_resolved": null,
-          "label": "NONE",
-          "owner": null,
-          "precision": "none",
-          "quote": "Will do.",
-          "recipient": null,
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "NONE"
       ],
       "flagged_turns": null,
       "id": "spec-23",
       "latency_ms": null,
-      "note": "contrast with spec-05: no prior turn, no action",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "NONE"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "Will do."
-        }
-      ]
+      "turns": null
     },
     {
       "cached": false,
-      "call_date": "2026-10-21",
+      "call_date": null,
       "correct": null,
       "cost_usd": null,
       "dropped_quotes": 0,
       "error": null,
-      "expected": [
-        {
-          "action_keywords": [],
-          "condition": null,
-          "due_raw": null,
-          "due_resolved": null,
-          "label": "NONE",
-          "owner": null,
-          "precision": "none",
-          "quote": "Oh sure, I'll definitely rewrite the whole platform by Friday.",
-          "recipient": null,
-          "turn_index": 0
-        }
-      ],
+      "expected": null,
       "expected_labels": [
         "NONE"
       ],
       "flagged_turns": null,
       "id": "spec-24",
       "latency_ms": null,
-      "note": "sarcasm; reported separately",
+      "note": null,
       "predicted": null,
       "predicted_labels": [
         "NONE"
       ],
-      "provenance": "spec",
+      "provenance": null,
       "tags": [
         "ambiguous"
       ],
-      "turns": [
-        {
-          "speaker": "seller",
-          "text": "Oh sure, I'll definitely rewrite the whole platform by Friday."
-        }
-      ]
+      "turns": null
     }
   ],
   "legacy": true,

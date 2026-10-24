@@ -7,10 +7,12 @@ from typing import Any
 import pytest
 
 from commitment_tracker.evaluation import cli
+from commitment_tracker.evaluation.audio_eval import AudioScores
 from commitment_tracker.evaluation.report import build_report, write_report
 from commitment_tracker.evaluation.results import ItemResult
 from commitment_tracker.evaluation.sets import load_set
 from commitment_tracker.evaluation.site_export import SITE_DATA_DIR, export_site
+from commitment_tracker.schemas import Turn
 from tests.eval.builders import exp, item, pred, response
 from tests.eval.test_report import RUN
 from tests.eval.test_set_loading import write_set
@@ -93,6 +95,39 @@ def test_a_run_file_joins_items_with_transcripts_and_judgement(repo: Repo) -> No
     assert (first["correct"], second["correct"]) == (False, True)
     assert run["scores"]["ledger"]["f1"] == 0.0
     assert run["run"]["configuration"] == run["configuration"] == "opus"
+
+
+def test_a_run_of_an_older_set_version_is_not_joined_to_the_current_items(repo: Repo) -> None:
+    stem = repo.report("opus", 0, right=False)
+    write_set(repo.sets, "test", [i.model_dump(mode="json") for i in ITEMS])
+    items = (repo.sets / "test" / "items.jsonl").read_text(encoding="utf-8")
+    (repo.sets / "test" / "items.jsonl").write_text(items.replace("Friday", "Monday"), "utf-8")
+    repo.export()
+    run = json.loads((repo.out / "runs" / f"{stem}.json").read_text(encoding="utf-8"))
+    first = run["items"][0]
+    assert (first["expected"], first["turns"], first["correct"]) == (None, None, None)
+    assert first["expected_labels"] == ["COMMITMENT"]  # the report's own record stays
+
+
+def test_audio_items_show_the_transcript_without_expected_spans(repo: Repo) -> None:
+    run = RUN.model_copy(
+        update={"configuration": "opus", "set_name": "audio", "set_sha256": "a" * 64}
+    )
+    report = build_report(run, results())
+    transcript = [Turn(speaker="seller", text="ill send it friday")]
+    details = [d.model_copy(update={"transcript": transcript}) for d in report.items]
+    audio = AudioScores(
+        slices={}, turn_mismatches=0, speaker_errors=0, unmatched_spans=0, text_set_sha256="f"
+    )
+    path, _ = write_report(
+        report.model_copy(update={"items": details, "audio": audio}), repo.reports / "audio"
+    )
+    repo.export()
+    exported = json.loads((repo.out / "runs" / f"{path.stem}.json").read_text(encoding="utf-8"))
+    first = exported["items"][0]
+    assert first["turns"] == [{"speaker": "seller", "text": "ill send it friday"}]
+    assert (first["expected"], first["correct"]) == (None, None)
+    assert first["predicted"] is not None
 
 
 def test_the_export_is_deterministic(repo: Repo) -> None:

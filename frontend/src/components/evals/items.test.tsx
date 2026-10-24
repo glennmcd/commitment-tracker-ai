@@ -89,3 +89,23 @@ describe("one item", () => {
     expect(turns[0]).toHaveTextContent("[0] buyer: Can you send the deck?");
   });
 });
+
+describe("pairing like the scorer", () => {
+  it("lets one predicted span match only one of two similar expected spans", () => {
+    const base = item("gem01-04");
+    const first = base.expected?.[0];
+    if (!first) throw new Error("fixture");
+    const second = { ...first, quote: "I'll send it Friday." };
+    render(<ItemDiff item={{ ...base, correct: false, expected: [first, second] }} />);
+    const expected = screen.getByRole("region", { name: /^Expected/ });
+    expect(within(expected).getAllByText("matched")).toHaveLength(1);
+    expect(within(expected).getAllByText(/not found/)).toHaveLength(1);
+  });
+
+  it("judges nothing on an audio item, which has no expected spans on the transcribed turns", () => {
+    render(<ItemDiff item={{ ...item("gem01-05"), expected: null, correct: null }} />);
+    expect(screen.getByText("Not judged")).toBeInTheDocument();
+    expect(screen.queryByText(/not expected/)).not.toBeInTheDocument();
+    expect(screen.queryByText("matched")).not.toBeInTheDocument();
+  });
+});

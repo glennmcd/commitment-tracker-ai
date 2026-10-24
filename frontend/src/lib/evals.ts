@@ -351,3 +351,42 @@ export function share(count: number, row: number[]): number {
   const total = row.reduce((sum, n) => sum + n, 0);
   return total ? count / total : 0;
 }
+
+// ---- Pairing, as the scorer does it (backend/src/commitment_tracker/evaluation/matching.py) ----------------------
+
+const WORD = /[a-z0-9']+/g;
+export const MIN_OVERLAP = 0.6;
+
+/** The share of the shorter quote's words found in the other. */
+export function overlap(a: string, b: string): number {
+  const wa = new Set(a.toLowerCase().match(WORD) ?? []);
+  const wb = new Set(b.toLowerCase().match(WORD) ?? []);
+  if (!wa.size || !wb.size) return 0;
+  let shared = 0;
+  for (const word of wa) if (wb.has(word)) shared += 1;
+  return shared / Math.min(wa.size, wb.size);
+}
+
+/**
+ * Expected span index -> predicted span index. Spans pair only within a turn, one to one, best overlap first (ties by
+ * expected then predicted index), and only at MIN_OVERLAP or more: the same greedy rule the scorer uses.
+ */
+export function pairSpans(expected: ExpectedSpan[], predicted: PredictedSpan[]): Map<number, number> {
+  const candidates: [number, number, number][] = [];
+  expected.forEach((e, ei) => {
+    predicted.forEach((p, pi) => {
+      if (e.turn_index === p.turn_index) candidates.push([overlap(e.quote, p.quote), ei, pi]);
+    });
+  });
+  candidates.sort((x, y) => y[0] - x[0] || x[1] - y[1] || x[2] - y[2]);
+  const partner = new Map<number, number>();
+  const taken = new Set<number>();
+  for (const [score, ei, pi] of candidates) {
+    if (score < MIN_OVERLAP) break;
+    if (!partner.has(ei) && !taken.has(pi)) {
+      partner.set(ei, pi);
+      taken.add(pi);
+    }
+  }
+  return partner;
+}

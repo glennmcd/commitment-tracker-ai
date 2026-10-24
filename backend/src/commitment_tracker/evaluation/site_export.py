@@ -19,7 +19,7 @@ from typing import Any
 
 from commitment_tracker.evaluation.agreement import agreement
 from commitment_tracker.evaluation.compare import item_correct
-from commitment_tracker.evaluation.dataset import EvalItem
+from commitment_tracker.evaluation.dataset import EvalItem, canonical_sha256
 from commitment_tracker.evaluation.report import DEFAULT_REPORTS_DIR, ItemDetail, Report
 from commitment_tracker.evaluation.rescore import RescoreError, result_from_detail
 from commitment_tracker.evaluation.sets import (
@@ -27,6 +27,7 @@ from commitment_tracker.evaluation.sets import (
     list_sets,
     load_manifest,
     load_set,
+    set_dir,
     summarize,
 )
 from commitment_tracker.settings import configuration_for_model
@@ -59,17 +60,19 @@ def _write(path: Path, data: Any) -> None:
     path.write_bytes(text.encode("utf-8"))
 
 
-def _items_by_set(root: Path) -> dict[str, dict[str, EvalItem]]:
-    """Items per published set; the audio set borrows the items of the set its clips speak."""
-    by_set: dict[str, dict[str, EvalItem]] = {}
+def _items_by_set(root: Path) -> dict[str, tuple[str, dict[str, EvalItem]]]:
+    """Each set's current hash and items. The audio set is hashed by its clips and borrows the
+    items of the set its clips speak (for call dates, notes and authors)."""
+    by_set: dict[str, tuple[str, dict[str, EvalItem]]] = {}
     for name in list_sets(root):
-        manifest = load_manifest(name, root)
-        if manifest.kind == "text":
-            by_set[name] = {i.id: i for i in load_set(name, root, allow_empty=True).items}
+        if load_manifest(name, root).kind == "text":
+            loaded = load_set(name, root, allow_empty=True)
+            by_set[name] = (loaded.sha256, {i.id: i for i in loaded.items})
     for name in list_sets(root):
         manifest = load_manifest(name, root)
         if manifest.kind == "audio" and manifest.items_from in by_set:
-            by_set[name] = by_set[manifest.items_from]
+            clips = canonical_sha256(set_dir(name, root) / "clips.jsonl")
+            by_set[name] = (clips, by_set[manifest.items_from][1])
     return by_set
 
 
@@ -85,7 +88,9 @@ def _item_entry(
         if result is not None:
             spans = result.response.spans if result.response else []
             correct = result.response is not None and item_correct(item, spans)
-    turns = detail.transcript if audio and detail.transcript else (item.turns if item else None)
+    # An audio run's spans point at transcribed turns, so the text item's expected spans (on the
+    # original turns) would pair wrongly; its items are shown without them and not judged.
+    turns = detail.transcript if audio else (item.turns if item else None)
     return {
         "id": detail.item_id,
         "tags": detail.tags,
@@ -93,7 +98,9 @@ def _item_entry(
         "call_date": item.call_date.isoformat() if item else None,
         "note": item.note if item else None,
         "turns": [{"speaker": t.speaker, "text": t.text} for t in turns] if turns else None,
-        "expected": [s.model_dump(mode="json") for s in item.expected] if item else None,
+        "expected": [s.model_dump(mode="json") for s in item.expected]
+        if item and not audio
+        else None,
         "expected_labels": detail.expected,
         "predicted": [s.model_dump(mode="json") for s in detail.spans]
         if detail.spans is not None
@@ -162,7 +169,10 @@ def export_site(
                 raise ValueError(f"two reports share the run id {run_id}")
             produced.add(run_id)
             audio = report.audio is not None
-            items = items_by_set.get(folder.name, {})
+            current_sha, current_items = items_by_set.get(folder.name, ("", {}))
+            # Join only a run of the set's current version; an older run keeps its own labels.
+            pinned = report.run.set_sha256 is not None and report.run.set_sha256 == current_sha
+            items = current_items if pinned else {}
             _write(
                 out / "runs" / f"{run_id}.json",
                 {
