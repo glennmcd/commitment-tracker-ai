@@ -220,7 +220,7 @@ cd backend
 uv run eval --model claude-haiku-5-5 --prompt v1
 ```
 
-The runner sends each item in [backend/eval/data/dev.jsonl](backend/eval/data/dev.jsonl) through the extractor,
+The runner sends each item in [backend/eval/sets/dev/items.jsonl](backend/eval/sets/dev/items.jsonl) through the extractor,
 four at a time (`--concurrency`), and writes a JSON report and a markdown summary to `backend/eval/reports/`. The
 report covers:
 

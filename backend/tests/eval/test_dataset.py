@@ -1,4 +1,4 @@
-"""The evaluation dataset: dev.jsonl matches the spec's 24 seed utterances, and the loader rejects
+"""The evaluation dataset: the dev set matches the spec's 24 seed utterances, and the loader rejects
 malformed items with the line number."""
 
 import json
@@ -25,12 +25,22 @@ def dev() -> dict[str, EvalItem]:
     return {item.id: item for item in load_dataset(DEV_PATH)}
 
 
-# --- dev.jsonl -----------------------------------------------------------------------------------
+# --- The dev set ---------------------------------------------------------------------------------
 
 
 def test_dev_set_has_the_24_spec_items_in_order(dev: dict[str, EvalItem]) -> None:
     assert list(dev) == [f"spec-{n:02d}" for n in range(1, 25)]
     assert all(item.call_date == CALL_DATE for item in dev.values())
+
+
+def test_spec_items_are_accepted_with_spec_provenance(dev: dict[str, EvalItem]) -> None:
+    spec = [item for item in dev.values() if item.id.startswith("spec-")]
+    assert {(item.provenance, item.review) for item in spec} == {("spec", "accepted")}
+
+
+@pytest.mark.parametrize("provenance", ["spec", "hand-written", "gemini-3-pro", "gpt-5.2"])
+def test_provenance_values(provenance: str) -> None:
+    assert EvalItem.model_validate(item_data(provenance=provenance)).provenance == provenance
 
 
 def test_dev_set_covers_every_label(dev: dict[str, EvalItem]) -> None:
@@ -151,6 +161,8 @@ def item_data(**overrides: Any) -> dict[str, Any]:
                 "precision": "day",
             }
         ],
+        "provenance": "hand-written",
+        "review": "accepted",
     }
     data.update(overrides)
     return data
@@ -184,6 +196,9 @@ def expected(**overrides: Any) -> list[dict[str, Any]]:
         (item_data(expected=[]), "at least 1"),
         (item_data(surprise=True), "Extra inputs"),
         (item_data(call_date="21/10/2026"), "date"),
+        (item_data(provenance="Gemini 3"), "provenance"),
+        (item_data(review="maybe"), "review"),
+        ({k: v for k, v in item_data().items() if k != "provenance"}, "provenance"),
     ],
 )
 def test_invalid_item_is_rejected_with_its_line(

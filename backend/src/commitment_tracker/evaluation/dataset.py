@@ -14,10 +14,13 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 
 from commitment_tracker.schemas import LEDGER_LABELS, Label, Precision, Turn
 
-# backend/src/commitment_tracker/evaluation/dataset.py -> backend/eval/data/dev.jsonl
-DEV_PATH = Path(__file__).resolve().parents[3] / "eval" / "data" / "dev.jsonl"
+# backend/src/commitment_tracker/evaluation/dataset.py -> backend/eval/sets/dev/items.jsonl
+DEV_PATH = Path(__file__).resolve().parents[3] / "eval" / "sets" / "dev" / "items.jsonl"
 
 Tag = Literal["ambiguous", "multi_turn", "keyword_trap"]
+Review = Literal["unreviewed", "accepted", "edited"]
+# Who wrote the item: the spec, a person, or a generator named `<family>-<model>`.
+PROVENANCE = r"^(spec|hand-written|[a-z]+-[a-z0-9][a-z0-9.\-]*)$"
 
 
 class DatasetError(ValueError):
@@ -65,6 +68,8 @@ class EvalItem(EvalModel):
     tags: list[Tag] = Field(default_factory=list)
     expected: list[ExpectedSpan] = Field(min_length=1)
     note: str | None = None
+    provenance: str = Field(pattern=PROVENANCE)
+    review: Review
 
     @model_validator(mode="after")
     def _spans_point_into_the_transcript(self) -> Self:

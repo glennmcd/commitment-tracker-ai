@@ -26,9 +26,9 @@ plugin, configured in `.claude/cc-practices.json`. This file covers only what is
   - `src/commitment_tracker/lambda_handlers.py`: the Mangum API handler and the worker handler; one zip serves
     both, and the Anthropic key is read from SSM on a cold start.
   - `src/commitment_tracker/evaluation/`: the eval runner, importable so `uv run eval` works.
-  - `eval/`: `data/dev.jsonl` and `reports/` (committed), `generation/prompt-v1.md` (the prompt for drafting items
-    with other models); `.cache/` holds cached model responses (ignored). Part 3 moves the data to `sets/`
-    (`docs/plans/part-3-evaluation.md`).
+  - `eval/`: `sets/<name>/` (items and manifest per set) and `reports/<set>/` (committed),
+    `generation/prompt-v1.md` (the prompt for drafting items with other models); `.cache/` holds cached model
+    responses (ignored). See `docs/plans/part-3-evaluation.md`.
   - `samples/`: the scripted dialogues behind the demo's sample clips and their ground truth.
   - `scripts/`: run by hand with AWS credentials: `make_samples.py` (Polly clips), `measure_latency.py` and
     `check_audio_gone.py` against the deployed stack.

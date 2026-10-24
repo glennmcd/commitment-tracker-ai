@@ -16,7 +16,7 @@ from tests.fakes import FunctionAdapter
 DATA = (
     '{"id": "a", "call_date": "2026-10-21", "turns": [{"speaker": "seller", "text": "Our SLA is '
     'four hours."}], "expected": [{"turn_index": 0, "label": "NONE", "quote": "Our SLA is four '
-    'hours."}]}\n'
+    'hours."}], "provenance": "hand-written", "review": "accepted"}\n'
 )
 
 

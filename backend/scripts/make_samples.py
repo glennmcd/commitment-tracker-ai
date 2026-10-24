@@ -146,6 +146,8 @@ def _truth(dialogue: Dialogue, clip: Clip) -> dict[str, Any]:
         tags=dialogue.tags,
         expected=dialogue.expected,
         note=dialogue.note,
+        provenance=dialogue.provenance,
+        review=dialogue.review,
     )
     dumped: dict[str, Any] = item.model_dump(mode="json")
     return dumped
