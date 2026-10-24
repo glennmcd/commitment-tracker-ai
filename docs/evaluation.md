@@ -180,3 +180,17 @@ Measured on Haiku and estimated for the others from the same token counts (secti
 
 Polly for 20 clips costs under $0.03 and Transcribe for 30 clips about $0.25, once. Opus and Sonnet output at medium
 effort is unmeasured: run Opus on `dev` first and check its token counts before running `test`.
+
+## Known limits
+
+- **Two-stage windows run in parallel without a bound.** Within one item, every flagged window goes to Opus at once,
+  and each pays its own prompt-cache write. A long call with many flagged turns can hit rate limits; lower
+  `--concurrency` if it does.
+- **File writes aren't atomic.** Interrupting a command mid-write can leave a truncated file. A corrupt
+  response-cache entry reads as a miss and is fetched again. A truncated `items.jsonl` or `review.jsonl` fails to
+  load with its line number; restore a committed set with `git checkout -- <file>`.
+- **Promote writes three files in turn**: the target's items, its manifest, then the staging items. If it is
+  interrupted between them, a rerun fails with "already has …". Remove the items already promoted from
+  `staging/<batch>/items.jsonl` by hand, or restore the target from git and promote again.
+- **Some unexpected errors end in a traceback**, such as a failed cache write or a malformed report passed to
+  `eval-compare`. Expected failures (bad input, missing sets, AWS and transcription errors) exit with a message.
