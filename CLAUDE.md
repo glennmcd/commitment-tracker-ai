@@ -70,6 +70,7 @@ uv run eval promote --batch gem01 --to test
 uv run eval --set test --config two-stage --offline   # cache only; never builds the adapter
 uv run eval rescore --set test      # rebuild scores from stored predictions
 uv run eval-compare <run-a> <run-b> # score changes and items that flipped
+uv run eval-gate                    # CI's regression gate; --update-baseline when a change is intended
 ```
 
 Run from `frontend/` (the root's `bun run lint`, `typecheck` and `test` cover `frontend/` and `infra/` together):
