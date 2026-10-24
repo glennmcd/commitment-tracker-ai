@@ -25,6 +25,7 @@ from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any, Protocol
 
+from botocore.exceptions import ClientError
 from pydantic import BaseModel
 
 from commitment_tracker.evaluation.audio import AudioClip
@@ -40,6 +41,8 @@ from commitment_tracker.transcription.turns import to_timed_turns
 TRANSCRIPTS_DIR = Path(__file__).resolve().parents[3] / "eval" / ".cache" / "transcripts"
 NO_TURN = -1  # where an expected span points when its turn was not transcribed
 JOB_PREFIX = "eval-"
+# Codes Transcribe uses for "no such job" (as in transcription/aws.py).
+JOB_GONE = {"BadRequestException", "NotFoundException"}
 SAMPLE_RATE_HZ = 16_000
 
 
@@ -86,9 +89,27 @@ class AwsClipTranscriber:
         self._timeout = timeout_seconds
         self._sleep = sleep
 
+    def _forget(self, name: str, key: str) -> None:
+        """Remove a job and its output; either may already be gone."""
+        try:
+            self._transcribe.delete_transcription_job(TranscriptionJobName=name)
+        except ClientError as error:
+            if error.response.get("Error", {}).get("Code") not in JOB_GONE:
+                raise
+        self._s3.delete_object(Bucket=self._bucket, Key=key)  # no error when the key is absent
+
     def __call__(self, clip: AudioClip) -> list[TimedTurn]:
         name = f"{JOB_PREFIX}{clip.sha256[:24]}"
         key = f"transcripts/{name}.json"
+        # Job names are per clip, so a failed or timed-out attempt would block this one.
+        self._forget(name, key)
+        try:
+            return self._transcribe_once(clip, name, key)
+        finally:
+            # The turns are cached locally; the job and its output aren't needed again.
+            self._forget(name, key)
+
+    def _transcribe_once(self, clip: AudioClip, name: str, key: str) -> list[TimedTurn]:
         self._transcribe.start_transcription_job(
             TranscriptionJobName=name,
             LanguageCode="en-US",
@@ -113,11 +134,7 @@ class AwsClipTranscriber:
             self._sleep(self._poll)
             waited += self._poll
         body = self._s3.get_object(Bucket=self._bucket, Key=key)["Body"].read()
-        turns = to_timed_turns(json.loads(body))
-        # The turns are cached locally; the job and its output aren't needed again.
-        self._transcribe.delete_transcription_job(TranscriptionJobName=name)
-        self._s3.delete_object(Bucket=self._bucket, Key=key)
-        return turns
+        return to_timed_turns(json.loads(body))
 
 
 @dataclass(frozen=True)

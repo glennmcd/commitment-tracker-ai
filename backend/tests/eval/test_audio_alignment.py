@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from botocore.exceptions import ClientError
 
 from commitment_tracker.evaluation import cli
 from commitment_tracker.evaluation.audio import AudioClip, make_polly
@@ -197,15 +198,45 @@ def test_the_aws_transcriber_uses_its_own_job_prefix_and_cleans_up() -> None:
     # Not "ct-": the stack's EventBridge rule would hand a ct- job to the demo worker.
     assert started["TranscriptionJobName"].startswith("eval-")
     assert started["Media"] == {"MediaFileUri": "s3://eval-bucket/clips/t-01.wav"}
-    assert transcribe.deleted == [started["TranscriptionJobName"]]
-    assert s3.deleted == [started["OutputKey"]]
+    # Once before (a leftover from a failed attempt would block the name) and once after.
+    assert transcribe.deleted == [started["TranscriptionJobName"]] * 2
+    assert s3.deleted == [started["OutputKey"]] * 2
 
 
-def test_a_failed_transcription_job_raises() -> None:
+def test_a_failed_transcription_job_raises_and_is_cleaned_up() -> None:
+    transcribe = FakeTranscribe(["FAILED"])
     transcriber = AwsClipTranscriber(
-        FakeTranscribe(["FAILED"]), FakeS3(TRANSCRIBE_OUTPUT), "b", sleep=lambda _: None
+        transcribe, FakeS3(TRANSCRIBE_OUTPUT), "b", sleep=lambda _: None
     )
     with pytest.raises(RuntimeError, match="bad"):
+        transcriber(clip())
+    assert len(transcribe.deleted) == 2  # so a retry can reuse the job name
+
+
+def test_a_job_already_gone_is_not_an_error() -> None:
+    class GoneTranscribe(FakeTranscribe):
+        def delete_transcription_job(self, TranscriptionJobName: str) -> None:  # noqa: N803
+            raise ClientError(
+                {"Error": {"Code": "BadRequestException", "Message": "gone"}},
+                "DeleteTranscriptionJob",
+            )
+
+    transcriber = AwsClipTranscriber(
+        GoneTranscribe(["COMPLETED"]), FakeS3(TRANSCRIBE_OUTPUT), "b", sleep=lambda _: None
+    )
+    assert [t.text for t in transcriber(clip())] == ["Hello"]
+
+
+def test_a_timed_out_job_raises() -> None:
+    transcriber = AwsClipTranscriber(
+        FakeTranscribe(["IN_PROGRESS"] * 5),
+        FakeS3(TRANSCRIBE_OUTPUT),
+        "b",
+        poll_seconds=1,
+        timeout_seconds=2,
+        sleep=lambda _: None,
+    )
+    with pytest.raises(RuntimeError, match="timed out"):
         transcriber(clip())
 
 
@@ -315,3 +346,39 @@ def test_a_short_turn_maps_in_order_not_to_an_earlier_turn_sharing_its_words() -
     assert [t.speaker for t in result.item.turns] == ["buyer", "seller", "buyer", "seller"]
     assert (result.speaker_errors, result.unmatched_spans) == (0, 0)
     assert result.item.expected[0].turn_index == 1
+
+
+def test_cli_reports_a_transcription_failure_without_a_traceback(
+    tmp_path: Path,
+    fake_model: list[tuple[str, str]],
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    sets = audio_repo(tmp_path)
+
+    def failing(profile: str | None, region: str, bucket: str | None) -> Any:
+        def transcribe(c: AudioClip) -> list[TimedTurn]:
+            raise RuntimeError("transcription of t-01 failed: bad audio")
+
+        return transcribe
+
+    monkeypatch.setattr(cli, "make_transcriber", failing)
+    assert run_audio(tmp_path, sets) == 1
+    assert "transcription failed" in capsys.readouterr().err
+
+
+def test_transcribe_on_a_text_set_is_refused(
+    tmp_path: Path, fake_model: list[tuple[str, str]], capsys: pytest.CaptureFixture[str]
+) -> None:
+    sets = audio_repo(tmp_path)
+    argv = [
+        "--set",
+        "test",
+        "--transcribe",
+        "--sets-dir",
+        str(sets),
+        "--reports-dir",
+        str(tmp_path),
+    ]
+    assert cli.main(argv) == 2
+    assert "audio set only" in capsys.readouterr().err

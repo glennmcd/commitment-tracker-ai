@@ -25,6 +25,7 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 
 import boto3
+from botocore.exceptions import BotoCoreError, ClientError
 
 from commitment_tracker.evaluation.agreement import agreement, render_agreement
 from commitment_tracker.evaluation.audio import (
@@ -223,9 +224,13 @@ def _audio_target(args: argparse.Namespace) -> _Target:
 
 def _target(args: argparse.Namespace) -> _Target:
     if args.data is not None:
+        if args.transcribe:
+            raise SetError("--transcribe applies to the audio set only")
         return _Target(load_dataset(args.data), dataset=args.data.name, reports=ADHOC)
     if load_manifest(args.set_name or "dev", args.sets_dir).kind == "audio":
         return _audio_target(args)
+    if args.transcribe:
+        raise SetError("--transcribe applies to the audio set only")
     loaded = load_set(args.set_name or "dev", args.sets_dir)
     return _Target(
         loaded.items,
@@ -569,6 +574,10 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     except _MissingTranscripts as error:
         print(f"eval: --offline: {error}; run without --offline to transcribe", file=sys.stderr)
+        return 1
+    except (BotoCoreError, ClientError, RuntimeError) as error:
+        # AWS credentials, the bucket or a transcription job: transcripts done so far stay cached.
+        print(f"eval: transcription failed: {error}", file=sys.stderr)
         return 1
     described = analyzer.describe()
     every_item = target.items + (target.audio.text_items if target.audio else [])
