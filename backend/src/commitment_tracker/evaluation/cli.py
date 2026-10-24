@@ -105,6 +105,7 @@ from commitment_tracker.evaluation.sets import (
     set_dir,
     summarize,
 )
+from commitment_tracker.evaluation.site_export import SITE_DATA_DIR, export_site
 from commitment_tracker.evaluation.synthesis import Synthesizer, polly_synthesizer
 from commitment_tracker.extractor.analyzer import Analyzer
 from commitment_tracker.extractor.extractor import Extractor
@@ -481,6 +482,22 @@ def audio_main(argv: list[str] | None = None) -> int:
         return 1
 
 
+def export_site_main(argv: list[str] | None = None) -> int:
+    """`uv run eval-export-site`: write the /evals data under frontend/src/data/evals."""
+    parser = argparse.ArgumentParser(
+        prog="eval-export-site", description="Write the static data for the /evals pages."
+    )
+    parser.add_argument("--sets-dir", type=Path, default=SETS_DIR)
+    parser.add_argument("--reports-dir", type=Path, default=DEFAULT_REPORTS_DIR)
+    parser.add_argument("--out", type=Path, default=SITE_DATA_DIR)
+    args = parser.parse_args(argv)
+    result = export_site(args.sets_dir, args.reports_dir, args.out)
+    print(f"exported {result.runs} runs to {args.out}")
+    for name in result.removed:
+        print(f"  removed stale {name}")
+    return 0
+
+
 def compare_main(argv: list[str] | None = None) -> int:
     """`uv run eval-compare <a> <b>`: two runs on the same set, by path or file stem."""
     parser = argparse.ArgumentParser(
@@ -606,7 +623,12 @@ def main(argv: list[str] | None = None) -> int:
             text_results,
             text_sha256=target.audio.text_sha256,
         )
-        report = report.model_copy(update={"audio": penalty})
+        transcripts = {item.id: item.turns for item in target.items}
+        details = [
+            detail.model_copy(update={"transcript": transcripts[detail.item_id]})
+            for detail in report.items
+        ]
+        report = report.model_copy(update={"audio": penalty, "items": details})
     json_path, md_path = write_report(report, reports_dir)
 
     scores = report.scores

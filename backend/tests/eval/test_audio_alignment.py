@@ -263,6 +263,8 @@ def test_cli_scores_audio_and_reports_the_penalty(
     assert data["run"]["set_name"] == "audio"
     assert set(data["audio"]["slices"]) == {"polly", "all"}
     assert data["audio"]["turn_mismatches"] == 0
+    transcript = data["items"][0]["transcript"]
+    assert [turn["speaker"] for turn in transcript] == ["buyer", "seller"]
 
 
 def test_cli_audio_offline_needs_every_transcript_cached(

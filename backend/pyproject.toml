@@ -20,6 +20,7 @@ eval-sets = "commitment_tracker.evaluation.cli:sets_main"
 eval-compare = "commitment_tracker.evaluation.cli:compare_main"
 eval-gate = "commitment_tracker.evaluation.cli:gate_main"
 eval-audio = "commitment_tracker.evaluation.cli:audio_main"
+eval-export-site = "commitment_tracker.evaluation.cli:export_site_main"
 export-openapi = "commitment_tracker.api.export_openapi:main"
 
 [dependency-groups]

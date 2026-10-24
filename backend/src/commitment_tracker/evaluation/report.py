@@ -14,7 +14,7 @@ from commitment_tracker.evaluation.dataset import EvalItem
 from commitment_tracker.evaluation.metrics import Scores, compute_scores
 from commitment_tracker.evaluation.results import ItemResult
 from commitment_tracker.extractor.two_stage import StageUsage
-from commitment_tracker.schemas import LEDGER_LABELS, Label, Precision, Span
+from commitment_tracker.schemas import LEDGER_LABELS, Label, Precision, Span, Turn
 
 # backend/src/commitment_tracker/evaluation/report.py -> backend/eval/reports
 DEFAULT_REPORTS_DIR = Path(__file__).resolve().parents[3] / "eval" / "reports"
@@ -105,6 +105,8 @@ class ItemDetail(BaseModel):
     turns: int | None = None
     flagged_turns: list[int] | None = None
     stages: list[StageDetail] | None = None
+    # Audio runs only: the transcribed turns the spans' turn indices refer to.
+    transcript: list[Turn] | None = None
 
 
 class ProvenanceScore(BaseModel):
