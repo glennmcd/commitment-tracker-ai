@@ -25,4 +25,10 @@ describe("the home page", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Commitment Tracker AI" })).toBeInTheDocument();
     expect(screen.getByText(/who promised what, to whom, and by when/i)).toBeInTheDocument();
   });
+
+  it("links to the evaluation results, which need no password", () => {
+    render(<Home />);
+
+    expect(screen.getByRole("link", { name: /evaluation results/i }).getAttribute("href")).toMatch(/^\/evals\/?$/);
+  });
 });

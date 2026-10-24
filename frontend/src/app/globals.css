@@ -682,3 +682,142 @@ button.secondary {
 .chip:hover:not(:disabled) {
   border-color: var(--accent);
 }
+
+/* ---- Evaluation pages ---- */
+
+.evals-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.evals a,
+.intro a {
+  color: var(--accent);
+}
+
+.table-scroll {
+  overflow-x: auto;
+  margin: 0 0 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table caption {
+  padding: 0.6rem 0.75rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.45rem 0.75rem;
+  border-top: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.data-table thead th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.data-table td {
+  white-space: nowrap;
+}
+
+.cell-note {
+  display: block;
+  max-width: 28rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+  white-space: normal;
+}
+
+.tag {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.bar-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bar {
+  display: inline-block;
+  width: 4rem;
+  height: 0.4rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+/* The tint repeats the count's share of its row; the number is always there. */
+.matrix td {
+  text-align: right;
+  background: color-mix(in srgb, var(--accent) calc(var(--share, 0) * 35%), transparent);
+}
+
+.matrix td[data-diagonal="true"] {
+  font-weight: 700;
+}
+
+.headline {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 0.75rem;
+  margin: 0 0 1.5rem;
+}
+
+.headline div {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.headline dt {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.headline dd {
+  margin: 0;
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.facts-table td {
+  white-space: normal;
+}
+
+.run-list li {
+  padding: 0.25rem 0;
+}
