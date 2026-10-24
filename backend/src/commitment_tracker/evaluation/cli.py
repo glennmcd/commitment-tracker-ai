@@ -3,6 +3,7 @@
     uv run eval --set test --model claude-opus-5-5 --prompt v1
     uv run eval --data some-items.jsonl
     uv run eval import gemini.jsonl --batch gem01 --provenance gemini-3-pro
+    uv run eval review --batch gem01
 
 Calls the real model (and spends money) for every item not already in the response cache. Set runs
 are written to eval/reports/<set>/; `--data` and staging runs go to eval/reports/adhoc/, which is
@@ -32,6 +33,7 @@ from commitment_tracker.evaluation.report import (
     build_report,
     write_report,
 )
+from commitment_tracker.evaluation.review import review_batch
 from commitment_tracker.evaluation.runner import run_items
 from commitment_tracker.evaluation.sets import SETS_DIR, SetError, is_staging, load_set
 from commitment_tracker.extractor.factory import build_extractor
@@ -130,7 +132,28 @@ def _import(argv: list[str]) -> int:
     return 0
 
 
-SUBCOMMANDS = {"import": _import}
+def _review(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(
+        prog="eval review", description="Review a staging batch blind, label by label."
+    )
+    parser.add_argument("--batch", required=True)
+    parser.add_argument("--sets-dir", type=Path, default=SETS_DIR)
+    args = parser.parse_args(argv)
+    try:
+        summary = review_batch(args.batch, args.sets_dir)
+    except SetError as error:
+        print(f"eval review: {error}", file=sys.stderr)
+        return 1
+    print(
+        f"accepted {summary.accepted} | edited {summary.edited} | rejected {summary.rejected} | "
+        f"left to review {summary.remaining}"
+    )
+    if not summary.remaining:
+        print(f"next: uv run eval promote --batch {args.batch} --to test")
+    return 0
+
+
+SUBCOMMANDS = {"import": _import, "review": _review}
 
 
 def main(argv: list[str] | None = None) -> int:
