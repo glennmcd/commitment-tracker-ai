@@ -53,7 +53,7 @@ def _span(stored: PredictedSpan) -> Span:
     )
 
 
-def _result(detail: ItemDetail, item: EvalItem, run: RunInfo) -> ItemResult:
+def result_from_detail(detail: ItemDetail, item: EvalItem, run: RunInfo) -> ItemResult:
     if detail.spans is None:
         raise RescoreError(f"{detail.item_id} was written before predictions were stored")
     if detail.error is not None:
@@ -80,7 +80,7 @@ def rescore(report: Report, items: dict[str, EvalItem]) -> Report:
     missing = [d.item_id for d in report.items if d.item_id not in items]
     if missing:
         raise RescoreError(f"items not in the set: {', '.join(missing)}")
-    results = [_result(d, items[d.item_id], report.run) for d in report.items]
+    results = [result_from_detail(d, items[d.item_id], report.run) for d in report.items]
     return report.model_copy(
         update={
             "scores": compute_scores(results),

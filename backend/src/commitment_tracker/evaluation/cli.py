@@ -32,6 +32,12 @@ from commitment_tracker.evaluation.cache import (
     OfflineAdapter,
     ResponseCache,
 )
+from commitment_tracker.evaluation.compare import (
+    CompareError,
+    compare,
+    find_report,
+    render_comparison,
+)
 from commitment_tracker.evaluation.dataset import DatasetError, EvalItem, load_dataset
 from commitment_tracker.evaluation.importer import (
     BatchError,
@@ -41,6 +47,7 @@ from commitment_tracker.evaluation.importer import (
 from commitment_tracker.evaluation.promote import PromoteError, promote_batch
 from commitment_tracker.evaluation.report import (
     DEFAULT_REPORTS_DIR,
+    Report,
     RunInfo,
     build_report,
     write_report,
@@ -244,6 +251,36 @@ def sets_main(argv: list[str] | None = None) -> int:
     if args.agreement:
         print("\n".join(render_agreement(agreement(args.sets_dir))))
     return 1 if any(summary.error for summary in summaries) else 0
+
+
+def compare_main(argv: list[str] | None = None) -> int:
+    """`uv run eval-compare <a> <b>`: two runs on the same set, by path or file stem."""
+    parser = argparse.ArgumentParser(
+        prog="eval-compare", description="Compare two evaluation runs on the same set."
+    )
+    parser.add_argument("a", help="the earlier run: a report path or its file stem")
+    parser.add_argument("b", help="the later run")
+    parser.add_argument("--sets-dir", type=Path, default=SETS_DIR)
+    parser.add_argument("--reports-dir", type=Path, default=DEFAULT_REPORTS_DIR)
+    args = parser.parse_args(argv)
+    try:
+        a, b = (
+            Report.model_validate_json(
+                find_report(name, args.reports_dir).read_text(encoding="utf-8")
+            )
+            for name in (args.a, args.b)
+        )
+        if a.run.set_name is None:
+            raise CompareError("the first report is not a named-set run")
+        loaded = load_set(a.run.set_name, args.sets_dir)
+        if loaded.sha256 != a.run.set_sha256:
+            raise CompareError(f"the runs used an earlier version of {loaded.name}")
+        comparison = compare(a, b, {item.id: item for item in loaded.items})
+    except (CompareError, SetError) as error:
+        print(f"eval-compare: {error}", file=sys.stderr)
+        return 1
+    print("\n".join(render_comparison(comparison)))
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:

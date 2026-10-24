@@ -67,6 +67,9 @@ uv run eval-sets [--agreement]      # role, size, review, label and provenance m
 uv run eval import <file> --batch gem01 --provenance gemini-<model>   # into eval/sets/staging/gem01
 uv run eval review --batch gem01    # blind, resumable
 uv run eval promote --batch gem01 --to test
+uv run eval --set test --config two-stage --offline   # cache only; never builds the adapter
+uv run eval rescore --set test      # rebuild scores from stored predictions
+uv run eval-compare <run-a> <run-b> # score changes and items that flipped
 ```
 
 Run from `frontend/` (the root's `bun run lint`, `typecheck` and `test` cover `frontend/` and `infra/` together):
