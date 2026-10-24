@@ -16,7 +16,7 @@ dependencies = [
 
 [project.scripts]
 eval = "commitment_tracker.evaluation.cli:main"
-eval-sets = "commitment_tracker.evaluation.sets:main"
+eval-sets = "commitment_tracker.evaluation.cli:sets_main"
 export-openapi = "commitment_tracker.api.export_openapi:main"
 
 [dependency-groups]

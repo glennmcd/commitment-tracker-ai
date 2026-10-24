@@ -4,6 +4,8 @@
     uv run eval --data some-items.jsonl
     uv run eval import gemini.jsonl --batch gem01 --provenance gemini-3-pro
     uv run eval review --batch gem01
+    uv run eval promote --batch gem01 --to test
+    uv run eval-sets [--agreement]
 
 Calls the real model (and spends money) for every item not already in the response cache. Set runs
 are written to eval/reports/<set>/; `--data` and staging runs go to eval/reports/adhoc/, which is
@@ -20,6 +22,7 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from pathlib import Path
 
+from commitment_tracker.evaluation.agreement import agreement, render_agreement
 from commitment_tracker.evaluation.cache import DEFAULT_CACHE_DIR, ResponseCache
 from commitment_tracker.evaluation.dataset import DatasetError, EvalItem, load_dataset
 from commitment_tracker.evaluation.importer import (
@@ -27,6 +30,7 @@ from commitment_tracker.evaluation.importer import (
     import_batch,
     latest_generation_prompt,
 )
+from commitment_tracker.evaluation.promote import PromoteError, promote_batch
 from commitment_tracker.evaluation.report import (
     DEFAULT_REPORTS_DIR,
     RunInfo,
@@ -35,7 +39,14 @@ from commitment_tracker.evaluation.report import (
 )
 from commitment_tracker.evaluation.review import review_batch
 from commitment_tracker.evaluation.runner import run_items
-from commitment_tracker.evaluation.sets import SETS_DIR, SetError, is_staging, load_set
+from commitment_tracker.evaluation.sets import (
+    SETS_DIR,
+    SetError,
+    is_staging,
+    load_set,
+    render_summary,
+    summarize,
+)
 from commitment_tracker.extractor.factory import build_extractor
 from commitment_tracker.extractor.prompt import UnknownPromptVersion
 from commitment_tracker.settings import Settings
@@ -153,7 +164,47 @@ def _review(argv: list[str]) -> int:
     return 0
 
 
-SUBCOMMANDS = {"import": _import, "review": _review}
+def _promote(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(
+        prog="eval promote", description="Move a reviewed batch's kept items into a set."
+    )
+    parser.add_argument("--batch", required=True)
+    parser.add_argument("--to", required=True, dest="target", help="e.g. test or dev")
+    parser.add_argument("--sets-dir", type=Path, default=SETS_DIR)
+    args = parser.parse_args(argv)
+    try:
+        result = promote_batch(args.batch, args.target, args.sets_dir, today=date.today())
+    except (PromoteError, SetError) as error:
+        print(f"eval promote: {error}", file=sys.stderr)
+        return 1
+    print(f"promoted {len(result.promoted)} into {result.target}; sha256 {result.sha256}")
+    if result.gated:
+        print(
+            f"{result.target} is gated: its hash changed, so the gate now wants a new report and "
+            f"baseline (uv run eval --set {result.target})"
+        )
+    return 0
+
+
+SUBCOMMANDS = {"import": _import, "review": _review, "promote": _promote}
+
+
+def sets_main(argv: list[str] | None = None) -> int:
+    """`uv run eval-sets`: list the sets; `--agreement` adds the review agreement summary."""
+    parser = argparse.ArgumentParser(
+        prog="eval-sets", description="List the evaluation sets and what they hold."
+    )
+    parser.add_argument("--sets-dir", type=Path, default=SETS_DIR)
+    parser.add_argument(
+        "--agreement", action="store_true", help="agreement with generators, from review logs"
+    )
+    args = parser.parse_args(argv)
+    summaries = summarize(args.sets_dir)
+    for summary in summaries:
+        print("\n".join(render_summary(summary)))
+    if args.agreement:
+        print("\n".join(render_agreement(agreement(args.sets_dir))))
+    return 1 if any(summary.error for summary in summaries) else 0
 
 
 def main(argv: list[str] | None = None) -> int:

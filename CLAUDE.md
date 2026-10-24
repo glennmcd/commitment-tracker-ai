@@ -62,7 +62,10 @@ uv run pytest                       # no network calls
 uv run ruff check . && uv run ruff format --check .
 uv run mypy                         # strict
 uv run eval --set dev --model <id> --prompt v1   # spends money on cache misses
-uv run eval-sets                    # role, size, review, label and provenance mix per set
+uv run eval-sets [--agreement]      # role, size, review, label and provenance mix per set
+uv run eval import <file> --batch gem01 --provenance gemini-<model>   # into eval/sets/staging/gem01
+uv run eval review --batch gem01    # blind, resumable
+uv run eval promote --batch gem01 --to test
 ```
 
 Run from `frontend/` (the root's `bun run lint`, `typecheck` and `test` cover `frontend/` and `infra/` together):

@@ -6,9 +6,7 @@ Staging sets (`staging/<batch>`) hold imported drafts awaiting review; every oth
 reviewed items.
 """
 
-import argparse
 import re
-import sys
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date
@@ -182,19 +180,3 @@ def render_summary(summary: SetSummary) -> list[str]:
         f"  labels      {_mix(summary.labels)}",
         f"  provenance  {_mix(summary.provenance)}",
     ]
-
-
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        prog="eval-sets", description="List the evaluation sets and what they hold."
-    )
-    parser.add_argument("--sets-dir", type=Path, default=SETS_DIR)
-    args = parser.parse_args(argv)
-    summaries = summarize(args.sets_dir)
-    for summary in summaries:
-        print("\n".join(render_summary(summary)))
-    return 1 if any(summary.error for summary in summaries) else 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

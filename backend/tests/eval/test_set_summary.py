@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from commitment_tracker.evaluation import sets
+from commitment_tracker.evaluation import cli
 from commitment_tracker.evaluation.sets import summarize
 from tests.eval.builders import exp
 from tests.eval.test_dataset import item_data
@@ -59,7 +59,7 @@ def test_a_broken_set_is_reported_not_raised(tmp_path: Path) -> None:
 
 def test_cli_prints_a_block_per_set(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     populate(tmp_path)
-    assert sets.main(["--sets-dir", str(tmp_path)]) == 0
+    assert cli.sets_main(["--sets-dir", str(tmp_path)]) == 0
     out = capsys.readouterr().out
     assert "dev  role dev  gated no  items 2  sha256 " in out
     assert "test  role test  gated yes  items 0" in out
@@ -73,5 +73,5 @@ def test_cli_exits_1_when_a_set_is_broken(
 ) -> None:
     populate(tmp_path)
     (tmp_path / "test" / "items.jsonl").write_text("{nope\n", encoding="utf-8")
-    assert sets.main(["--sets-dir", str(tmp_path)]) == 1
+    assert cli.sets_main(["--sets-dir", str(tmp_path)]) == 1
     assert "error" in capsys.readouterr().out

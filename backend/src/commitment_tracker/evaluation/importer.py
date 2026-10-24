@@ -245,10 +245,29 @@ def import_batch(
     )
 
 
+def item_line(item: EvalItem) -> str:
+    """One item as a JSONL line; turn timestamps appear only when set (audio items)."""
+    data = item.model_dump(mode="json")
+    for turn in data["turns"]:
+        for key in ("start_ms", "end_ms"):
+            if turn[key] is None:
+                del turn[key]
+    return json.dumps(data, ensure_ascii=False)
+
+
 def write_items(path: Path, items: list[EvalItem]) -> None:
     """One item per line, LF endings on every platform, so set hashes and diffs stay stable."""
-    lines = [json.dumps(item.model_dump(mode="json"), ensure_ascii=False) for item in items]
+    lines = [item_line(item) for item in items]
     path.write_bytes(("\n".join(lines) + "\n" if lines else "").encode("utf-8"))
+
+
+def append_items(path: Path, items: list[EvalItem]) -> None:
+    """Add items after the existing lines, leaving those byte for byte as they are."""
+    existing = path.read_bytes() if path.is_file() else b""
+    if existing and not existing.endswith(b"\n"):
+        existing += b"\n"
+    added = "".join(item_line(item) + "\n" for item in items)
+    path.write_bytes(existing + added.encode("utf-8"))
 
 
 def write_json(path: Path, model: BaseModel) -> None:
