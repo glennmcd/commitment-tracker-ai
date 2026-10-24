@@ -138,3 +138,11 @@ def test_the_live_evaluation_job_is_disabled_and_covers_every_configuration() ->
     assert f"config: [{', '.join(CONFIGURATIONS)}]" in text
     assert "uv run eval --set test --config ${{ matrix.config }}" in text
     assert "protected GitHub environment" in read()
+
+
+def test_the_backend_job_fails_when_the_evaluation_export_is_stale() -> None:
+    text = job("backend")
+    assert "uv run eval-export-site" in text
+    status = "git status --porcelain -- ../frontend/src/data/evals"
+    assert status in text
+    assert text.index("uv run eval-export-site") < text.index(status)

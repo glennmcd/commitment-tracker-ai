@@ -37,6 +37,10 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run mypy
+      # The /evals pages are built from frontend/src/data/evals, exported from the sets and reports. A stale or
+      # missing file fails here (`uv run eval-export-site` regenerates it); porcelain status also catches new files.
+      - run: uv run eval-export-site
+      - run: test -z "$(git status --porcelain -- ../frontend/src/data/evals)" || { git status --short -- ../frontend/src/data/evals; exit 1; }
 
   # The regression gate (ADR 0012) checks committed evaluation reports against backend/eval/baseline.json. It
   # never calls a model, so it needs no API key. A workflow-level `paths:` filter would leave a required check
