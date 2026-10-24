@@ -9,6 +9,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
+from commitment_tracker.evaluation.audio_eval import AudioScores
 from commitment_tracker.evaluation.dataset import EvalItem
 from commitment_tracker.evaluation.metrics import Scores, compute_scores
 from commitment_tracker.evaluation.results import ItemResult
@@ -137,6 +138,7 @@ class Report(BaseModel):
     items: list[ItemDetail]
     by_provenance: dict[str, ProvenanceScore] = Field(default_factory=dict)
     two_stage: TwoStageScores | None = None
+    audio: AudioScores | None = None  # audio-set runs: the transcription penalty
 
 
 def _detail(r: ItemResult) -> ItemDetail:
@@ -335,6 +337,34 @@ def render_markdown(report: Report) -> str:
         lines += [
             _row(f"Cost, {stage}", f"${cost:.4f}" if cost is not None else "n/a")
             for stage, cost in staged.stage_cost_usd.items()
+        ]
+    if report.audio is not None:
+        audio = report.audio
+        lines += [
+            "",
+            "## Audio",
+            "",
+            "Ledger F1 on transcribed clips against the same items as text; the penalty is the "
+            "difference.",
+            "",
+            _row("Source", "Clips", "Audio", "Text", "Penalty"),
+            _row("---", "---", "---", "---", "---"),
+        ]
+        lines += [
+            _row(
+                name,
+                s.clips,
+                _f(s.ledger_f1_audio),
+                _f(s.ledger_f1_text),
+                f"{s.penalty:+.3f}",
+            )
+            for name, s in audio.slices.items()
+        ]
+        lines += [
+            "",
+            f"Turn-count mismatches {audio.turn_mismatches}, speaker errors "
+            f"{audio.speaker_errors}, spans whose turn was not transcribed "
+            f"{audio.unmatched_spans}.",
         ]
     lines += ["", "## Ambiguous items", ""]
     if scores.ambiguous:

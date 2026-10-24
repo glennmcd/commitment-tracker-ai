@@ -72,6 +72,7 @@ uv run eval rescore --set test      # rebuild scores from stored predictions
 uv run eval-compare <run-a> <run-b> # score changes and items that flipped
 uv run eval-gate                    # CI's regression gate; --update-baseline when a change is intended
 uv run eval-audio make --item <id> --profile <p>   # Polly clip; also add (human), upload, fetch
+uv run eval --set audio --transcribe --config <c>  # transcripts cached by audio hash
 ```
 
 Run from `frontend/` (the root's `bun run lint`, `typecheck` and `test` cover `frontend/` and `infra/` together):

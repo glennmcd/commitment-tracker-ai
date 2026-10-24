@@ -30,14 +30,25 @@ from commitment_tracker.evaluation.agreement import agreement, render_agreement
 from commitment_tracker.evaluation.audio import (
     AUDIO_DIR,
     DEFAULT_VOICES,
+    AudioClip,
     AudioSetError,
     ClipStore,
     S3ClipStore,
     add_human,
     fetch,
+    load_clips,
     make_polly,
     parse_readers,
+    source_items,
     upload,
+)
+from commitment_tracker.evaluation.audio_eval import (
+    Alignment,
+    AwsClipTranscriber,
+    Transcribe,
+    TranscriptCache,
+    align,
+    audio_scores,
 )
 from commitment_tracker.evaluation.cache import (
     DEFAULT_CACHE_DIR,
@@ -52,7 +63,12 @@ from commitment_tracker.evaluation.compare import (
     find_report,
     render_comparison,
 )
-from commitment_tracker.evaluation.dataset import DatasetError, EvalItem, load_dataset
+from commitment_tracker.evaluation.dataset import (
+    DatasetError,
+    EvalItem,
+    canonical_sha256,
+    load_dataset,
+)
 from commitment_tracker.evaluation.gate import (
     BASELINE_PATH,
     GATED_CONFIGURATIONS,
@@ -83,8 +99,10 @@ from commitment_tracker.evaluation.sets import (
     SETS_DIR,
     SetError,
     is_staging,
+    load_manifest,
     load_set,
     render_summary,
+    set_dir,
     summarize,
 )
 from commitment_tracker.evaluation.synthesis import Synthesizer, polly_synthesizer
@@ -99,12 +117,25 @@ ADHOC = "adhoc"
 
 
 @dataclass(frozen=True)
+class _Audio:
+    clips: dict[str, AudioClip]
+    alignments: dict[str, Alignment]
+    text_items: list[EvalItem]
+    text_sha256: str
+
+
+@dataclass(frozen=True)
 class _Target:
     items: list[EvalItem]
     dataset: str
     reports: str  # the subdirectory of the reports directory
     set_name: str | None = None
     set_sha256: str | None = None
+    audio: _Audio | None = None
+
+
+class _MissingTranscripts(Exception):
+    pass
 
 
 def _parser(settings: Settings) -> argparse.ArgumentParser:
@@ -122,6 +153,14 @@ def _parser(settings: Settings) -> argparse.ArgumentParser:
     source.add_argument("--set", dest="set_name", help="a named set under eval/sets (default dev)")
     source.add_argument("--data", type=Path, help="a JSONL file of items, for ad hoc runs")
     parser.add_argument("--sets-dir", type=Path, default=SETS_DIR)
+    parser.add_argument(
+        "--transcribe",
+        action="store_true",
+        help="for the audio set: transcribe each clip (cached by audio hash) and score it",
+    )
+    parser.add_argument("--profile", help="AWS profile, for --transcribe on uncached clips")
+    parser.add_argument("--region", default="us-east-2")
+    parser.add_argument("--bucket", help="evaluation clip bucket (default EVAL_AUDIO_BUCKET)")
     parser.add_argument("--concurrency", type=int, default=4)
     parser.add_argument("--reports-dir", type=Path, default=DEFAULT_REPORTS_DIR)
     parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR)
@@ -135,9 +174,57 @@ def _parser(settings: Settings) -> argparse.ArgumentParser:
     return parser
 
 
+def make_transcriber(profile: str | None, region: str, bucket: str | None) -> Transcribe:
+    if not bucket:
+        raise SetError("set EVAL_AUDIO_BUCKET or pass --bucket (stack output EvalAudioBucketName)")
+    session = boto3.Session(profile_name=profile, region_name=region)
+    return AwsClipTranscriber(session.client("transcribe"), session.client("s3"), bucket)
+
+
+def _audio_target(args: argparse.Namespace) -> _Target:
+    if not args.transcribe:
+        raise SetError("the audio set is scored with --transcribe")
+    clips = {clip.test_item_id: clip for clip in load_clips(args.sets_dir)}
+    if not clips:
+        raise SetError("the audio set has no clips yet (uv run eval-audio make)")
+    items = source_items(args.sets_dir)
+    cache = TranscriptCache(args.cache_dir / "transcripts")
+    missing = [clip for clip in clips.values() if cache.get(clip.sha256) is None]
+    if missing and args.offline:
+        raise _MissingTranscripts(f"{len(missing)} clips have no cached transcript")
+    if missing:
+        transcribe = make_transcriber(
+            args.profile, args.region, args.bucket or Settings().eval_audio_bucket
+        )
+        for clip in missing:
+            cache.put(clip.sha256, transcribe(clip))
+    alignments = {}
+    for item_id, clip in clips.items():
+        turns = cache.get(clip.sha256)
+        assert turns is not None
+        alignments[item_id] = align(items[item_id], turns)
+    manifest = load_manifest("audio", args.sets_dir)
+    text_set = load_set(manifest.items_from or "test", args.sets_dir)
+    return _Target(
+        [alignments[item_id].item for item_id in sorted(alignments)],
+        dataset="audio",
+        reports="audio",
+        set_name="audio",
+        set_sha256=canonical_sha256(set_dir("audio", args.sets_dir) / "clips.jsonl"),
+        audio=_Audio(
+            clips=clips,
+            alignments=alignments,
+            text_items=[items[item_id] for item_id in sorted(alignments)],
+            text_sha256=text_set.sha256,
+        ),
+    )
+
+
 def _target(args: argparse.Namespace) -> _Target:
     if args.data is not None:
         return _Target(load_dataset(args.data), dataset=args.data.name, reports=ADHOC)
+    if load_manifest(args.set_name or "dev", args.sets_dir).kind == "audio":
+        return _audio_target(args)
     loaded = load_set(args.set_name or "dev", args.sets_dir)
     return _Target(
         loaded.items,
@@ -457,14 +544,18 @@ def main(argv: list[str] | None = None) -> int:
     except (DatasetError, SetError, UnknownPromptVersion) as error:
         print(f"eval: {error}", file=sys.stderr)
         return 2
+    except _MissingTranscripts as error:
+        print(f"eval: --offline: {error}; run without --offline to transcribe", file=sys.stderr)
+        return 1
     described = analyzer.describe()
+    every_item = target.items + (target.audio.text_items if target.audio else [])
     if args.offline:
         first = analyzer.screen if isinstance(analyzer, TwoStageExtractor) else analyzer
         assert isinstance(first, CachedAnalyzer)
-        missing = [i.id for i in target.items if not first.is_cached(request_for(i))]
+        missing = [i.id for i in every_item if not first.is_cached(request_for(i))]
         if missing:
             print(
-                f"eval: --offline: {len(missing)} of {len(target.items)} items are not cached "
+                f"eval: --offline: {len(missing)} of {len(every_item)} items are not cached "
                 f"(first: {missing[0]}); run without --offline to fill the cache",
                 file=sys.stderr,
             )
@@ -479,6 +570,11 @@ def main(argv: list[str] | None = None) -> int:
     started_at, started = datetime.now(UTC), time.perf_counter()
     try:
         results = asyncio.run(run_items(target.items, analyzer, concurrency=args.concurrency))
+        text_results = (
+            asyncio.run(run_items(target.audio.text_items, analyzer, concurrency=args.concurrency))
+            if target.audio
+            else []
+        )
     except CacheMiss:
         # Only a two-stage extract window gets here: its keys depend on the screen's labels.
         print(
@@ -502,6 +598,15 @@ def main(argv: list[str] | None = None) -> int:
         stages=described.stages,
     )
     report = build_report(run, results)
+    if target.audio is not None:
+        penalty = audio_scores(
+            target.audio.clips,
+            target.audio.alignments,
+            results,
+            text_results,
+            text_sha256=target.audio.text_sha256,
+        )
+        report = report.model_copy(update={"audio": penalty})
     json_path, md_path = write_report(report, reports_dir)
 
     scores = report.scores
