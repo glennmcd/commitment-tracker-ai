@@ -218,13 +218,21 @@ class _Session:
                     if (result := edited_in_editor()) is not None:
                         return result
                     continue
+                if key == "m":
+                    try:
+                        current = _relabel(current, review.span, review.mine)
+                    except ValidationError as error:
+                        # e.g. COMMITMENT needs an owner the generator's SUGGESTION never had.
+                        self.io.print(
+                            f"  {review.mine} needs more than a new label "
+                            f"({describe_validation_error(error)}); use [e] to edit the item"
+                        )
+                        continue
+                    review.final = review.mine
+                    changed = True
                 break
             if key == "r":
                 return finish("rejected", item)
-            if key == "m":
-                current = _relabel(current, review.span, review.mine)
-                review.final = review.mine
-                changed = True
 
         for check in dates:
             span = current.expected[check.span]

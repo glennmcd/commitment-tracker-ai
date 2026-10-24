@@ -248,3 +248,13 @@ def test_cli_review_of_a_missing_batch_exits_1(
 ) -> None:
     assert cli.main(["review", "--batch", "nope", "--sets-dir", str(root)]) == 1
     assert "no set named 'staging/nope'" in capsys.readouterr().err
+
+
+def test_taking_a_label_that_needs_more_fields_asks_for_an_edit(tmp_path: Path, root: Path) -> None:
+    # The generator's REQUEST has no owner; COMMITMENT needs one, so "take mine" can't just relabel.
+    stage(tmp_path, root, two_span_draft("gem01-01"))
+    terminal = Terminal("c", "c", "m", "g")
+    assert review_batch("gem01", root, terminal.io()).accepted == 1
+    assert "needs more than a new label" in terminal.text
+    assert "use [e] to edit" in terminal.text
+    assert staged(root)["gem01-01"].expected[0].label is Label.REQUEST
