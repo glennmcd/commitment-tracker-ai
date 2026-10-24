@@ -5,6 +5,7 @@ name: ci
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 # The jobs only read the repository.
 permissions:
@@ -36,6 +37,47 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run mypy
+
+  # The regression gate (ADR 0012) checks committed evaluation reports against backend/eval/baseline.json. It
+  # never calls a model, so it needs no API key. A workflow-level `paths:` filter would leave a required check
+  # pending, so the job always runs and its first step decides whether anything it guards changed.
+  eval-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - id: changes
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          # No usable base (a new branch, a manual run): check everything.
+          if [ -z "$BASE" ] || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          guarded='^backend/(src/commitment_tracker/(extractor/|evaluation/|settings\.py)|eval/(sets/|reports/|baseline\.json))'
+          if git diff --name-only "$BASE" HEAD | grep -Eq "$guarded"; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "nothing the gate guards changed"
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.changes.outputs.run == 'true'
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - if: steps.changes.outputs.run == 'true'
+        run: uv sync --locked
+      - if: steps.changes.outputs.run == 'true'
+        run: uv run eval-gate
 
   frontend:
     runs-on: ubuntu-latest
@@ -104,3 +146,39 @@ jobs:
         working-directory: infra
         env:
           CDK_DEFAULT_ACCOUNT: '123456789012'
+
+  # Live evaluation: disabled. It would run the configurations on the test set with a real API key; today those
+  # runs happen locally and their reports are committed, which the eval-gate job checks. To enable it:
+  #   - put ANTHROPIC_API_KEY in a protected GitHub environment with required reviewers, and set
+  #     `environment:` on this job so every run waits for approval;
+  #   - give that key a spend cap in the Anthropic console;
+  #   - restore backend/eval/.cache between runs (actions/cache keyed on the sets and the prompt files), so a
+  #     rerun only pays for what changed;
+  #   - expect roughly $0.03-0.05 (haiku), $0.49-1.35 (sonnet), $0.98-2.70 (opus) and $0.90-2.45 (two-stage)
+  #     per full run of the test set (docs/plans/part-3-evaluation.md, section 7);
+  #   - then remove `if: false` and pass the key to the run step's environment.
+  eval-live:
+    if: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: backend
+    strategy:
+      matrix:
+        config: [haiku, sonnet, opus, two-stage]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - run: uv sync --locked
+      - run: uv run eval --set test --config ${{ matrix.config }}
+      # The reports come back as an artifact for a person to review and commit; the job never pushes.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: eval-reports-${{ matrix.config }}
+          path: backend/eval/reports/test/
