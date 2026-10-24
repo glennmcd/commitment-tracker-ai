@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from commitment_tracker.evaluation.report import (
+    Report,
     RunInfo,
     build_report,
     render_markdown,
@@ -74,3 +75,49 @@ def test_write_report_names_files_by_time_model_and_prompt(tmp_path: Path) -> No
     data = json.loads(json_path.read_text(encoding="utf-8"))
     assert data["scores"]["ledger"]["f1"] == 1.0
     assert md_path.read_text(encoding="utf-8").startswith("# Evaluation")
+
+
+# --- predicted spans and provenance --------------------------------------------------------------
+
+LEGACY = Path(__file__).resolve().parents[2] / "eval" / "reports" / "dev"
+
+
+def test_items_keep_the_predicted_spans_scoring_reads() -> None:
+    report = build_report(RUN, results())
+    (span,) = report.items[0].spans or []
+    assert (span.turn_index, span.label, span.quote) == (0, "COMMITMENT", "I'll send it Friday.")
+    assert span.owner == "seller"
+    assert report.items[0].latency_ms == 1_000
+    assert report.items[0].cost_usd == 0.01
+    assert report.items[0].provenance == "hand-written"
+
+
+def test_a_failed_item_has_no_spans_but_keeps_its_error() -> None:
+    report = build_report(RUN, [ItemResult(COMMIT, None, "model_unavailable", False)])
+    assert report.items[0].spans == []
+    assert report.items[0].error == "model_unavailable"
+
+
+def test_scores_are_broken_down_by_provenance() -> None:
+    gemini = COMMIT.model_copy(update={"id": "g-1", "provenance": "gemini-3-pro"})
+    report = build_report(
+        RUN,
+        [
+            ItemResult(
+                COMMIT, response(pred(0, "COMMITMENT", "I'll send it Friday.")), None, False
+            ),
+            ItemResult(gemini, response(pred(0, "NONE", "I'll send it Friday.")), None, False),
+        ],
+    )
+    assert set(report.by_provenance) == {"gemini-3-pro", "hand-written"}
+    assert report.by_provenance["hand-written"].ledger_f1 == 1.0
+    assert report.by_provenance["gemini-3-pro"].ledger_f1 == 0.0
+    assert report.by_provenance["gemini-3-pro"].items == 1
+    assert "## By provenance" in render_markdown(report)
+
+
+def test_reports_written_before_spans_were_stored_still_load() -> None:
+    for path in LEGACY.glob("*.json"):
+        report = Report.model_validate_json(path.read_text(encoding="utf-8"))
+        assert report.items and report.items[0].spans is None
+        assert report.by_provenance == {}

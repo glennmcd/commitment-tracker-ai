@@ -4,13 +4,14 @@ Files go to backend/eval/reports/<set>/ (or `adhoc/` for `--data` and staging ru
 `<UTC start>-<model>-<prompt>.json` and `.md`. A set run pins the set by name, hash and size.
 """
 
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 from pydantic import BaseModel, Field
 
 from commitment_tracker.evaluation.metrics import Scores, compute_scores
 from commitment_tracker.evaluation.results import ItemResult
+from commitment_tracker.schemas import Label, Precision, Span
 
 # backend/src/commitment_tracker/evaluation/report.py -> backend/eval/reports
 DEFAULT_REPORTS_DIR = Path(__file__).resolve().parents[3] / "eval" / "reports"
@@ -31,6 +32,36 @@ class RunInfo(BaseModel):
     set_items: int | None = None
 
 
+class PredictedSpan(BaseModel):
+    """The parts of a predicted span that scoring reads, plus what a reader needs to judge it."""
+
+    turn_index: int
+    label: Label
+    quote: str
+    owner: str | None
+    recipient: str | None
+    action: str | None
+    due_raw: str | None
+    due_resolved: date | None
+    precision: Precision
+    condition: str | None
+
+    @classmethod
+    def from_span(cls, span: Span) -> "PredictedSpan":
+        return cls(
+            turn_index=span.turn_index,
+            label=span.label,
+            quote=span.quote,
+            owner=span.owner,
+            recipient=span.recipient,
+            action=span.action,
+            due_raw=span.due.raw,
+            due_resolved=span.due.resolved,
+            precision=span.due.precision,
+            condition=span.condition,
+        )
+
+
 class ItemDetail(BaseModel):
     item_id: str
     tags: list[str]
@@ -40,33 +71,74 @@ class ItemDetail(BaseModel):
     cached: bool
     attempts: int | None
     dropped_quotes: int | None
+    # None in reports written before predictions were stored; those can't be re-scored.
+    spans: list[PredictedSpan] | None = None
+    provenance: str | None = None
+    latency_ms: int | None = None
+    cost_usd: float | None = None
+    served_by: str | None = None
+
+
+class ProvenanceScore(BaseModel):
+    items: int
+    scored_items: int
+    ledger_f1: float
+    ledger_precision: float
+    ledger_recall: float
+    accuracy: float
 
 
 class Report(BaseModel):
     run: RunInfo
     scores: Scores
     items: list[ItemDetail]
+    by_provenance: dict[str, ProvenanceScore] = Field(default_factory=dict)
+
+
+def _detail(r: ItemResult) -> ItemDetail:
+    metadata = r.response.metadata if r.response else None
+    return ItemDetail(
+        item_id=r.item.id,
+        tags=list(r.item.tags),
+        expected=[span.label.value for span in r.item.expected],
+        predicted=[span.label.value for span in r.response.spans] if r.response else [],
+        error=r.error,
+        cached=r.cached,
+        attempts=metadata.attempts if metadata else None,
+        dropped_quotes=metadata.dropped_quotes if metadata else None,
+        spans=[PredictedSpan.from_span(span) for span in r.response.spans] if r.response else [],
+        provenance=r.item.provenance,
+        latency_ms=metadata.latency_ms if metadata else None,
+        cost_usd=metadata.cost_usd if metadata else None,
+        served_by=metadata.served_by if metadata else None,
+    )
+
+
+def scores_by_provenance(results: list[ItemResult]) -> dict[str, ProvenanceScore]:
+    groups: dict[str, list[ItemResult]] = {}
+    for result in results:
+        groups.setdefault(result.item.provenance, []).append(result)
+    breakdown = {}
+    for provenance in sorted(groups):
+        scores = compute_scores(groups[provenance])
+        breakdown[provenance] = ProvenanceScore(
+            items=scores.items,
+            scored_items=scores.scored_items,
+            ledger_f1=scores.ledger.f1,
+            ledger_precision=scores.ledger.precision,
+            ledger_recall=scores.ledger.recall,
+            accuracy=scores.accuracy,
+        )
+    return breakdown
 
 
 def build_report(run: RunInfo, results: list[ItemResult]) -> Report:
     served = sorted({r.response.metadata.served_by for r in results if r.response})
-    details = [
-        ItemDetail(
-            item_id=r.item.id,
-            tags=list(r.item.tags),
-            expected=[span.label.value for span in r.item.expected],
-            predicted=[span.label.value for span in r.response.spans] if r.response else [],
-            error=r.error,
-            cached=r.cached,
-            attempts=r.response.metadata.attempts if r.response else None,
-            dropped_quotes=r.response.metadata.dropped_quotes if r.response else None,
-        )
-        for r in results
-    ]
     return Report(
         run=run.model_copy(update={"served_by": served}),
         scores=compute_scores(results),
-        items=details,
+        items=[_detail(r) for r in results],
+        by_provenance=scores_by_provenance(results),
     )
 
 
@@ -136,6 +208,29 @@ def render_markdown(report: Report) -> str:
         _row("---", "---", "---", "---"),
     ]
     lines += [_row(field, s.correct, s.total, _f(s.accuracy)) for field, s in scores.fields.items()]
+    if report.by_provenance:
+        lines += [
+            "",
+            "## By provenance",
+            "",
+            "Who wrote the items: the same scores over each author's items alone.",
+            "",
+            _row(
+                "Provenance", "Items", "Ledger F1", "Ledger precision", "Ledger recall", "Accuracy"
+            ),
+            _row("---", "---", "---", "---", "---", "---"),
+        ]
+        lines += [
+            _row(
+                name,
+                p.items,
+                _f(p.ledger_f1),
+                _f(p.ledger_precision),
+                _f(p.ledger_recall),
+                _f(p.accuracy),
+            )
+            for name, p in report.by_provenance.items()
+        ]
     lines += ["", "## Ambiguous items", ""]
     if scores.ambiguous:
         lines += [_row("Item", "Expected", "Predicted"), _row("---", "---", "---")]
