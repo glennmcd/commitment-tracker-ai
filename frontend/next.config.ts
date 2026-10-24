@@ -18,6 +18,8 @@ const version = releaseVersion();
 
 const config: NextConfig = {
   output: "export",
+  // Every route is written as <route>/index.html, which any static host (and e2e/serve.mjs) serves for <route>/.
+  trailingSlash: true,
   // The export has no image optimizer to call.
   images: { unoptimized: true },
   reactStrictMode: true,

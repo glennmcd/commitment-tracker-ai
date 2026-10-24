@@ -100,6 +100,7 @@ function positiveInteger(name: string, value: number): void {
 export class ApiStack extends Stack {
   readonly httpApiUrl: string;
   readonly bucket: Bucket;
+  readonly evalAudioBucket: Bucket;
   readonly jobsTable: Table;
   readonly guardrailsTable: Table;
   readonly feedbackTable: Table;
@@ -145,6 +146,17 @@ export class ApiStack extends Stack {
         expiration: Duration.days(1),
         abortIncompleteMultipartUploadAfter: Duration.days(1),
       })),
+    });
+
+    // Evaluation clips (docs/plans/part-3-evaluation.md, section 3): Polly clips and two people's recordings, pinned
+    // by SHA-256 in backend/eval/sets/audio/clips.jsonl. Private and versioned, with no expiry, unlike the upload
+    // bucket. Nothing in the stack reads it: `uv run eval-audio` uploads and fetches with the owner's credentials.
+    this.evalAudioBucket = new Bucket(this, "EvalAudioBucket", {
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      encryption: BucketEncryption.S3_MANAGED,
+      enforceSSL: true,
+      versioned: true,
+      removalPolicy: RemovalPolicy.RETAIN,
     });
 
     // Jobs and counters expire on their own (TTL), so losing either table loses nothing that matters.
@@ -277,6 +289,7 @@ export class ApiStack extends Stack {
 
     new CfnOutput(this, "ApiUrl", { value: httpApi.apiEndpoint, description: "NEXT_PUBLIC_API_BASE_URL for the site" });
     new CfnOutput(this, "AudioBucketName", { value: this.bucket.bucketName });
+    new CfnOutput(this, "EvalAudioBucketName", { value: this.evalAudioBucket.bucketName });
     new CfnOutput(this, "ApiFunctionName", { value: this.apiFunction.functionName });
     new CfnOutput(this, "WorkerFunctionName", { value: this.workerFunction.functionName });
     new CfnOutput(this, "ApiKeyParameter", {

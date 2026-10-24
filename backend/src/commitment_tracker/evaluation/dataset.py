@@ -6,6 +6,8 @@ keywords (all must appear in the predicted action) and the resolved due date. Th
 document the expectation for readers.
 """
 
+import hashlib
+import json
 from datetime import date
 from pathlib import Path
 from typing import Literal, Self
@@ -14,10 +16,13 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 
 from commitment_tracker.schemas import LEDGER_LABELS, Label, Precision, Turn
 
-# backend/src/commitment_tracker/evaluation/dataset.py -> backend/eval/data/dev.jsonl
-DEV_PATH = Path(__file__).resolve().parents[3] / "eval" / "data" / "dev.jsonl"
+# backend/src/commitment_tracker/evaluation/dataset.py -> backend/eval/sets/dev/items.jsonl
+DEV_PATH = Path(__file__).resolve().parents[3] / "eval" / "sets" / "dev" / "items.jsonl"
 
 Tag = Literal["ambiguous", "multi_turn", "keyword_trap"]
+Review = Literal["unreviewed", "accepted", "edited"]
+# Who wrote the item: the spec, a person, or a generator named `<family>-<model>`.
+PROVENANCE = r"^(spec|hand-written|[a-z]+-[a-z0-9][a-z0-9.\-]*)$"
 
 
 class DatasetError(ValueError):
@@ -65,6 +70,8 @@ class EvalItem(EvalModel):
     tags: list[Tag] = Field(default_factory=list)
     expected: list[ExpectedSpan] = Field(min_length=1)
     note: str | None = None
+    provenance: str = Field(pattern=PROVENANCE)
+    review: Review
 
     @model_validator(mode="after")
     def _spans_point_into_the_transcript(self) -> Self:
@@ -78,7 +85,7 @@ class EvalItem(EvalModel):
         return self
 
 
-def _describe(error: ValidationError) -> str:
+def describe_validation_error(error: ValidationError) -> str:
     parts = []
     for detail in error.errors(include_url=False, include_input=False):
         path = ".".join(str(part) for part in detail["loc"])
@@ -86,17 +93,42 @@ def _describe(error: ValidationError) -> str:
     return "; ".join(parts)
 
 
+def jsonl_lines(path: Path) -> list[str]:
+    """A JSONL file's lines: a leading byte-order mark (PowerShell redirects write one) is dropped,
+    and lines split on newline only. `str.splitlines` would also split on U+2028 and similar
+    characters, which `json.dumps(ensure_ascii=False)` writes raw inside transcripts."""
+    text = path.read_text(encoding="utf-8-sig")
+    return [line.removesuffix("\r") for line in text.split("\n")]
+
+
+def canonical_sha256(path: Path) -> str:
+    """SHA-256 of a JSONL file's items in canonical form (sorted keys, compact, one per line), so
+    key order, spacing, blank lines and line endings never change a set's hash."""
+    lines = []
+    for number, line in enumerate(jsonl_lines(path), start=1):
+        if not line.strip():
+            continue
+        try:
+            data = json.loads(line)
+        except json.JSONDecodeError as error:
+            raise DatasetError(f"{path.name} line {number}: {error.msg}") from None
+        lines.append(json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False))
+    return hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()
+
+
 def load_dataset(path: Path) -> list[EvalItem]:
     """Load and validate every item; the first problem raises with its line number."""
     items: list[EvalItem] = []
     seen: set[str] = set()
-    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+    for number, line in enumerate(jsonl_lines(path), start=1):
         if not line.strip():
             continue
         try:
             item = EvalItem.model_validate_json(line)
         except ValidationError as error:
-            raise DatasetError(f"{path.name} line {number}: {_describe(error)}") from None
+            raise DatasetError(
+                f"{path.name} line {number}: {describe_validation_error(error)}"
+            ) from None
         if item.id in seen:
             raise DatasetError(f"{path.name} line {number}: duplicate id {item.id}")
         seen.add(item.id)

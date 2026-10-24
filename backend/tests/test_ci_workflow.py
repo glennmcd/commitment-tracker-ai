@@ -6,6 +6,8 @@ the plan calls for, with the checks each one must run. No YAML parser is needed.
 import re
 from pathlib import Path
 
+from commitment_tracker.settings import CONFIGURATIONS
+
 ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW = ".github/workflows/ci.yml"
 
@@ -23,8 +25,9 @@ def job(name: str) -> str:
 
 
 def test_runs_on_every_push_and_pull_request() -> None:
+    # workflow_dispatch is there for the disabled live evaluation job.
     on_block = read().split("\non:\n", 1)[1].split("\n\n", 1)[0]
-    assert on_block == "  push:\n  pull_request:"
+    assert on_block == "  push:\n  pull_request:\n  workflow_dispatch:"
 
 
 def test_never_runs_on_pull_request_target() -> None:
@@ -49,14 +52,11 @@ def test_uses_no_secrets() -> None:
     assert "secrets." not in read()
 
 
-def test_three_jobs_each_with_a_timeout() -> None:
+def test_the_jobs_each_have_a_timeout() -> None:
     body = read().split("\njobs:\n", 1)[1]
-    assert re.findall(r"^  ([a-z-]+):\n", body, flags=re.MULTILINE) == [
-        "backend",
-        "frontend",
-        "infra",
-    ]
-    for name in ("backend", "frontend", "infra"):
+    names = re.findall(r"^  ([a-z0-9-]+):\n", body, flags=re.MULTILINE)
+    assert names == ["backend", "eval-gate", "frontend", "e2e", "infra", "eval-live"]
+    for name in names:
         assert re.search(r"^    timeout-minutes: \d+$", job(name), re.MULTILINE), name
 
 
@@ -119,3 +119,30 @@ def test_the_pinned_python_and_bun_versions_match_the_repository() -> None:
     assert (ROOT / "backend/.python-version").read_text().strip() == "3.12"
     assert "bun-version: 1.4.2" in read()
     assert "bun@1.4.2" in (ROOT / "infra/lib/web-stack.ts").read_text(encoding="utf-8")
+
+
+def test_the_eval_gate_checks_committed_reports_when_guarded_paths_change() -> None:
+    text = job("eval-gate")
+    assert "permissions:\n      contents: read" in text
+    assert "fetch-depth: 0" in text  # the base commit must be there to diff against
+    for path in ("extractor/", "evaluation/", "settings", "eval/(sets/|reports/|baseline"):
+        assert path in text, path
+    assert text.index("id: changes") < text.index("uv run eval-gate")
+    assert text.count("if: steps.changes.outputs.run == 'true'") == 3
+    assert "uv sync --locked" in text
+
+
+def test_the_live_evaluation_job_is_disabled_and_covers_every_configuration() -> None:
+    text = job("eval-live")
+    assert "    if: false\n" in text
+    assert f"config: [{', '.join(CONFIGURATIONS)}]" in text
+    assert "uv run eval --set test --config ${{ matrix.config }}" in text
+    assert "protected GitHub environment" in read()
+
+
+def test_the_backend_job_fails_when_the_evaluation_export_is_stale() -> None:
+    text = job("backend")
+    assert "uv run eval-export-site" in text
+    status = "git status --porcelain -- ../frontend/src/data/evals"
+    assert status in text
+    assert text.index("uv run eval-export-site") < text.index(status)

@@ -1,0 +1,127 @@
+{
+  "agreement": {
+    "generators": [],
+    "labels": []
+  },
+  "audio": [],
+  "results": {
+    "dev": [
+      {
+        "accuracy": 1.0,
+        "configuration": "haiku",
+        "cost_usd": 0.004627,
+        "effort": "medium",
+        "escalation_rate": null,
+        "failed_items": 0,
+        "fields": {
+          "action": 1.0,
+          "due": 1.0,
+          "owner": 1.0
+        },
+        "items": 24,
+        "latency_p50_ms": 1512,
+        "latency_p95_ms": 2648,
+        "ledger_f1": 1.0,
+        "ledger_precision": 1.0,
+        "ledger_recall": 1.0,
+        "legacy": true,
+        "macro_f1": 1.0,
+        "model": "claude-haiku-5-5",
+        "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
+        "prompt_version": "v1",
+        "run": "20261022T040145Z-claude-haiku-5-5-v1",
+        "screen_misses": null,
+        "set": "dev",
+        "set_sha256": null,
+        "stages": {},
+        "started_at": "2026-10-22T04:01:45.187091+00:00"
+      }
+    ]
+  },
+  "runs": [
+    {
+      "accuracy": 1.0,
+      "configuration": "haiku",
+      "cost_usd": 0.004627,
+      "effort": "medium",
+      "escalation_rate": null,
+      "failed_items": 0,
+      "fields": {
+        "action": 1.0,
+        "due": 1.0,
+        "owner": 1.0
+      },
+      "items": 24,
+      "latency_p50_ms": 1512,
+      "latency_p95_ms": 2648,
+      "ledger_f1": 1.0,
+      "ledger_precision": 1.0,
+      "ledger_recall": 1.0,
+      "legacy": true,
+      "macro_f1": 1.0,
+      "model": "claude-haiku-5-5",
+      "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
+      "prompt_version": "v1",
+      "run": "20261022T040145Z-claude-haiku-5-5-v1",
+      "screen_misses": null,
+      "set": "dev",
+      "set_sha256": null,
+      "stages": {},
+      "started_at": "2026-10-22T04:01:45.187091+00:00"
+    }
+  ],
+  "sets": [
+    {
+      "description": "Clips of test items: Polly (regenerable) and two people reading (fetched), scored against the same items as text.",
+      "error": null,
+      "gated": false,
+      "items": 0,
+      "kind": "audio",
+      "labels": {},
+      "name": "audio",
+      "provenance": {},
+      "review": {},
+      "role": "test",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "description": "Development set: the spec's 24 seed utterances plus later dev items. Prompts are tuned on it; its score is never a headline.",
+      "error": null,
+      "gated": false,
+      "items": 24,
+      "kind": "text",
+      "labels": {
+        "COMMITMENT": 7,
+        "CONDITIONAL": 2,
+        "HEDGED": 4,
+        "NONE": 4,
+        "REFUSAL": 2,
+        "REPORTED": 2,
+        "REQUEST": 3,
+        "SUGGESTION": 2
+      },
+      "name": "dev",
+      "provenance": {
+        "spec": 24
+      },
+      "review": {
+        "accepted": 24
+      },
+      "role": "dev",
+      "sha256": "69836e7e08697be27d1634a3f8e81c8fa32dbff1c3c1dffd6588d27e252b9271"
+    },
+    {
+      "description": "Held-out headline set: reviewed drafts from non-Claude models plus hand-written items.",
+      "error": null,
+      "gated": true,
+      "items": 0,
+      "kind": "text",
+      "labels": {},
+      "name": "test",
+      "provenance": {},
+      "review": {},
+      "role": "test",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

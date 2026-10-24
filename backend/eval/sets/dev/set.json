@@ -1,0 +1,9 @@
+{
+  "name": "dev",
+  "description": "Development set: the spec's 24 seed utterances plus later dev items. Prompts are tuned on it; its score is never a headline.",
+  "role": "dev",
+  "gated": false,
+  "sources": [
+    {"batch": "spec", "provenance": "spec", "generation_prompt": null, "items": 24}
+  ]
+}

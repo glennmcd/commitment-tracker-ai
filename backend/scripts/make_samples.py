@@ -19,30 +19,27 @@ AWS. Standard voices cost $4 per million characters.
 
 import argparse
 import hashlib
-import io
 import json
-import wave
-from collections.abc import Callable, Sequence
-from dataclasses import dataclass
+from collections.abc import Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from pydantic import Field, model_validator
 
+from commitment_tracker.evaluation import synthesis
 from commitment_tracker.evaluation.dataset import EvalItem
-from commitment_tracker.jobs.audio import MAX_AUDIO_SECONDS, SAMPLE_RATE_HZ
+from commitment_tracker.evaluation.synthesis import (
+    Clip,
+    Synthesizer,
+    assign_voices,
+    polly_synthesizer,
+    wav_bytes,
+)
 from commitment_tracker.jobs.samples import SampleClip
-from commitment_tracker.schemas import Turn
-
-if TYPE_CHECKING:
-    from types_boto3_polly import PollyClient
 
 BACKEND = Path(__file__).resolve().parents[1]
-GAP_MS = 400
 USD_PER_MILLION_CHARS = 4.0
 CHARS_PER_SECOND = 14  # a rough rate for Polly's standard voices, for the dry-run estimate
-
-Synthesizer = Callable[[str, str], bytes]  # (text, voice id) -> 16 kHz mono 16-bit PCM
 
 
 class Dialogue(EvalItem):
@@ -67,75 +64,11 @@ def load_dialogues(path: Path) -> list[Dialogue]:
 
 def speaker_voices(dialogue: Dialogue) -> dict[str, str]:
     """The first speaker to talk gets the first voice, the other speaker the second."""
-    order = list(dict.fromkeys(turn.speaker for turn in dialogue.turns))
-    return dict(zip(order, dialogue.voices, strict=True))
-
-
-@dataclass(frozen=True)
-class Clip:
-    id: str
-    pcm: bytes
-    turns: list[Turn]  # with start_ms and end_ms
-
-    @property
-    def duration_ms(self) -> int:
-        return len(self.pcm) // 2 * 1000 // SAMPLE_RATE_HZ
+    return assign_voices(dialogue.turns, dialogue.voices)
 
 
 def build_clip(dialogue: Dialogue, synthesize: Synthesizer) -> Clip:
-    voices = speaker_voices(dialogue)
-    silence = b"\x00\x00" * (SAMPLE_RATE_HZ * GAP_MS // 1000)
-    parts: list[bytes] = []
-    timed: list[Turn] = []
-    samples = 0
-    for index, turn in enumerate(dialogue.turns):
-        if index:
-            parts.append(silence)
-            samples += len(silence) // 2
-        pcm = synthesize(turn.text, voices[turn.speaker])
-        start = samples * 1000 // SAMPLE_RATE_HZ
-        samples += len(pcm) // 2
-        parts.append(pcm)
-        timed.append(
-            Turn(
-                speaker=turn.speaker,
-                text=turn.text,
-                start_ms=start,
-                end_ms=samples * 1000 // SAMPLE_RATE_HZ,
-            )
-        )
-    clip = Clip(id=dialogue.id, pcm=b"".join(parts), turns=timed)
-    if clip.duration_ms > MAX_AUDIO_SECONDS * 1000:
-        raise ValueError(f"{dialogue.id}: {clip.duration_ms} ms is over {MAX_AUDIO_SECONDS} s")
-    return clip
-
-
-def wav_bytes(pcm: bytes) -> bytes:
-    buffer = io.BytesIO()
-    with wave.open(buffer, "wb") as out:
-        out.setnchannels(1)
-        out.setsampwidth(2)
-        out.setframerate(SAMPLE_RATE_HZ)
-        out.writeframes(pcm)
-    return buffer.getvalue()
-
-
-def polly_synthesizer(client: "PollyClient | Any") -> Synthesizer:
-    def synthesize(text: str, voice: str) -> bytes:
-        response = client.synthesize_speech(
-            Engine="standard",
-            OutputFormat="pcm",
-            SampleRate=str(SAMPLE_RATE_HZ),
-            TextType="text",
-            VoiceId=voice,
-            Text=text,
-        )
-        pcm: bytes = response["AudioStream"].read()
-        if len(pcm) % 2:
-            raise ValueError("Polly returned a stream that is not whole 16-bit samples")
-        return pcm
-
-    return synthesize
+    return synthesis.build_clip(dialogue.id, dialogue.turns, speaker_voices(dialogue), synthesize)
 
 
 def _truth(dialogue: Dialogue, clip: Clip) -> dict[str, Any]:
@@ -146,6 +79,8 @@ def _truth(dialogue: Dialogue, clip: Clip) -> dict[str, Any]:
         tags=dialogue.tags,
         expected=dialogue.expected,
         note=dialogue.note,
+        provenance=dialogue.provenance,
+        review=dialogue.review,
     )
     dumped: dict[str, Any] = item.model_dump(mode="json")
     return dumped

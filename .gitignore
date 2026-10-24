@@ -15,6 +15,8 @@ htmlcov/
 
 # Evaluation response cache (reports in backend/eval/reports/ are committed)
 backend/eval/.cache/
+# Evaluation clips, fetched from the private bucket by `uv run eval-audio fetch`
+backend/eval/.audio/
 
 # Part 2 frontend
 node_modules/

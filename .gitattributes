@@ -1,2 +1,4 @@
 * text=auto eol=lf
 *.wav binary
+# Evaluation sets are hashed; keep their bytes identical on every checkout.
+backend/eval/** text eol=lf

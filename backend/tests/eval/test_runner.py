@@ -4,7 +4,7 @@ import asyncio
 import re
 from pathlib import Path
 
-from commitment_tracker.evaluation.cache import ResponseCache
+from commitment_tracker.evaluation.cache import CachedAnalyzer, ResponseCache
 from commitment_tracker.evaluation.results import ItemResult
 from commitment_tracker.evaluation.runner import run_items
 from commitment_tracker.extractor.adapter import ModelReply, ModelRequest
@@ -12,8 +12,11 @@ from commitment_tracker.extractor.errors import ModelUnavailable
 from commitment_tracker.extractor.extractor import Extractor
 from commitment_tracker.extractor.model_output import ModelOutput
 from commitment_tracker.extractor.prompt import load_prompt
+from commitment_tracker.extractor.two_stage import TwoStageExtractor
+from commitment_tracker.schemas import Label
 from tests.eval.builders import exp, item
 from tests.fakes import FunctionAdapter, reply
+from tests.test_two_stage import labeller
 
 TURN = re.compile(r'<turn index="(\d+)" speaker="[^"]*">(.*?)</turn>')
 ITEMS = [
@@ -95,3 +98,52 @@ def test_a_failed_item_is_recorded_and_the_run_continues(tmp_path: Path) -> None
     assert [r.error for r in results] == [None, None, "model_unavailable"]
     assert results[2].response is None
     assert len(list(tmp_path.glob("*.json"))) == 2  # failures are not cached
+
+
+# --- two-stage -----------------------------------------------------------------------------------
+
+SEND = [
+    item(
+        f"s{n}",
+        ["Hello there.", f"I'll send item {n}."],
+        [exp(1, "COMMITMENT", f"I'll send item {n}.")],
+    )
+    for n in range(3)
+]
+
+
+def two_stage(cache: ResponseCache) -> tuple[TwoStageExtractor, FunctionAdapter, FunctionAdapter]:
+    prompt = load_prompt("v1")
+    rules = {"send": Label.COMMITMENT}
+    screen = FunctionAdapter(
+        labeller(rules, served_by="claude-haiku-5-5"), model="claude-haiku-5-5"
+    )
+    extract = FunctionAdapter(labeller(rules, served_by="claude-opus-5-5"), model="claude-opus-5-5")
+    pipeline = TwoStageExtractor(
+        CachedAnalyzer(Extractor(screen, prompt), cache, "medium"),
+        CachedAnalyzer(Extractor(extract, prompt), cache, "medium"),
+    )
+    return pipeline, screen, extract
+
+
+def test_two_stage_results_carry_stages_and_flagged_turns(tmp_path: Path) -> None:
+    pipeline, _, _ = two_stage(ResponseCache(tmp_path))
+    results = asyncio.run(run_items(SEND, pipeline))
+    assert all(r.flagged_turns == [1] for r in results)
+    assert all([s.stage for s in r.stages or []] == ["screen", "extract"] for r in results)
+    assert not any(r.cached for r in results)
+
+
+def test_the_screen_reuses_a_plain_haiku_run(tmp_path: Path) -> None:
+    cache = ResponseCache(tmp_path)
+    haiku = FunctionAdapter(
+        labeller({"send": Label.COMMITMENT}, served_by="claude-haiku-5-5"), model="claude-haiku-5-5"
+    )
+    asyncio.run(run_items(SEND, Extractor(haiku, load_prompt("v1")), cache=cache))
+    pipeline, screen, extract = two_stage(cache)
+    results = asyncio.run(run_items(SEND, pipeline))
+    assert (screen.calls, extract.calls) == (0, 3)
+    assert not any(r.cached for r in results)  # the extract stage still missed
+    again, screen_again, extract_again = two_stage(cache)
+    assert all(r.cached for r in asyncio.run(run_items(SEND, again)))
+    assert (screen_again.calls, extract_again.calls) == (0, 0)

@@ -100,7 +100,7 @@ def test_together_the_dialogues_cover_every_ledger_label_and_the_near_misses() -
 
 
 def test_the_dialogues_are_new_text_not_dev_set_utterances() -> None:
-    dev = (BACKEND / "eval" / "data" / "dev.jsonl").read_text(encoding="utf-8")
+    dev = (BACKEND / "eval" / "sets" / "dev" / "items.jsonl").read_text(encoding="utf-8")
     for dialogue in committed():
         for turn in dialogue.turns:
             assert turn.text not in dev

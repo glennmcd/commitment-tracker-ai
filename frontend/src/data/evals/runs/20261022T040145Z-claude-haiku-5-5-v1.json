@@ -1,0 +1,793 @@
+{
+  "audio": false,
+  "audio_scores": null,
+  "by_provenance": {},
+  "configuration": "haiku",
+  "id": "20261022T040145Z-claude-haiku-5-5-v1",
+  "items": [
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "spec-01",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "COMMITMENT"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "spec-02",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "COMMITMENT"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "spec-03",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "COMMITMENT"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "spec-04",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "COMMITMENT"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "spec-05",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "provenance": null,
+      "tags": [
+        "multi_turn"
+      ],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "COMMITMENT",
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "spec-06",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "COMMITMENT",
+        "COMMITMENT"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "HEDGED"
+      ],
+      "flagged_turns": null,
+      "id": "spec-07",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "HEDGED"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "HEDGED"
+      ],
+      "flagged_turns": null,
+      "id": "spec-08",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "HEDGED"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "HEDGED"
+      ],
+      "flagged_turns": null,
+      "id": "spec-09",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "HEDGED"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "HEDGED"
+      ],
+      "flagged_turns": null,
+      "id": "spec-10",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "HEDGED"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "CONDITIONAL"
+      ],
+      "flagged_turns": null,
+      "id": "spec-11",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "CONDITIONAL"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "CONDITIONAL"
+      ],
+      "flagged_turns": null,
+      "id": "spec-12",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "CONDITIONAL"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "SUGGESTION"
+      ],
+      "flagged_turns": null,
+      "id": "spec-13",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "SUGGESTION"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "SUGGESTION"
+      ],
+      "flagged_turns": null,
+      "id": "spec-14",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "SUGGESTION"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "REQUEST"
+      ],
+      "flagged_turns": null,
+      "id": "spec-15",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "REQUEST"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "REQUEST"
+      ],
+      "flagged_turns": null,
+      "id": "spec-16",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "REQUEST"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "REPORTED"
+      ],
+      "flagged_turns": null,
+      "id": "spec-17",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "REPORTED"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "REPORTED"
+      ],
+      "flagged_turns": null,
+      "id": "spec-18",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "REPORTED"
+      ],
+      "provenance": null,
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "REFUSAL"
+      ],
+      "flagged_turns": null,
+      "id": "spec-19",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "REFUSAL"
+      ],
+      "provenance": null,
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "REFUSAL"
+      ],
+      "flagged_turns": null,
+      "id": "spec-20",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "REFUSAL"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "spec-21",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": null,
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "spec-22",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": null,
+      "tags": [
+        "ambiguous"
+      ],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "spec-23",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": null,
+      "tags": [],
+      "turns": null
+    },
+    {
+      "cached": false,
+      "call_date": null,
+      "correct": null,
+      "cost_usd": null,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": null,
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "spec-24",
+      "latency_ms": null,
+      "note": null,
+      "predicted": null,
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": null,
+      "tags": [
+        "ambiguous"
+      ],
+      "turns": null
+    }
+  ],
+  "legacy": true,
+  "run": {
+    "configuration": null,
+    "dataset": "dev.jsonl",
+    "duration_seconds": 14.285289,
+    "effort": "medium",
+    "model": "claude-haiku-5-5",
+    "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
+    "prompt_version": "v1",
+    "served_by": [
+      "claude-haiku-5-5"
+    ],
+    "set_items": null,
+    "set_name": null,
+    "set_sha256": null,
+    "stages": {},
+    "started_at": "2026-10-22T04:01:45.187091Z"
+  },
+  "scores": {
+    "accuracy": 1.0,
+    "ambiguous": [
+      {
+        "expected": "NONE",
+        "item_id": "spec-22",
+        "predicted": "NONE"
+      },
+      {
+        "expected": "NONE",
+        "item_id": "spec-24",
+        "predicted": "NONE"
+      }
+    ],
+    "cache_hits": 0,
+    "confusion": {
+      "labels": [
+        "COMMITMENT",
+        "HEDGED",
+        "CONDITIONAL",
+        "SUGGESTION",
+        "REQUEST",
+        "REPORTED",
+        "REFUSAL",
+        "NONE"
+      ],
+      "rows": [
+        [
+          7,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          3,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2
+        ]
+      ]
+    },
+    "cost_usd": 0.004627,
+    "failed_items": [],
+    "fields": {
+      "action": {
+        "accuracy": 1.0,
+        "correct": 11,
+        "total": 11
+      },
+      "due": {
+        "accuracy": 1.0,
+        "correct": 13,
+        "total": 13
+      },
+      "owner": {
+        "accuracy": 1.0,
+        "correct": 13,
+        "total": 13
+      }
+    },
+    "items": 24,
+    "labels": {
+      "COMMITMENT": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 7
+      },
+      "CONDITIONAL": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 2
+      },
+      "HEDGED": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 4
+      },
+      "NONE": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 2
+      },
+      "REFUSAL": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 2
+      },
+      "REPORTED": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 2
+      },
+      "REQUEST": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 3
+      },
+      "SUGGESTION": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 2
+      }
+    },
+    "latency_ms": {
+      "p50": 1512,
+      "p95": 2648
+    },
+    "ledger": {
+      "f1": 1.0,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "true_positives": 13
+    },
+    "macro_f1": 1.0,
+    "quote_failures": 0,
+    "retried_items": 0,
+    "scored_items": 22
+  },
+  "set": "dev",
+  "two_stage": null
+}

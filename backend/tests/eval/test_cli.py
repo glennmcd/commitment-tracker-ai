@@ -10,30 +10,13 @@ from commitment_tracker.extractor.errors import ModelUnavailable
 from commitment_tracker.extractor.extractor import Extractor
 from commitment_tracker.extractor.prompt import load_prompt
 from commitment_tracker.settings import Settings
-from tests.eval.test_runner import all_none
 from tests.fakes import FunctionAdapter
 
 DATA = (
     '{"id": "a", "call_date": "2026-10-21", "turns": [{"speaker": "seller", "text": "Our SLA is '
     'four hours."}], "expected": [{"turn_index": 0, "label": "NONE", "quote": "Our SLA is four '
-    'hours."}]}\n'
+    'hours."}], "provenance": "hand-written", "review": "accepted"}\n'
 )
-
-
-@pytest.fixture
-def fake_model(monkeypatch: pytest.MonkeyPatch) -> list[tuple[str, str]]:
-    """Replaces the Anthropic extractor; records (model, prompt version) for each build."""
-    built: list[tuple[str, str]] = []
-
-    def build(settings: Settings, *, model: str | None = None) -> Extractor:
-        chosen = model or settings.extractor_model
-        built.append((chosen, settings.prompt_version))
-        return Extractor(
-            FunctionAdapter(all_none, model=chosen), load_prompt(settings.prompt_version)
-        )
-
-    monkeypatch.setattr(cli, "build_extractor", build)
-    return built
 
 
 def run_cli(tmp_path: Path, *extra: str) -> int:
@@ -57,9 +40,9 @@ def test_runs_and_writes_both_reports(
 ) -> None:
     assert run_cli(tmp_path, "--model", "claude-haiku-5-5", "--prompt", "v1") == 0
     assert fake_model == [("claude-haiku-5-5", "v1")]
-    reports = sorted(p.suffix for p in (tmp_path / "reports").iterdir())
+    reports = sorted(p.suffix for p in (tmp_path / "reports" / "adhoc").iterdir())
     assert reports == [".json", ".md"]
-    (json_report,) = (tmp_path / "reports").glob("*.json")
+    (json_report,) = (tmp_path / "reports" / "adhoc").glob("*.json")
     assert json.loads(json_report.read_text(encoding="utf-8"))["run"]["model"] == "claude-haiku-5-5"
     assert "ledger F1" in capsys.readouterr().out
 
@@ -67,7 +50,7 @@ def test_runs_and_writes_both_reports(
 def test_second_run_uses_the_cache(tmp_path: Path, fake_model: list[tuple[str, str]]) -> None:
     run_cli(tmp_path)
     run_cli(tmp_path)
-    reports = sorted((tmp_path / "reports").glob("*.json"))
+    reports = sorted((tmp_path / "reports" / "adhoc").glob("*.json"))
     latest = json.loads(reports[-1].read_text(encoding="utf-8"))
     assert latest["scores"]["cache_hits"] == 1
 
@@ -100,6 +83,119 @@ def test_failed_items_still_write_a_report_but_exit_1(
 
     monkeypatch.setattr(cli, "build_extractor", build)
     assert run_cli(tmp_path) == 1
-    assert len(list((tmp_path / "reports").glob("*.md"))) == 1
+    assert len(list((tmp_path / "reports" / "adhoc").glob("*.md"))) == 1
     out = capsys.readouterr()
     assert "1 of 1 items failed" in out.err
+
+
+# --- named sets ----------------------------------------------------------------------------------
+
+
+def make_set(root: Path, name: str, role: str = "test") -> None:
+    directory = root / name
+    directory.mkdir(parents=True)
+    manifest = {"name": name, "role": role, "gated": role == "test", "sources": []}
+    (directory / "set.json").write_text(json.dumps(manifest), encoding="utf-8")
+    (directory / "items.jsonl").write_text(DATA, encoding="utf-8")
+
+
+def run_set(tmp_path: Path, *extra: str) -> int:
+    return cli.main(
+        [
+            "--sets-dir",
+            str(tmp_path / "sets"),
+            "--reports-dir",
+            str(tmp_path / "reports"),
+            "--cache-dir",
+            str(tmp_path / "cache"),
+            *extra,
+        ]
+    )
+
+
+def test_a_set_run_pins_the_set_and_writes_under_its_name(
+    tmp_path: Path, fake_model: list[tuple[str, str]]
+) -> None:
+    make_set(tmp_path / "sets", "test")
+    assert run_set(tmp_path, "--set", "test") == 0
+    (report,) = (tmp_path / "reports" / "test").glob("*.json")
+    run = json.loads(report.read_text(encoding="utf-8"))["run"]
+    assert run["set_name"] == "test"
+    assert len(run["set_sha256"]) == 64
+    assert run["set_items"] == 1
+
+
+def test_dev_is_the_default_set(tmp_path: Path, fake_model: list[tuple[str, str]]) -> None:
+    make_set(tmp_path / "sets", "dev", role="dev")
+    assert run_set(tmp_path) == 0
+    assert len(list((tmp_path / "reports" / "dev").glob("*.json"))) == 1
+
+
+def test_staging_runs_are_written_to_adhoc(
+    tmp_path: Path, fake_model: list[tuple[str, str]]
+) -> None:
+    make_set(tmp_path / "sets", "staging/gem01", role="staging")
+    assert run_set(tmp_path, "--set", "staging/gem01") == 0
+    assert len(list((tmp_path / "reports" / "adhoc").glob("*.json"))) == 1
+
+
+def test_test_runs_say_which_prompts_already_looked(
+    tmp_path: Path, fake_model: list[tuple[str, str]], capsys: pytest.CaptureFixture[str]
+) -> None:
+    make_set(tmp_path / "sets", "test")
+    run_set(tmp_path, "--set", "test")
+    assert "already: none" in capsys.readouterr().out
+    run_set(tmp_path, "--set", "test")
+    assert "already: v1" in capsys.readouterr().out
+
+
+def test_set_and_data_are_exclusive(tmp_path: Path) -> None:
+    with pytest.raises(SystemExit):
+        cli.main(["--set", "dev", "--data", "x.jsonl"])
+
+
+def test_unknown_set_exits_2(
+    tmp_path: Path, fake_model: list[tuple[str, str]], capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert run_set(tmp_path, "--set", "nope") == 2
+    assert "no set named 'nope'" in capsys.readouterr().err
+
+
+# --- configurations ------------------------------------------------------------------------------
+
+
+def latest_run(tmp_path: Path) -> dict[str, object]:
+    report = sorted((tmp_path / "reports" / "adhoc").glob("*.json"))[-1]
+    run: dict[str, object] = json.loads(report.read_text(encoding="utf-8"))["run"]
+    return run
+
+
+def test_a_bare_model_id_is_named_by_its_configuration(
+    tmp_path: Path, fake_model: list[tuple[str, str]]
+) -> None:
+    assert run_cli(tmp_path, "--model", "claude-haiku-5-5") == 0
+    run = latest_run(tmp_path)
+    assert (run["configuration"], run["model"]) == ("haiku", "claude-haiku-5-5")
+    assert run["stages"] == {"extract": "claude-haiku-5-5"}
+
+
+def test_two_stage_builds_both_stages(tmp_path: Path, fake_model: list[tuple[str, str]]) -> None:
+    assert run_cli(tmp_path, "--config", "two-stage") == 0
+    assert [model for model, _ in fake_model] == ["claude-haiku-5-5", "claude-opus-5-5"]
+    run = latest_run(tmp_path)
+    assert (run["configuration"], run["model"]) == ("two-stage", "two-stage")
+    assert run["stages"] == {"screen": "claude-haiku-5-5", "extract": "claude-opus-5-5"}
+
+
+def test_the_default_is_the_settings_model(
+    tmp_path: Path, fake_model: list[tuple[str, str]], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("EXTRACTOR_MODEL", raising=False)
+    monkeypatch.setattr(cli, "Settings", lambda: Settings(_env_file=None))
+    assert run_cli(tmp_path) == 0
+    assert latest_run(tmp_path)["configuration"] == "opus"
+
+
+def test_config_and_model_are_exclusive(tmp_path: Path) -> None:
+    with pytest.raises(SystemExit):
+        run_cli(tmp_path, "--config", "opus", "--model", "claude-opus-5-5")

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Demo } from "@/components/Demo";
 import { Footer } from "@/components/Footer";
 import { PasswordGate } from "@/components/PasswordGate";
@@ -8,6 +9,9 @@ export default function Home() {
       <header className="intro">
         <h1>Commitment Tracker AI</h1>
         <p>Finds who promised what, to whom, and by when in a conversation.</p>
+        <p>
+          <Link href="/evals/">How well it works: evaluation results</Link>
+        </p>
       </header>
       <PasswordGate>
         <Demo />

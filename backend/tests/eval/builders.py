@@ -17,6 +17,8 @@ def item(
             "turns": [{"speaker": "seller", "text": text} for text in texts],
             "tags": tags or [],
             "expected": expected,
+            "provenance": "hand-written",
+            "review": "accepted",
         }
     )
 
