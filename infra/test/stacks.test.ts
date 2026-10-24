@@ -18,6 +18,13 @@ function envOf(template: typeof defaults.template, logicalPrefix: string): Recor
   return (entry[1].Properties as { Environment: { Variables: Record<string, unknown> } }).Environment.Variables;
 }
 
+function bucketOf(template: typeof defaults.template, logicalPrefix: string): Record<string, unknown> {
+  const buckets = template.findResources("AWS::S3::Bucket");
+  const entry = Object.entries(buckets).find(([id]) => id.replace(/[0-9A-F]{8}$/, "") === logicalPrefix);
+  if (!entry) throw new Error(`no bucket ${logicalPrefix}`);
+  return entry[1];
+}
+
 describe("the audio bucket", () => {
   it("is private, encrypted and TLS-only", () => {
     defaults.template.hasResourceProperties("AWS::S3::Bucket", {
@@ -41,8 +48,7 @@ describe("the audio bucket", () => {
   });
 
   it("expires uploads and transcripts after a day, and nothing else", () => {
-    const [bucket] = Object.values(defaults.template.findResources("AWS::S3::Bucket"));
-    if (!bucket) throw new Error("no bucket");
+    const bucket = bucketOf(defaults.template, "AudioBucket");
     const rules = (bucket.Properties as { LifecycleConfiguration: { Rules: Record<string, unknown>[] } })
       .LifecycleConfiguration.Rules;
     expect(rules.map((r) => r.Prefix).sort()).toEqual(["transcripts/", "uploads/"]);
@@ -70,8 +76,46 @@ describe("the audio bucket", () => {
   });
 
   it("is kept when the stack is deleted", () => {
-    const [bucket] = Object.values(defaults.template.findResources("AWS::S3::Bucket"));
-    expect(bucket).toMatchObject({ DeletionPolicy: "Retain" });
+    expect(bucketOf(defaults.template, "AudioBucket")).toMatchObject({ DeletionPolicy: "Retain" });
+  });
+});
+
+describe("the evaluation audio bucket", () => {
+  const bucket = bucketOf(defaults.template, "EvalAudioBucket");
+
+  it("is private, encrypted, versioned and kept", () => {
+    expect(bucket).toMatchObject({
+      DeletionPolicy: "Retain",
+      Properties: {
+        PublicAccessBlockConfiguration: {
+          BlockPublicAcls: true,
+          BlockPublicPolicy: true,
+          IgnorePublicAcls: true,
+          RestrictPublicBuckets: true,
+        },
+        BucketEncryption: {
+          ServerSideEncryptionConfiguration: [{ ServerSideEncryptionByDefault: { SSEAlgorithm: "AES256" } }],
+        },
+        VersioningConfiguration: { Status: "Enabled" },
+      },
+    });
+  });
+
+  it("never expires a clip and takes no browser uploads", () => {
+    const properties = bucket.Properties as Record<string, unknown>;
+    expect(properties.LifecycleConfiguration).toBeUndefined();
+    expect(properties.CorsConfiguration).toBeUndefined();
+  });
+
+  it("is TLS-only", () => {
+    const policies = Object.values(defaults.template.findResources("AWS::S3::BucketPolicy"));
+    const own = policies.find((p) => JSON.stringify(p).includes("EvalAudioBucket"));
+    expect(JSON.stringify(own)).toContain('"aws:SecureTransport":"false"');
+  });
+
+  it("is reachable by no function in the stack", () => {
+    const policies = defaults.template.findResources("AWS::IAM::Policy");
+    expect(JSON.stringify(policies)).not.toContain("EvalAudioBucket");
   });
 });
 
@@ -309,6 +353,7 @@ describe("the outputs", () => {
       "ApiKeyParameter",
       "ApiUrl",
       "AudioBucketName",
+      "EvalAudioBucketName",
       "WorkerFunctionName",
     ]);
     expect(outputs.ApiKeyParameter?.Value).toBe(API_KEY_PARAMETER);
