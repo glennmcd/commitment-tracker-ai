@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.7.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.6.1...v0.7.0) (2026-10-24)
+
+
+### Features
+
+* add demo GIF to README ([a1e6bed](https://github.com/glennmcd/commitment-tracker-ai/commit/a1e6bed8e2144dd81bb6ad224cc08a2167da27b4))
+* add demo GIF to README ([b5e4398](https://github.com/glennmcd/commitment-tracker-ai/commit/b5e439857c80dc003a5fbe7b792cf99f8e234f72))
+* **evaluation:** implement Part 3 design for evaluation ([e3dea36](https://github.com/glennmcd/commitment-tracker-ai/commit/e3dea36b7eca087baf242b3cab2a0fefa2e1f6ab))
+* **evaluation:** implement Part 3 design for evaluation ([5d45282](https://github.com/glennmcd/commitment-tracker-ai/commit/5d45282a582e200ab8598ea7c618cfb24f86ef79))
+
 ## [0.6.1](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.6.0...v0.6.1) (2026-10-23)
 
 
