@@ -25,7 +25,12 @@ from typing import Literal
 
 from pydantic import BaseModel, ValidationError
 
-from commitment_tracker.evaluation.dataset import EvalItem, ExpectedSpan, describe_validation_error
+from commitment_tracker.evaluation.dataset import (
+    EvalItem,
+    ExpectedSpan,
+    describe_validation_error,
+    jsonl_lines,
+)
 from commitment_tracker.evaluation.importer import write_items
 from commitment_tracker.evaluation.sets import SETS_DIR, STAGING, load_set, set_dir
 from commitment_tracker.extractor.dates import resolve_due
@@ -102,7 +107,7 @@ def load_reviews(directory: Path) -> list[ItemReview]:
     path = directory / "review.jsonl"
     if not path.is_file():
         return []
-    lines = path.read_text(encoding="utf-8").splitlines()
+    lines = jsonl_lines(path)
     return [ItemReview.model_validate_json(line) for line in lines if line.strip()]
 
 

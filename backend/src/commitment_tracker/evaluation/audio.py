@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Literal, Protocol
 from botocore.exceptions import ClientError
 from pydantic import BaseModel, ConfigDict, Field
 
-from commitment_tracker.evaluation.dataset import EvalItem
+from commitment_tracker.evaluation.dataset import EvalItem, jsonl_lines
 from commitment_tracker.evaluation.sets import SETS_DIR, load_manifest, load_set, set_dir
 from commitment_tracker.evaluation.synthesis import (
     Synthesizer,
@@ -90,7 +90,7 @@ def _clips_path(root: Path) -> Path:
 
 def load_clips(root: Path = SETS_DIR) -> list[AudioClip]:
     path = _clips_path(root)
-    lines = path.read_text(encoding="utf-8").splitlines() if path.is_file() else []
+    lines = jsonl_lines(path) if path.is_file() else []
     return [AudioClip.model_validate_json(line) for line in lines if line.strip()]
 
 

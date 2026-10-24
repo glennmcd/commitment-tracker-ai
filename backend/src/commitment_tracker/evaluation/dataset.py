@@ -93,11 +93,19 @@ def describe_validation_error(error: ValidationError) -> str:
     return "; ".join(parts)
 
 
+def jsonl_lines(path: Path) -> list[str]:
+    """A JSONL file's lines: a leading byte-order mark (PowerShell redirects write one) is dropped,
+    and lines split on newline only. `str.splitlines` would also split on U+2028 and similar
+    characters, which `json.dumps(ensure_ascii=False)` writes raw inside transcripts."""
+    text = path.read_text(encoding="utf-8-sig")
+    return [line.removesuffix("\r") for line in text.split("\n")]
+
+
 def canonical_sha256(path: Path) -> str:
     """SHA-256 of a JSONL file's items in canonical form (sorted keys, compact, one per line), so
     key order, spacing, blank lines and line endings never change a set's hash."""
     lines = []
-    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+    for number, line in enumerate(jsonl_lines(path), start=1):
         if not line.strip():
             continue
         try:
@@ -112,7 +120,7 @@ def load_dataset(path: Path) -> list[EvalItem]:
     """Load and validate every item; the first problem raises with its line number."""
     items: list[EvalItem] = []
     seen: set[str] = set()
-    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+    for number, line in enumerate(jsonl_lines(path), start=1):
         if not line.strip():
             continue
         try:

@@ -20,6 +20,7 @@ from commitment_tracker.evaluation.dataset import (
     DatasetError,
     EvalItem,
     canonical_sha256,
+    jsonl_lines,
     load_dataset,
 )
 from commitment_tracker.schemas import Label
@@ -173,7 +174,7 @@ def summarize(root: Path = SETS_DIR) -> list[SetSummary]:
 def _audio_summary(name: str, manifest: SetManifest, clips: Path) -> SetSummary:
     """An audio set holds clips, not items: count them by source (polly or human)."""
     try:
-        lines = [line for line in clips.read_text(encoding="utf-8").splitlines() if line.strip()]
+        lines = [line for line in jsonl_lines(clips) if line.strip()]
         sources = Counter(json.loads(line)["source"] for line in lines)
         sha256 = canonical_sha256(clips)
     except (OSError, ValueError, KeyError, DatasetError) as error:

@@ -25,6 +25,7 @@ from commitment_tracker.evaluation.dataset import (
     PROVENANCE,
     EvalItem,
     describe_validation_error,
+    jsonl_lines,
 )
 from commitment_tracker.evaluation.leaks import transcript_key
 from commitment_tracker.evaluation.sets import (
@@ -114,6 +115,15 @@ def _existing(root: Path) -> tuple[dict[str, str], set[str]]:
     return transcripts, ids
 
 
+def _similarity(a: str, b: str) -> float:
+    """difflib's ratio without its autojunk heuristic, which on texts of 200 characters or more
+    ignores common characters and under-reports; the cheap upper bounds skip most pairs."""
+    matcher = SequenceMatcher(None, a, b, autojunk=False)
+    if matcher.real_quick_ratio() < NEAR_DUPLICATE or matcher.quick_ratio() < NEAR_DUPLICATE:
+        return 0.0
+    return matcher.ratio()
+
+
 def _date_checks(item: EvalItem) -> list[DateDisagreement]:
     found = []
     for index, span in enumerate(item.expected):
@@ -159,7 +169,7 @@ def import_batch(
     accepted: list[tuple[EvalItem, str]] = []  # item and its normalised transcript
     rejections: list[Rejection] = []
     near: list[NearDuplicate] = []
-    for number, raw in enumerate(source.read_text(encoding="utf-8").splitlines(), start=1):
+    for number, raw in enumerate(jsonl_lines(source), start=1):
         line = raw.strip()
         if not line or line.startswith("```"):
             continue
@@ -187,10 +197,7 @@ def import_batch(
             rejections.append(Rejection(line=number, reason=reason))
             continue
         best = max(
-            (
-                (SequenceMatcher(None, key, other).ratio(), where)
-                for other, where in transcripts.items()
-            ),
+            ((_similarity(key, other), where) for other, where in transcripts.items()),
             default=(0.0, ""),
         )
         if best[0] >= NEAR_DUPLICATE:

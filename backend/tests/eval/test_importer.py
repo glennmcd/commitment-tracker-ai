@@ -251,3 +251,32 @@ def test_cli_import_with_nothing_valid_exits_1(
     assert "nothing to import" in captured.err
     assert "line 1: invalid JSON" in captured.out
     assert not (root / "staging").exists()
+
+
+def test_a_byte_order_mark_does_not_break_the_first_line(tmp_path: Path, root: Path) -> None:
+    source = tmp_path / "powershell.jsonl"
+    source.write_bytes(("\ufeff" + json.dumps(draft("gem01-01")) + "\n").encode("utf-8"))
+    assert run(source, root).imported == ["gem01-01"]
+
+
+def test_a_line_separator_inside_a_transcript_survives_import(tmp_path: Path, root: Path) -> None:
+    text = "I'll send it Friday.\u2028Thanks again."
+    line = json.dumps(draft("gem01-01", text), ensure_ascii=False)
+    source = tmp_path / "reply.jsonl"
+    source.write_bytes((line + "\n").encode("utf-8"))
+    assert run(source, root).imported == ["gem01-01"]
+    staged = load_set("staging/gem01", root)
+    assert staged.items[0].turns[0].text == text
+
+
+def test_long_near_duplicates_are_still_flagged(tmp_path: Path, root: Path) -> None:
+    long = " ".join(
+        f"We reviewed item {n} of the rollout plan with the onboarding team." for n in range(8)
+    )
+    first = draft("gem01-01", long, expected=[{"turn_index": 0, "label": "NONE", "quote": long}])
+    changed = long.replace("item 3", "item three")
+    second = draft(
+        "gem01-02", changed, expected=[{"turn_index": 0, "label": "NONE", "quote": changed}]
+    )
+    result = run(write_source(tmp_path, json.dumps(first), json.dumps(second)), root)
+    assert [flag.item for flag in result.near_duplicates] == ["gem01-02"]

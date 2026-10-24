@@ -14,7 +14,7 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-from commitment_tracker.evaluation.dataset import EvalItem
+from commitment_tracker.evaluation.dataset import EvalItem, jsonl_lines
 from commitment_tracker.evaluation.sets import SETS_DIR, list_sets, load_manifest, load_set, set_dir
 
 # backend/src/commitment_tracker/evaluation/leaks.py -> extractor/prompts
@@ -106,7 +106,7 @@ def orphan_clips(root: Path = SETS_DIR) -> list[str]:
         source = manifest.items_from or ""
         ids = {item.id for item in text_sets.get(source, [])}
         clips = set_dir(name, root) / "clips.jsonl"
-        lines = clips.read_text(encoding="utf-8").splitlines() if clips.is_file() else []
+        lines = jsonl_lines(clips) if clips.is_file() else []
         for line in filter(str.strip, lines):
             item_id = json.loads(line).get("test_item_id")
             if item_id not in ids:
