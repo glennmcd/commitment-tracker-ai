@@ -1,6 +1,7 @@
 """Evaluation reports: JSON for tools and comparisons, markdown for people.
 
-Files go to backend/eval/reports/ as `<UTC start>-<model>-<prompt>.json` and `.md`.
+Files go to backend/eval/reports/<set>/ (or `adhoc/` for `--data` and staging runs) as
+`<UTC start>-<model>-<prompt>.json` and `.md`. A set run pins the set by name, hash and size.
 """
 
 from datetime import datetime
@@ -24,6 +25,10 @@ class RunInfo(BaseModel):
     started_at: datetime
     duration_seconds: float
     served_by: list[str] = Field(default_factory=list)  # more than one after refusal fallbacks
+    # Unset for `--data` runs and for reports written before named sets existed.
+    set_name: str | None = None
+    set_sha256: str | None = None
+    set_items: int | None = None
 
 
 class ItemDetail(BaseModel):
@@ -69,6 +74,12 @@ def _f(value: float | None, digits: int = 3) -> str:
     return "n/a" if value is None else f"{value:.{digits}f}"
 
 
+def _dataset(run: RunInfo) -> str:
+    if run.set_name and run.set_sha256:
+        return f"set {run.set_name} (sha256 {run.set_sha256[:12]})"
+    return run.dataset
+
+
 def _row(*cells: object) -> str:
     return "| " + " | ".join(str(cell) for cell in cells) + " |"
 
@@ -79,7 +90,7 @@ def render_markdown(report: Report) -> str:
     lines = [
         f"# Evaluation: {run.model}, prompt {run.prompt_version}",
         "",
-        f"{run.started_at:%Y-%m-%d %H:%M} UTC · {run.dataset} · {scores.items} items "
+        f"{run.started_at:%Y-%m-%d %H:%M} UTC · {_dataset(run)} · {scores.items} items "
         f"({scores.scored_items} scored, {len(scores.ambiguous)} ambiguous spans reported apart)",
         "",
         "## Headline",

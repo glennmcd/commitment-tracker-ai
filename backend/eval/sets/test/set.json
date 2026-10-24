@@ -1,0 +1,7 @@
+{
+  "name": "test",
+  "description": "Held-out headline set: reviewed drafts from non-Claude models plus hand-written items.",
+  "role": "test",
+  "gated": true,
+  "sources": []
+}

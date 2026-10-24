@@ -6,6 +6,8 @@ keywords (all must appear in the predicted action) and the resolved due date. Th
 document the expectation for readers.
 """
 
+import hashlib
+import json
 from datetime import date
 from pathlib import Path
 from typing import Literal, Self
@@ -89,6 +91,21 @@ def _describe(error: ValidationError) -> str:
         path = ".".join(str(part) for part in detail["loc"])
         parts.append(f"{path}: {detail['msg']}" if path else detail["msg"])
     return "; ".join(parts)
+
+
+def canonical_sha256(path: Path) -> str:
+    """SHA-256 of a JSONL file's items in canonical form (sorted keys, compact, one per line), so
+    key order, spacing, blank lines and line endings never change a set's hash."""
+    lines = []
+    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            data = json.loads(line)
+        except json.JSONDecodeError as error:
+            raise DatasetError(f"{path.name} line {number}: {error.msg}") from None
+        lines.append(json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False))
+    return hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()
 
 
 def load_dataset(path: Path) -> list[EvalItem]:
