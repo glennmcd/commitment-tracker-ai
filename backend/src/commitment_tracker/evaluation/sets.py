@@ -6,8 +6,11 @@ Staging sets (`staging/<batch>`) hold imported drafts awaiting review; every oth
 reviewed items.
 """
 
+import argparse
 import re
-from dataclasses import dataclass
+import sys
+from collections import Counter
+from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 from typing import Literal
@@ -20,6 +23,7 @@ from commitment_tracker.evaluation.dataset import (
     canonical_sha256,
     load_dataset,
 )
+from commitment_tracker.schemas import Label
 
 # backend/src/commitment_tracker/evaluation/sets.py -> backend/eval/sets
 SETS_DIR = Path(__file__).resolve().parents[3] / "eval" / "sets"
@@ -90,14 +94,16 @@ def load_manifest(name: str, root: Path = SETS_DIR) -> SetManifest:
     return manifest
 
 
-def load_set(name: str, root: Path = SETS_DIR) -> LoadedSet:
-    """Load a text set: manifest, validated items and canonical hash."""
+def load_set(name: str, root: Path = SETS_DIR, *, allow_empty: bool = False) -> LoadedSet:
+    """Load a text set: manifest, validated items and canonical hash. An empty set loads only with
+    `allow_empty` (for listing and promoting); a run needs items."""
     manifest = load_manifest(name, root)
     if manifest.kind != "text":
         raise SetError(f"{name} is an {manifest.kind} set; it has no items of its own")
     path = set_dir(name, root) / "items.jsonl"
     try:
-        items = load_dataset(path)
+        empty = allow_empty and not path.read_text(encoding="utf-8").strip()
+        items = [] if empty else load_dataset(path)
         sha256 = canonical_sha256(path)
     except (DatasetError, FileNotFoundError) as error:
         raise SetError(f"{name}: {error}") from None
@@ -114,3 +120,81 @@ def list_sets(root: Path = SETS_DIR) -> list[str]:
         path.parent.relative_to(root).as_posix() for path in root.glob(f"{STAGING}/*/set.json")
     ]
     return sorted(names)
+
+
+# --- `uv run eval-sets` --------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class SetSummary:
+    name: str
+    role: str
+    gated: bool
+    items: int = 0
+    sha256: str = ""
+    review: dict[str, int] = field(default_factory=dict)
+    labels: dict[str, int] = field(default_factory=dict)  # by expected span, in label order
+    provenance: dict[str, int] = field(default_factory=dict)
+    error: str | None = None
+
+
+def summarize(root: Path = SETS_DIR) -> list[SetSummary]:
+    """One summary per set; a set that fails to load is reported with its error."""
+    summaries = []
+    for name in list_sets(root):
+        try:
+            manifest = load_manifest(name, root)
+        except SetError as error:
+            summaries.append(SetSummary(name, role="?", gated=False, error=str(error)))
+            continue
+        try:
+            loaded = load_set(name, root, allow_empty=True)
+        except SetError as error:
+            summaries.append(SetSummary(name, manifest.role, manifest.gated, error=str(error)))
+            continue
+        labels = Counter(span.label for item in loaded.items for span in item.expected)
+        summaries.append(
+            SetSummary(
+                name=name,
+                role=manifest.role,
+                gated=manifest.gated,
+                items=len(loaded.items),
+                sha256=loaded.sha256,
+                review=dict(sorted(Counter(item.review for item in loaded.items).items())),
+                labels={label.value: labels[label] for label in Label if labels[label]},
+                provenance=dict(sorted(Counter(item.provenance for item in loaded.items).items())),
+            )
+        )
+    return summaries
+
+
+def _mix(counts: dict[str, int]) -> str:
+    return ", ".join(f"{key} {count}" for key, count in counts.items()) or "-"
+
+
+def render_summary(summary: SetSummary) -> list[str]:
+    head = f"{summary.name}  role {summary.role}  gated {'yes' if summary.gated else 'no'}"
+    if summary.error is not None:
+        return [head, f"  error       {summary.error}"]
+    return [
+        f"{head}  items {summary.items}  sha256 {summary.sha256[:12]}",
+        f"  review      {_mix(summary.review)}",
+        f"  labels      {_mix(summary.labels)}",
+        f"  provenance  {_mix(summary.provenance)}",
+    ]
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="eval-sets", description="List the evaluation sets and what they hold."
+    )
+    parser.add_argument("--sets-dir", type=Path, default=SETS_DIR)
+    args = parser.parse_args(argv)
+    summaries = summarize(args.sets_dir)
+    for summary in summaries:
+        print("\n".join(render_summary(summary)))
+    return 1 if any(summary.error for summary in summaries) else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

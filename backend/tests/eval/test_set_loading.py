@@ -139,3 +139,10 @@ def test_committed_test_manifest_is_gated() -> None:
     test = SetManifest.model_validate_json((SETS_DIR / "test" / "set.json").read_text("utf-8"))
     assert test.role == "test"
     assert test.gated
+
+
+def test_an_empty_set_loads_only_when_allowed(tmp_path: Path) -> None:
+    write_set(tmp_path, "test", [])
+    with pytest.raises(SetError, match="no items"):
+        load_set("test", tmp_path)
+    assert load_set("test", tmp_path, allow_empty=True).items == []
