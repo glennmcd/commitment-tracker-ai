@@ -14,7 +14,8 @@ plugin, configured in `.claude/cc-practices.json`. This file covers only what is
   - `src/commitment_tracker/schemas.py`: Pydantic v2 models shared by the API, extractor and evaluation.
   - `src/commitment_tracker/settings.py`: pydantic-settings configuration (model, limits, AWS resource names).
   - `src/commitment_tracker/extractor/`: prompt files (`prompts/v1.md`, ...), the model adapter, validation with
-    one retry, the quote check, the date resolver and pricing.
+    one retry, the quote check, the date resolver and pricing; `two_stage.py` (Haiku screen, Opus on flagged
+    turns) and `factory.build_analyzer` for the named configurations in `settings.CONFIGURATIONS`.
   - `src/commitment_tracker/transcription/`: the transcriber protocol, the Amazon Transcribe batch adapter, the
     mapping from Transcribe output to timed turns, and a fake.
   - `src/commitment_tracker/jobs/`: the job record and its stores (DynamoDB, memory), presigned uploads, WAV

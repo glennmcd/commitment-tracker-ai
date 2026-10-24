@@ -1,6 +1,7 @@
 """`uv run eval`: run the extractor over an evaluation set and write a report.
 
-    uv run eval --set test --model claude-opus-5-5 --prompt v1
+    uv run eval --set test --config two-stage --prompt v1
+    uv run eval --set test --model claude-opus-5-5
     uv run eval --data some-items.jsonl
     uv run eval import gemini.jsonl --batch gem01 --provenance gemini-3-pro
     uv run eval review --batch gem01
@@ -24,7 +25,13 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 
 from commitment_tracker.evaluation.agreement import agreement, render_agreement
-from commitment_tracker.evaluation.cache import DEFAULT_CACHE_DIR, OfflineAdapter, ResponseCache
+from commitment_tracker.evaluation.cache import (
+    DEFAULT_CACHE_DIR,
+    CachedAnalyzer,
+    CacheMiss,
+    OfflineAdapter,
+    ResponseCache,
+)
 from commitment_tracker.evaluation.dataset import DatasetError, EvalItem, load_dataset
 from commitment_tracker.evaluation.importer import (
     BatchError,
@@ -40,7 +47,7 @@ from commitment_tracker.evaluation.report import (
 )
 from commitment_tracker.evaluation.rescore import rescore_set
 from commitment_tracker.evaluation.review import review_batch
-from commitment_tracker.evaluation.runner import run_items, uncached_items
+from commitment_tracker.evaluation.runner import request_for, run_items
 from commitment_tracker.evaluation.sets import (
     SETS_DIR,
     SetError,
@@ -49,10 +56,12 @@ from commitment_tracker.evaluation.sets import (
     render_summary,
     summarize,
 )
+from commitment_tracker.extractor.analyzer import Analyzer
 from commitment_tracker.extractor.extractor import Extractor
-from commitment_tracker.extractor.factory import build_extractor
+from commitment_tracker.extractor.factory import build_analyzer, build_extractor
 from commitment_tracker.extractor.prompt import UnknownPromptVersion, load_prompt
-from commitment_tracker.settings import Settings
+from commitment_tracker.extractor.two_stage import TwoStageExtractor
+from commitment_tracker.settings import CONFIGURATIONS, Settings, configuration_for_model
 
 ADHOC = "adhoc"
 
@@ -68,7 +77,9 @@ class _Target:
 
 def _parser(settings: Settings) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="eval", description=__doc__.split("\n")[0])
-    parser.add_argument("--model", default=settings.extractor_model)
+    which = parser.add_mutually_exclusive_group()
+    which.add_argument("--model", help=f"a model id (default {settings.extractor_model})")
+    which.add_argument("--config", choices=list(CONFIGURATIONS), help="a named configuration")
     parser.add_argument("--prompt", default=settings.prompt_version, help="prompt version, e.g. v1")
     parser.add_argument(
         "--effort",
@@ -246,24 +257,33 @@ def main(argv: list[str] | None = None) -> int:
         update={"prompt_version": args.prompt, "extractor_effort": args.effort}
     )
 
+    model = args.model or settings.extractor_model
+    configuration = args.config or configuration_for_model(model)
+    cache = None if args.no_cache else ResponseCache(args.cache_dir)
+
+    def make(stage_model: str) -> Extractor:
+        if args.offline:
+            return Extractor(OfflineAdapter(stage_model), load_prompt(args.prompt))
+        return build_extractor(settings, model=stage_model)
+
+    def cached(extractor: Extractor) -> Analyzer:
+        return CachedAnalyzer(extractor, cache, args.effort)
+
     try:
         target = _target(args)
-        extractor = (
-            Extractor(OfflineAdapter(args.model), load_prompt(args.prompt))
-            if args.offline
-            else build_extractor(settings, model=args.model)
+        analyzer = (
+            build_analyzer(settings, configuration, build=make, wrap=cached)
+            if configuration in CONFIGURATIONS
+            else cached(make(model))
         )
     except (DatasetError, SetError, UnknownPromptVersion) as error:
         print(f"eval: {error}", file=sys.stderr)
         return 2
+    described = analyzer.describe()
     if args.offline:
-        missing = uncached_items(
-            target.items,
-            ResponseCache(args.cache_dir),
-            model=args.model,
-            prompt_sha256=extractor.prompt.sha256,
-            effort=args.effort,
-        )
+        first = analyzer.screen if isinstance(analyzer, TwoStageExtractor) else analyzer
+        assert isinstance(first, CachedAnalyzer)
+        missing = [i.id for i in target.items if not first.is_cached(request_for(i))]
         if missing:
             print(
                 f"eval: --offline: {len(missing)} of {len(target.items)} items are not cached "
@@ -279,19 +299,20 @@ def main(argv: list[str] | None = None) -> int:
         print(f"eval: prompt versions with a test report already: {', '.join(seen) or 'none'}")
 
     started_at, started = datetime.now(UTC), time.perf_counter()
-    results = asyncio.run(
-        run_items(
-            target.items,
-            extractor,
-            cache=None if args.no_cache else ResponseCache(args.cache_dir),
-            concurrency=args.concurrency,
-            effort=args.effort,
+    try:
+        results = asyncio.run(run_items(target.items, analyzer, concurrency=args.concurrency))
+    except CacheMiss:
+        # Only a two-stage extract window gets here: its keys depend on the screen's labels.
+        print(
+            "eval: --offline: an extract window is not cached; run without --offline",
+            file=sys.stderr,
         )
-    )
+        return 1
+    single = len(described.stages) == 1
     run = RunInfo(
-        model=args.model,
-        prompt_version=extractor.prompt.version,
-        prompt_sha256=extractor.prompt.sha256,
+        model=described.stages["extract"] if single else described.name,
+        prompt_version=described.prompt_version,
+        prompt_sha256=described.prompt_sha256,
         effort=args.effort,
         dataset=target.dataset,
         started_at=started_at,
@@ -299,6 +320,8 @@ def main(argv: list[str] | None = None) -> int:
         set_name=target.set_name,
         set_sha256=target.set_sha256,
         set_items=len(target.items) if target.set_name else None,
+        configuration=described.name,
+        stages=described.stages,
     )
     report = build_report(run, results)
     json_path, md_path = write_report(report, reports_dir)

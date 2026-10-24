@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from pydantic import ValidationError
 
 from commitment_tracker.extractor.adapter import Message, ModelAdapter, ModelReply, ModelRequest
+from commitment_tracker.extractor.analyzer import Configuration
 from commitment_tracker.extractor.dates import resolve_due
 from commitment_tracker.extractor.errors import ModelOutputInvalid, ModelRefused
 from commitment_tracker.extractor.model_output import ModelOutput, ModelSpan
@@ -89,9 +90,19 @@ def _quoted(span: Span, request: AnalyzeRequest) -> bool:
 
 
 class Extractor:
-    def __init__(self, adapter: ModelAdapter, prompt: Prompt) -> None:
+    def __init__(self, adapter: ModelAdapter, prompt: Prompt, *, name: str | None = None) -> None:
         self.adapter = adapter
         self.prompt = prompt
+        self.name = name or adapter.model
+
+    def describe(self) -> Configuration:
+        return Configuration(
+            name=self.name,
+            stages={"extract": self.adapter.model},
+            prompt_version=self.prompt.version,
+            prompt_sha256=self.prompt.sha256,
+            effort=getattr(self.adapter, "effort", None),
+        )
 
     async def analyze(self, request: AnalyzeRequest) -> AnalyzeResponse:
         started = time.perf_counter()

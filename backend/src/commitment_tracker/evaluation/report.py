@@ -9,9 +9,11 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
+from commitment_tracker.evaluation.dataset import EvalItem
 from commitment_tracker.evaluation.metrics import Scores, compute_scores
 from commitment_tracker.evaluation.results import ItemResult
-from commitment_tracker.schemas import Label, Precision, Span
+from commitment_tracker.extractor.two_stage import StageUsage
+from commitment_tracker.schemas import LEDGER_LABELS, Label, Precision, Span
 
 # backend/src/commitment_tracker/evaluation/report.py -> backend/eval/reports
 DEFAULT_REPORTS_DIR = Path(__file__).resolve().parents[3] / "eval" / "reports"
@@ -30,6 +32,27 @@ class RunInfo(BaseModel):
     set_name: str | None = None
     set_sha256: str | None = None
     set_items: int | None = None
+    # The named configuration ("opus", "two-stage", ...) and the model behind each stage.
+    configuration: str | None = None
+    stages: dict[str, str] = Field(default_factory=dict)
+
+
+class StageDetail(BaseModel):
+    """One stage's share of a two-stage item: calls, wall-clock latency, tokens and cost."""
+
+    stage: str
+    model: str
+    calls: int
+    latency_ms: int
+    input_tokens: int
+    output_tokens: int
+    cache_creation_input_tokens: int
+    cache_read_input_tokens: int
+    cost_usd: float | None
+
+    @classmethod
+    def from_usage(cls, usage: StageUsage) -> "StageDetail":
+        return cls.model_validate(usage, from_attributes=True)
 
 
 class PredictedSpan(BaseModel):
@@ -77,6 +100,10 @@ class ItemDetail(BaseModel):
     latency_ms: int | None = None
     cost_usd: float | None = None
     served_by: str | None = None
+    # Two-stage runs only.
+    turns: int | None = None
+    flagged_turns: list[int] | None = None
+    stages: list[StageDetail] | None = None
 
 
 class ProvenanceScore(BaseModel):
@@ -88,11 +115,28 @@ class ProvenanceScore(BaseModel):
     accuracy: float
 
 
+class TwoStageScores(BaseModel):
+    """How much the screen escalated, and what it let through.
+
+    Escalation rate is flagged turns over all turns: on real calls it predicts the saving. A screen
+    miss is an expected ledger span on a turn the screen did not flag, so the extract model never
+    saw it; it is the number that says whether the cheap model is a safe screen.
+    """
+
+    turns: int
+    flagged_turns: int
+    escalation_rate: float
+    screen_misses: int
+    screen_miss_items: list[str]
+    stage_cost_usd: dict[str, float | None]
+
+
 class Report(BaseModel):
     run: RunInfo
     scores: Scores
     items: list[ItemDetail]
     by_provenance: dict[str, ProvenanceScore] = Field(default_factory=dict)
+    two_stage: TwoStageScores | None = None
 
 
 def _detail(r: ItemResult) -> ItemDetail:
@@ -111,6 +155,44 @@ def _detail(r: ItemResult) -> ItemDetail:
         latency_ms=metadata.latency_ms if metadata else None,
         cost_usd=metadata.cost_usd if metadata else None,
         served_by=metadata.served_by if metadata else None,
+        turns=len(r.item.turns) if r.flagged_turns is not None else None,
+        flagged_turns=r.flagged_turns,
+        stages=[StageDetail.from_usage(u) for u in r.stages] if r.stages is not None else None,
+    )
+
+
+def two_stage_scores(
+    details: list[ItemDetail], items: dict[str, EvalItem]
+) -> TwoStageScores | None:
+    """Two-stage numbers from stored item details, so a re-score can rebuild them too."""
+    staged = [d for d in details if d.flagged_turns is not None]
+    if not staged:
+        return None
+    turns = sum(len(items[d.item_id].turns) for d in staged)
+    flagged = sum(len(d.flagged_turns or []) for d in staged)
+    missed: dict[str, int] = {}
+    for detail in staged:
+        flagged_set = set(detail.flagged_turns or [])
+        count = sum(
+            span.label in LEDGER_LABELS and span.turn_index not in flagged_set
+            for span in items[detail.item_id].expected
+        )
+        if count:
+            missed[detail.item_id] = count
+    costs: dict[str, list[float | None]] = {}
+    for detail in staged:
+        for stage in detail.stages or []:
+            costs.setdefault(stage.stage, []).append(stage.cost_usd)
+    return TwoStageScores(
+        turns=turns,
+        flagged_turns=flagged,
+        escalation_rate=flagged / turns if turns else 0.0,
+        screen_misses=sum(missed.values()),
+        screen_miss_items=sorted(missed),
+        stage_cost_usd={
+            stage: None if None in values else sum(v for v in values if v is not None)
+            for stage, values in costs.items()
+        },
     )
 
 
@@ -134,11 +216,13 @@ def scores_by_provenance(results: list[ItemResult]) -> dict[str, ProvenanceScore
 
 def build_report(run: RunInfo, results: list[ItemResult]) -> Report:
     served = sorted({r.response.metadata.served_by for r in results if r.response})
+    details = [_detail(r) for r in results]
     return Report(
         run=run.model_copy(update={"served_by": served}),
         scores=compute_scores(results),
-        items=[_detail(r) for r in results],
+        items=details,
         by_provenance=scores_by_provenance(results),
+        two_stage=two_stage_scores(details, {r.item.id: r.item for r in results}),
     )
 
 
@@ -231,6 +315,27 @@ def render_markdown(report: Report) -> str:
             )
             for name, p in report.by_provenance.items()
         ]
+    if report.two_stage is not None:
+        staged = report.two_stage
+        stage_models = ", ".join(f"{k} {v}" for k, v in run.stages.items()) or "n/a"
+        lines += [
+            "",
+            "## Two-stage",
+            "",
+            _row("Metric", "Value"),
+            _row("---", "---"),
+            _row("Stages", stage_models),
+            _row(
+                "Escalation rate",
+                f"{_f(staged.escalation_rate)} ({staged.flagged_turns} of {staged.turns} turns)",
+            ),
+            _row("Screen misses", staged.screen_misses),
+            _row("Items with a screen miss", ", ".join(staged.screen_miss_items) or "none"),
+        ]
+        lines += [
+            _row(f"Cost, {stage}", f"${cost:.4f}" if cost is not None else "n/a")
+            for stage, cost in staged.stage_cost_usd.items()
+        ]
     lines += ["", "## Ambiguous items", ""]
     if scores.ambiguous:
         lines += [_row("Item", "Expected", "Predicted"), _row("---", "---", "---")]
@@ -244,6 +349,7 @@ def render_markdown(report: Report) -> str:
         "",
         _row("Item", "Value"),
         _row("---", "---"),
+        _row("Configuration", run.configuration or run.model),
         _row("Model requested", run.model),
         _row("Served by", ", ".join(run.served_by) or "n/a"),
         _row("Prompt", f"{run.prompt_version} (sha256 {run.prompt_sha256[:12]})"),

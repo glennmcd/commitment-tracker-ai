@@ -18,6 +18,7 @@ from commitment_tracker.evaluation.report import (
     Report,
     RunInfo,
     scores_by_provenance,
+    two_stage_scores,
     write_report,
 )
 from commitment_tracker.evaluation.results import ItemResult
@@ -81,7 +82,11 @@ def rescore(report: Report, items: dict[str, EvalItem]) -> Report:
         raise RescoreError(f"items not in the set: {', '.join(missing)}")
     results = [_result(d, items[d.item_id], report.run) for d in report.items]
     return report.model_copy(
-        update={"scores": compute_scores(results), "by_provenance": scores_by_provenance(results)}
+        update={
+            "scores": compute_scores(results),
+            "by_provenance": scores_by_provenance(results),
+            "two_stage": two_stage_scores(report.items, items),
+        }
     )
 
 

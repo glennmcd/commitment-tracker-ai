@@ -159,3 +159,43 @@ def test_unknown_set_exits_2(
 ) -> None:
     assert run_set(tmp_path, "--set", "nope") == 2
     assert "no set named 'nope'" in capsys.readouterr().err
+
+
+# --- configurations ------------------------------------------------------------------------------
+
+
+def latest_run(tmp_path: Path) -> dict[str, object]:
+    report = sorted((tmp_path / "reports" / "adhoc").glob("*.json"))[-1]
+    run: dict[str, object] = json.loads(report.read_text(encoding="utf-8"))["run"]
+    return run
+
+
+def test_a_bare_model_id_is_named_by_its_configuration(
+    tmp_path: Path, fake_model: list[tuple[str, str]]
+) -> None:
+    assert run_cli(tmp_path, "--model", "claude-haiku-5-5") == 0
+    run = latest_run(tmp_path)
+    assert (run["configuration"], run["model"]) == ("haiku", "claude-haiku-5-5")
+    assert run["stages"] == {"extract": "claude-haiku-5-5"}
+
+
+def test_two_stage_builds_both_stages(tmp_path: Path, fake_model: list[tuple[str, str]]) -> None:
+    assert run_cli(tmp_path, "--config", "two-stage") == 0
+    assert [model for model, _ in fake_model] == ["claude-haiku-5-5", "claude-opus-5-5"]
+    run = latest_run(tmp_path)
+    assert (run["configuration"], run["model"]) == ("two-stage", "two-stage")
+    assert run["stages"] == {"screen": "claude-haiku-5-5", "extract": "claude-opus-5-5"}
+
+
+def test_the_default_is_the_settings_model(
+    tmp_path: Path, fake_model: list[tuple[str, str]], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("EXTRACTOR_MODEL", raising=False)
+    monkeypatch.setattr(cli, "Settings", lambda: Settings(_env_file=None))
+    assert run_cli(tmp_path) == 0
+    assert latest_run(tmp_path)["configuration"] == "opus"
+
+
+def test_config_and_model_are_exclusive(tmp_path: Path) -> None:
+    with pytest.raises(SystemExit):
+        run_cli(tmp_path, "--config", "opus", "--model", "claude-opus-5-5")
