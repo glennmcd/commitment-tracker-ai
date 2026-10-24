@@ -1,5 +1,59 @@
 # Changelog
 
+## [0.8.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.7.0...v0.8.0) (2026-10-24)
+
+
+### Features
+
+* add the two-stage extractor ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* add the two-stage extractor ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **eval:** add --offline and rescore ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add --offline and rescore ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **eval:** add batch import with resolver checks ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add batch import with resolver checks ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **eval:** add blind review ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add blind review ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **eval:** add eval-audio make, add, upload and fetch ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add eval-audio make, add, upload and fetch ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **eval:** add eval-compare ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add eval-compare ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **eval:** add eval-export-site ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add eval-export-site ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **eval:** add eval-gate and the baseline ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add eval-gate and the baseline ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **eval:** add eval-sets ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add eval-sets ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **eval:** add promote and the review agreement summary ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add promote and the review agreement summary ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **eval:** add set manifests, canonical hashes and --set ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add set manifests, canonical hashes and --set ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **eval:** score transcribed audio against text items ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** score transcribed audio against text items ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **eval:** store predicted spans and provenance scores ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** store predicted spans and provenance scores ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **infra:** add the evaluation audio bucket ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **infra:** add the evaluation audio bucket ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **web:** add the evaluation overview and run pages ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **web:** add the evaluation overview and run pages ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **web:** add the items and compare pages ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **web:** add the items and compare pages ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+
+
+### Bug Fixes
+
+* **eval:** align transcribed turns in order ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** align transcribed turns in order ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **eval:** keep other configurations when updating the baseline ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** keep other configurations when updating the baseline ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **eval:** keep review alive when taking a label needs more fields ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** keep review alive when taking a label needs more fields ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **eval:** read JSONL safely and find long near-duplicates ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** read JSONL safely and find long near-duplicates ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **eval:** retry transcription after a failed or timed-out job ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** retry transcription after a failed or timed-out job ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+* **web:** publish runs only against the set version they scored ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **web:** publish runs only against the set version they scored ([d15e1a8](https://github.com/glennmcd/commitment-tracker-ai/commit/d15e1a8800d3d668a8c3adf1514b820a8a85ca7f))
+
 ## [0.7.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.6.1...v0.7.0) (2026-10-24)
 
 
