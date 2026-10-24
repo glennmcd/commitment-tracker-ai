@@ -1,0 +1,9 @@
+{
+  "name": "audio",
+  "description": "Clips of test items: Polly (regenerable) and two people reading (fetched), scored against the same items as text.",
+  "role": "test",
+  "gated": false,
+  "kind": "audio",
+  "items_from": "test",
+  "sources": []
+}

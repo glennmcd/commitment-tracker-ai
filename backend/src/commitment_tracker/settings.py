@@ -47,3 +47,5 @@ class Settings(BaseSettings):
     feedback_table: str | None = Field(default=None, min_length=1)
     daily_budget_usd: float = Field(default=5.0, gt=0)
     worker_function_name: str | None = Field(default=None, min_length=1)
+    # The private bucket of evaluation clips (stack output EvalAudioBucketName); `eval-audio` only.
+    eval_audio_bucket: str | None = Field(default=None, min_length=1)

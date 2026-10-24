@@ -6,6 +6,7 @@ Staging sets (`staging/<batch>`) hold imported drafts awaiting review; every oth
 reviewed items.
 """
 
+import json
 import re
 from collections import Counter
 from dataclasses import dataclass, field
@@ -145,6 +146,9 @@ def summarize(root: Path = SETS_DIR) -> list[SetSummary]:
         except SetError as error:
             summaries.append(SetSummary(name, role="?", gated=False, error=str(error)))
             continue
+        if manifest.kind == "audio":
+            summaries.append(_audio_summary(name, manifest, set_dir(name, root) / "clips.jsonl"))
+            continue
         try:
             loaded = load_set(name, root, allow_empty=True)
         except SetError as error:
@@ -164,6 +168,24 @@ def summarize(root: Path = SETS_DIR) -> list[SetSummary]:
             )
         )
     return summaries
+
+
+def _audio_summary(name: str, manifest: SetManifest, clips: Path) -> SetSummary:
+    """An audio set holds clips, not items: count them by source (polly or human)."""
+    try:
+        lines = [line for line in clips.read_text(encoding="utf-8").splitlines() if line.strip()]
+        sources = Counter(json.loads(line)["source"] for line in lines)
+        sha256 = canonical_sha256(clips)
+    except (OSError, ValueError, KeyError, DatasetError) as error:
+        return SetSummary(name, manifest.role, manifest.gated, error=f"clips.jsonl: {error}")
+    return SetSummary(
+        name=name,
+        role=manifest.role,
+        gated=manifest.gated,
+        items=len(lines),
+        sha256=sha256,
+        provenance=dict(sorted(sources.items())),
+    )
 
 
 def _mix(counts: dict[str, int]) -> str:
