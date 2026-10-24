@@ -35,7 +35,7 @@ function Headline({ data }: { data: EvalRun }) {
 function RunFacts({ data }: { data: EvalRun }) {
   const { run, scores } = data;
   const rows: [string, string][] = [
-    ["Configuration", run.configuration ?? run.model],
+    ["Configuration", data.configuration],
     ...Object.entries(run.stages).map(([stage, model]): [string, string] => [`Model, ${stage}`, model]),
     ["Served by", run.served_by.join(", ") || "n/a"],
     ["Prompt", `${run.prompt_version} (sha256 ${run.prompt_sha256.slice(0, 12)})`],
@@ -73,7 +73,7 @@ export default async function RunPage({ params }: { params: Promise<{ run: strin
   const { run: id } = await params;
   const data = loadRun(id);
   const { scores } = data;
-  const title = `${data.run.configuration ?? data.run.model} on ${data.set}`;
+  const title = `${data.configuration} on ${data.set}`;
   return (
     <>
       <header className="intro">

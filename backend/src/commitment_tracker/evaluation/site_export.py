@@ -168,6 +168,7 @@ def export_site(
                 {
                     "id": run_id,
                     "set": folder.name,
+                    "configuration": _configuration(report),
                     "legacy": report.run.set_sha256 is None,
                     "audio": audio,
                     "run": report.run.model_dump(mode="json"),

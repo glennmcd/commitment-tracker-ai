@@ -739,6 +739,7 @@ button.secondary {
 
 .cell-note {
   display: block;
+  min-width: 14rem;
   max-width: 28rem;
   color: var(--muted);
   font-size: 0.8rem;
@@ -746,9 +747,16 @@ button.secondary {
   white-space: normal;
 }
 
+.data-table td.wrap {
+  min-width: 8rem;
+  white-space: normal;
+}
+
 .tag {
-  display: inline-block;
-  margin-left: 0.5rem;
+  display: block;
+  width: fit-content;
+  margin-top: 0.25rem;
+  white-space: nowrap;
   padding: 0 0.45rem;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -820,4 +828,143 @@ button.secondary {
 
 .run-list li {
   padding: 0.25rem 0;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1.25rem;
+  margin: 0 0 1rem;
+}
+
+.filters label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.filters select {
+  min-height: 44px;
+  max-width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: inherit;
+  font: inherit;
+  font-weight: 400;
+}
+
+.verdicts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.verdicts legend {
+  padding: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.verdicts .check {
+  align-items: center;
+}
+
+.verdicts .check input {
+  margin-top: 0;
+}
+
+.item {
+  margin: 0 0 1rem;
+  padding: var(--gutter);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  scroll-margin-top: 1rem;
+}
+
+.item-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.item-head h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.verdict {
+  font-weight: 600;
+}
+
+.verdict[data-correct="true"],
+.match {
+  color: var(--accent);
+}
+
+.verdict[data-correct="false"],
+.mismatch {
+  color: var(--bad);
+}
+
+.diff {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.diff h4 {
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.span-box {
+  margin-bottom: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.span-box .facts {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.mismatch,
+.match {
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.flip-lists {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+}
+
+.flip-lists h3 {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.flips li {
+  padding: 0.15rem 0;
+}
+
+/* Below 640 px the comparison stacks expected above predicted; the matrix already scrolls in its own box. */
+@media (max-width: 640px) {
+  .diff {
+    grid-template-columns: 1fr;
+  }
 }

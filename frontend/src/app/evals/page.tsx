@@ -35,9 +35,9 @@ function SetsTable({ sets }: { sets: SetSummary[] }) {
               <td>{set.kind === "audio" ? "test (audio)" : set.role}</td>
               <td>{set.gated ? "yes" : "no"}</td>
               <td>{set.items}</td>
-              <td>{mix(set.review)}</td>
-              <td>{mix(set.labels)}</td>
-              <td>{mix(set.provenance)}</td>
+              <td className="wrap">{mix(set.review)}</td>
+              <td className="wrap">{mix(set.labels)}</td>
+              <td className="wrap">{mix(set.provenance)}</td>
               <td>
                 <code>{set.sha256.slice(0, 12) || "–"}</code>
               </td>
@@ -95,7 +95,10 @@ export default function EvalsPage() {
       {tested.map(([set, rows]) => (
         <section key={set} aria-labelledby={`results-${set}`}>
           <h2 id={`results-${set}`}>Results on {set}</h2>
-          <ResultsTable rows={rows} caption={`Latest run of each configuration on the ${set} set`} />
+          <ResultsTable
+            rows={rows}
+            caption={`Latest run of each configuration on the ${set} set. Labels is label accuracy over all spans; owner, action and due are field accuracy on matched ledger spans.`}
+          />
         </section>
       ))}
 

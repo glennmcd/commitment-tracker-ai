@@ -92,7 +92,7 @@ def test_a_run_file_joins_items_with_transcripts_and_judgement(repo: Repo) -> No
     assert first["predicted"][0]["label"] == "NONE"
     assert (first["correct"], second["correct"]) == (False, True)
     assert run["scores"]["ledger"]["f1"] == 0.0
-    assert run["run"]["configuration"] == "opus"
+    assert run["run"]["configuration"] == run["configuration"] == "opus"
 
 
 def test_the_export_is_deterministic(repo: Repo) -> None:
@@ -120,7 +120,7 @@ def test_legacy_reports_are_published_and_flagged(repo: Repo, tmp_path: Path) ->
     legacy.write_bytes(source.read_bytes())
     index = repo.export()
     (row,) = index["runs"]
-    assert (row["legacy"], row["set"]) == (True, "dev")
+    assert (row["legacy"], row["set"], row["configuration"]) == (True, "dev", "haiku")
     run = json.loads((repo.out / "runs" / f"{legacy.stem}.json").read_text(encoding="utf-8"))
     assert run["items"][0]["predicted"] is None
     assert run["items"][0]["correct"] is None

@@ -122,6 +122,7 @@ function run(id: string, configuration: string, items: RunItem[], extra: Partial
   return {
     id,
     set: "test",
+    configuration,
     legacy: false,
     audio: false,
     run: {

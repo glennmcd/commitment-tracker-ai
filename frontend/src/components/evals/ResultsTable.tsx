@@ -15,10 +15,11 @@ export function ResultsTable({ rows, caption }: { rows: RunRow[]; caption: strin
             <th scope="col">Ledger F1</th>
             <th scope="col">Precision</th>
             <th scope="col">Recall</th>
-            <th scope="col">Label accuracy</th>
+            <th scope="col">Labels</th>
             {fields.map((field) => (
-              <th scope="col" key={field}>
-                {field} accuracy
+              <th scope="col" key={field} title={`${field} accuracy on matched ledger spans`}>
+                {field[0]?.toUpperCase()}
+                {field.slice(1)}
               </th>
             ))}
             <th scope="col">Cost</th>

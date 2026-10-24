@@ -172,6 +172,9 @@ test("the page works by keyboard alone and has no horizontal scroll on a phone",
   );
   expect(overflow).toBe(false);
 
+  // The header's link to the evaluation comes first, then the demo.
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: /evaluation results/i })).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(page.getByRole("radio", { name: "Type or paste" })).toBeFocused();
   await page.keyboard.press("ArrowRight");

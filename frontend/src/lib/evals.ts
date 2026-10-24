@@ -204,6 +204,7 @@ export interface TwoStageScores {
 export interface EvalRun {
   id: string;
   set: string;
+  configuration: string; // the configuration's name, or the model id for runs without one
   legacy: boolean;
   audio: boolean;
   run: RunInfo;
@@ -238,7 +239,7 @@ export function parseIndex(data: unknown): EvalIndex {
 }
 
 export function parseRun(data: unknown): EvalRun {
-  const run = need(data, ["id", "set", "legacy", "audio", "run", "scores", "items"], "run");
+  const run = need(data, ["id", "set", "configuration", "legacy", "audio", "run", "scores", "items"], "run");
   need(run.scores, ["ledger", "labels", "confusion", "fields", "failed_items"], `${String(run.id)} scores`);
   for (const item of run.items as unknown[]) {
     need(
