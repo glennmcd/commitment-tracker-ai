@@ -282,3 +282,36 @@ def test_an_audio_set_needs_transcribe(
     argv = ["--set", "audio", "--sets-dir", str(sets), "--reports-dir", str(tmp_path / "r")]
     assert cli.main(argv) == 2
     assert "--transcribe" in capsys.readouterr().err
+
+
+def test_a_short_turn_maps_in_order_not_to_an_earlier_turn_sharing_its_words() -> None:
+    four = EvalItem.model_validate(
+        dialogue("t-01")
+        | {
+            "turns": [
+                {"speaker": "buyer", "text": "Okay, can you send the report?"},
+                {"speaker": "seller", "text": "Sure, I'll send it Friday."},
+                {"speaker": "buyer", "text": "Okay."},
+                {"speaker": "seller", "text": "Send the report?"},
+            ],
+            "expected": [
+                {
+                    **item_data()["expected"][0],
+                    "turn_index": 1,
+                    "quote": "Sure, I'll send it Friday.",
+                }
+            ],
+        }
+    )
+    result = align(
+        four,
+        timed(
+            (0, "Okay, can you send the report?"),
+            (1, "Sure, I'll send it Friday."),
+            (0, "Okay."),
+            (1, "Send the report?"),
+        ),
+    )
+    assert [t.speaker for t in result.item.turns] == ["buyer", "seller", "buyer", "seller"]
+    assert (result.speaker_errors, result.unmatched_spans) == (0, 0)
+    assert result.item.expected[0].turn_index == 1

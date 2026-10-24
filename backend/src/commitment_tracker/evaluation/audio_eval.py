@@ -4,7 +4,7 @@
    are cached by the audio's SHA-256 under eval/.cache/transcripts/, so every configuration after
    the first reads them for free. Evaluation jobs are named `eval-...`, never `ct-...`: the stack's
    EventBridge rule hands `ct-` jobs to the demo worker.
-2. Align: each transcribed turn maps to the item turn it shares the most words with (difflib over
+2. Align: transcribed turns map to item turns in order, by shared words (difflib over
    words), and each transcribed speaker number maps to the role it most often aligns with. An
    expected span moves to the transcribed turn, among those aligned to its original turn, that
    holds most of its quote's words; a span whose turn vanished points at no turn and counts as a
@@ -136,14 +136,46 @@ def _shared(a: list[str], b: list[str]) -> int:
     return sum(block.size for block in SequenceMatcher(None, a, b).get_matching_blocks())
 
 
+def _score(a: list[str], b: list[str]) -> float:
+    """Shared words, plus how much of the longer turn they cover, so "Okay." prefers "Okay."."""
+    shared = _shared(a, b)
+    return shared + shared / max(len(a), len(b)) if shared else 0.0
+
+
+def _in_order(scores: list[list[float]]) -> list[int]:
+    """The best mapping of transcribed turns to item turns that never goes backwards: each turn maps
+    to the same item turn as the previous one (a split) or a later one, or to none. Dynamic
+    programming over the highest item turn used so far; the inputs are a few dozen turns."""
+    if not scores or not scores[0]:
+        return [NO_TURN] * len(scores)
+    turns = len(scores[0])
+    unreachable = float("-inf")
+    best = [0.0] + [unreachable] * turns  # best[k]: total so far with item turn k - 1 the latest
+    steps: list[list[tuple[int, int]]] = []
+    for row in scores:
+        new = [unreachable] * (turns + 1)
+        step = [(0, NO_TURN)] * (turns + 1)
+        for state, total in enumerate(best):
+            if total == unreachable:
+                continue
+            if total > new[state]:  # this transcribed turn maps to no item turn
+                new[state], step[state] = total, (state, NO_TURN)
+            for target in range(max(state - 1, 0), turns):
+                if row[target] > 0 and total + row[target] > new[target + 1]:
+                    new[target + 1], step[target + 1] = total + row[target], (state, target)
+        steps.append(step)
+        best = new
+    state = max(range(turns + 1), key=lambda k: best[k])
+    mapped = [NO_TURN] * len(scores)
+    for index in range(len(scores) - 1, -1, -1):
+        state, mapped[index] = steps[index][state]
+    return mapped
+
+
 def align(item: EvalItem, transcribed: list[TimedTurn]) -> Alignment:
     item_words = [_words(turn.text) for turn in item.turns]
-    mapped: list[int] = []  # item turn index for each transcribed turn, or NO_TURN
-    for turn in transcribed:
-        words = _words(turn.text)
-        scores = [_shared(words, other) for other in item_words]
-        best = max(range(len(scores)), key=lambda i: (scores[i], -i)) if scores else NO_TURN
-        mapped.append(best if scores and scores[best] > 0 else NO_TURN)
+    scores = [[_score(_words(t.text), other) for other in item_words] for t in transcribed]
+    mapped = _in_order(scores)  # item turn index for each transcribed turn, or NO_TURN
 
     votes: dict[int, Counter[str]] = {}
     for turn, target in zip(transcribed, mapped, strict=True):
