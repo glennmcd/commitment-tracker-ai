@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.8.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.7.0...v0.8.0) (2026-10-24)
+
+
+### Features
+
+* add the two-stage extractor ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add --offline and rescore ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add batch import with resolver checks ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add blind review ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add eval-audio make, add, upload and fetch ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add eval-compare ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add eval-export-site ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add eval-gate and the baseline ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add eval-sets ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add promote and the review agreement summary ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** add set manifests, canonical hashes and --set ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** score transcribed audio against text items ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** store predicted spans and provenance scores ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **infra:** add the evaluation audio bucket ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **web:** add the evaluation overview and run pages ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **web:** add the items and compare pages ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+
+
+### Bug Fixes
+
+* **eval:** align transcribed turns in order ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** keep other configurations when updating the baseline ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** keep review alive when taking a label needs more fields ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** read JSONL safely and find long near-duplicates ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **eval:** retry transcription after a failed or timed-out job ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+* **web:** publish runs only against the set version they scored ([c863377](https://github.com/glennmcd/commitment-tracker-ai/commit/c86337793f0c803af1c537838c3fb8c5f6a7afd6))
+
 ## [0.7.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.6.1...v0.7.0) (2026-10-24)
 
 
