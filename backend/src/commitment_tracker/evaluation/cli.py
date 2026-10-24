@@ -2,6 +2,7 @@
 
     uv run eval --set test --model claude-opus-5-5 --prompt v1
     uv run eval --data some-items.jsonl
+    uv run eval import gemini.jsonl --batch gem01 --provenance gemini-3-pro
 
 Calls the real model (and spends money) for every item not already in the response cache. Set runs
 are written to eval/reports/<set>/; `--data` and staging runs go to eval/reports/adhoc/, which is
@@ -15,11 +16,16 @@ import logging
 import sys
 import time
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 from commitment_tracker.evaluation.cache import DEFAULT_CACHE_DIR, ResponseCache
 from commitment_tracker.evaluation.dataset import DatasetError, EvalItem, load_dataset
+from commitment_tracker.evaluation.importer import (
+    BatchError,
+    import_batch,
+    latest_generation_prompt,
+)
 from commitment_tracker.evaluation.report import (
     DEFAULT_REPORTS_DIR,
     RunInfo,
@@ -88,7 +94,49 @@ def prompt_versions_with_reports(directory: Path) -> set[str]:
     return versions
 
 
+def _import(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(
+        prog="eval import", description="Import a generator's JSONL reply as a staging batch."
+    )
+    parser.add_argument("file", type=Path)
+    parser.add_argument("--batch", required=True, help="e.g. gem01")
+    parser.add_argument("--provenance", required=True, help="hand-written or <family>-<model>")
+    parser.add_argument("--generation-prompt", help="default: the latest eval/generation file")
+    parser.add_argument("--sets-dir", type=Path, default=SETS_DIR)
+    args = parser.parse_args(argv)
+    try:
+        result = import_batch(
+            args.file,
+            batch=args.batch,
+            provenance=args.provenance,
+            generation_prompt=args.generation_prompt or latest_generation_prompt(),
+            root=args.sets_dir,
+            today=date.today(),
+        )
+    except (BatchError, SetError, OSError) as error:
+        print(f"eval import: {error}", file=sys.stderr)
+        return 1
+    print(
+        f"imported {len(result.imported)} | rejected {len(result.rejections)} | "
+        f"date disagreements {len(result.date_disagreements)} | "
+        f"near duplicates {len(result.near_duplicates)}"
+    )
+    for rejection in result.rejections:
+        print(f"  line {rejection.line}: {rejection.reason}")
+    if not result.imported:
+        print("eval import: nothing to import; no batch was written", file=sys.stderr)
+        return 1
+    print(f"staged in {result.directory}; next: uv run eval review --batch {args.batch}")
+    return 0
+
+
+SUBCOMMANDS = {"import": _import}
+
+
 def main(argv: list[str] | None = None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
+    if argv and argv[0] in SUBCOMMANDS:
+        return SUBCOMMANDS[argv[0]](argv[1:])
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     settings = Settings()
     args = _parser(settings).parse_args(argv)

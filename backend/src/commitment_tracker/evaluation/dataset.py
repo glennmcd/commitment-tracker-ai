@@ -85,7 +85,7 @@ class EvalItem(EvalModel):
         return self
 
 
-def _describe(error: ValidationError) -> str:
+def describe_validation_error(error: ValidationError) -> str:
     parts = []
     for detail in error.errors(include_url=False, include_input=False):
         path = ".".join(str(part) for part in detail["loc"])
@@ -118,7 +118,9 @@ def load_dataset(path: Path) -> list[EvalItem]:
         try:
             item = EvalItem.model_validate_json(line)
         except ValidationError as error:
-            raise DatasetError(f"{path.name} line {number}: {_describe(error)}") from None
+            raise DatasetError(
+                f"{path.name} line {number}: {describe_validation_error(error)}"
+            ) from None
         if item.id in seen:
             raise DatasetError(f"{path.name} line {number}: duplicate id {item.id}")
         seen.add(item.id)
