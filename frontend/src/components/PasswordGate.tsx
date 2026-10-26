@@ -17,9 +17,9 @@ function fitsInHeader(value: string): boolean {
  * Shows `children` only after the visitor enters the site password. The API's Lambda authorizer is what enforces it,
  * so this only collects the password, checks it with one cheap call and sends it with every later request
  * (src/api/client.ts). The password is kept for the tab only. If the API later refuses it (changed, say), the gate
- * closes again.
+ * closes again. `preview` shows above the form while the gate is locked (the landing page's evaluation results).
  */
-export function PasswordGate({ children }: { children: ReactNode }) {
+export function PasswordGate({ children, preview }: { children: ReactNode; preview?: ReactNode }) {
   const [state, setState] = useState<State>("starting");
   const [value, setValue] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
@@ -90,29 +90,32 @@ export function PasswordGate({ children }: { children: ReactNode }) {
   if (state === "open") return <>{children}</>;
 
   return (
-    <form className="panel gate" onSubmit={unlock}>
-      <div className="field">
-        <label htmlFor="site-password">Password</label>
-        <p className="hint">This demo is private. Enter the password you were given.</p>
-        <input
-          id="site-password"
-          type="password"
-          autoComplete="current-password"
-          value={value}
-          disabled={checking}
-          onChange={(event) => setValue(event.target.value)}
-        />
-      </div>
-      {notice && (
-        <p className="problem" role="alert">
-          {notice}
-        </p>
-      )}
-      <div className="actions">
-        <button type="submit" disabled={checking}>
-          {checking ? "Checking…" : "Unlock"}
-        </button>
-      </div>
-    </form>
+    <>
+      {preview}
+      <form className="panel gate" onSubmit={unlock}>
+        <div className="field">
+          <label htmlFor="site-password">Password</label>
+          <p className="hint">This demo is private. Enter the password you were given.</p>
+          <input
+            id="site-password"
+            type="password"
+            autoComplete="current-password"
+            value={value}
+            disabled={checking}
+            onChange={(event) => setValue(event.target.value)}
+          />
+        </div>
+        {notice && (
+          <p className="problem" role="alert">
+            {notice}
+          </p>
+        )}
+        <div className="actions">
+          <button type="submit" disabled={checking}>
+            {checking ? "Checking…" : "Unlock"}
+          </button>
+        </div>
+      </form>
+    </>
   );
 }

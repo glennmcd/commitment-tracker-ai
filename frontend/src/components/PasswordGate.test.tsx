@@ -36,6 +36,21 @@ async function enter(user: ReturnType<typeof userEvent.setup>, value: string) {
 }
 
 describe("PasswordGate", () => {
+  it("shows the preview only while locked", async () => {
+    const user = userEvent.setup();
+    client.GET.mockResolvedValue(answer(200));
+    render(
+      <PasswordGate preview={<p>the scores</p>}>
+        <p>the demo</p>
+      </PasswordGate>,
+    );
+
+    expect(await screen.findByText("the scores")).toBeInTheDocument();
+    await enter(user, "right");
+    expect(await screen.findByText("the demo")).toBeInTheDocument();
+    expect(screen.queryByText("the scores")).not.toBeInTheDocument();
+  });
+
   it("hides the demo and asks for the password", async () => {
     renderGate();
 
