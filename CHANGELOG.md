@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.9.0...v0.10.0) (2026-10-26)
+
+
+### Features
+
+* **eval:** added gpt cases and ran against opus/sonnet/haiku ([#22](https://github.com/glennmcd/commitment-tracker-ai/issues/22)) ([8b8a995](https://github.com/glennmcd/commitment-tracker-ai/commit/8b8a99519ae4b21827ae6b0073886d20bef50dcb))
+
 ## [0.9.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.8.0...v0.9.0) (2026-10-26)
 
 
