@@ -1,0 +1,24 @@
+{
+  "batch": "gpt01",
+  "source": "chatgpt-5.6-luna-low.jsonl",
+  "provenance": "chatgpt-5.6-luna-low",
+  "generation_prompt": "prompt-v1",
+  "imported_on": "2026-10-25",
+  "imported": 22,
+  "rejections": [
+    {
+      "line": 37,
+      "reason": "expected.1.action_keywords: Value error, action_keywords must be non-empty lower case words"
+    },
+    {
+      "line": 45,
+      "reason": "expected.1.action_keywords: Value error, action_keywords must be non-empty lower case words"
+    },
+    {
+      "line": 49,
+      "reason": "expected.0.action_keywords: Value error, action_keywords must be non-empty lower case words"
+    }
+  ],
+  "date_disagreements": [],
+  "near_duplicates": []
+}
