@@ -1,0 +1,18 @@
+{
+  "batch": "gem01",
+  "source": "gemini-2.5-flash-high.jsonl",
+  "provenance": "gemini-2.5-high",
+  "generation_prompt": "prompt-v1",
+  "imported_on": "2026-10-25",
+  "imported": 25,
+  "rejections": [],
+  "date_disagreements": [
+    {
+      "item": "gem01-11",
+      "span": 0,
+      "generator": null,
+      "resolver": "2026-11-12"
+    }
+  ],
+  "near_duplicates": []
+}

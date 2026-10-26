@@ -3,5 +3,17 @@
   "description": "Held-out headline set: reviewed drafts from non-Claude models plus hand-written items.",
   "role": "test",
   "gated": true,
-  "sources": []
+  "kind": "text",
+  "items_from": null,
+  "sources": [
+    {
+      "batch": "gem01",
+      "provenance": "gemini-2.5-high",
+      "generation_prompt": "prompt-v1",
+      "call_date": "2026-11-11",
+      "imported": "2026-10-25",
+      "promoted": "2026-10-25",
+      "items": 25
+    }
+  ]
 }

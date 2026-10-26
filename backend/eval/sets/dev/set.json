@@ -4,6 +4,7 @@
   "role": "dev",
   "gated": false,
   "sources": [
-    {"batch": "spec", "provenance": "spec", "generation_prompt": null, "items": 24}
+    {"batch": "spec", "provenance": "spec", "generation_prompt": null, "items": 24},
+    {"batch": "hand", "provenance": "hand-written", "generation_prompt": null, "items": 10}
   ]
 }

@@ -1,0 +1,1201 @@
+{
+  "run": {
+    "model": "claude-opus-5-5",
+    "prompt_version": "v1",
+    "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
+    "effort": "medium",
+    "dataset": "test",
+    "started_at": "2026-10-26T02:30:59.106704Z",
+    "duration_seconds": 25.103641800000332,
+    "served_by": [
+      "claude-opus-5-5"
+    ],
+    "set_name": "test",
+    "set_sha256": "6094cd09e4cc6e47a5faa3657e85ed5cad2e6fa51b3e715d3b6c565346ec4d9f",
+    "set_items": 25,
+    "configuration": "opus",
+    "stages": {
+      "extract": "claude-opus-5-5"
+    }
+  },
+  "scores": {
+    "items": 25,
+    "scored_items": 24,
+    "accuracy": 0.9642857142857143,
+    "macro_f1": 0.9666666666666667,
+    "labels": {
+      "COMMITMENT": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 4
+      },
+      "HEDGED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2
+      },
+      "CONDITIONAL": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2
+      },
+      "SUGGESTION": {
+        "precision": 0.6666666666666666,
+        "recall": 1.0,
+        "f1": 0.8,
+        "support": 2
+      },
+      "REQUEST": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 6
+      },
+      "REPORTED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2
+      },
+      "REFUSAL": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2
+      },
+      "NONE": {
+        "precision": 1.0,
+        "recall": 0.875,
+        "f1": 0.9333333333333333,
+        "support": 8
+      }
+    },
+    "confusion": {
+      "labels": [
+        "COMMITMENT",
+        "HEDGED",
+        "CONDITIONAL",
+        "SUGGESTION",
+        "REQUEST",
+        "REPORTED",
+        "REFUSAL",
+        "NONE"
+      ],
+      "rows": [
+        [
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          6,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          7
+        ]
+      ]
+    },
+    "ledger": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "true_positives": 8,
+      "false_positives": 0,
+      "false_negatives": 0
+    },
+    "fields": {
+      "owner": {
+        "correct": 8,
+        "total": 8,
+        "accuracy": 1.0
+      },
+      "action": {
+        "correct": 7,
+        "total": 7,
+        "accuracy": 1.0
+      },
+      "due": {
+        "correct": 8,
+        "total": 8,
+        "accuracy": 1.0
+      }
+    },
+    "ambiguous": [
+      {
+        "item_id": "gem01-22",
+        "expected": "HEDGED",
+        "predicted": "HEDGED"
+      }
+    ],
+    "failed_items": [],
+    "quote_failures": 0,
+    "retried_items": 0,
+    "cache_hits": 0,
+    "latency_ms": {
+      "p50": 2722,
+      "p95": 5686
+    },
+    "cost_usd": 0.185068
+  },
+  "items": [
+    {
+      "item_id": "gem01-01",
+      "tags": [],
+      "expected": [
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "COMMITMENT",
+          "quote": "I'll make sure the updated ad copy deck is delivered to your inbox by Friday.",
+          "owner": "account_manager",
+          "recipient": "buyer",
+          "action": "deliver the updated ad copy deck",
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 4644,
+      "cost_usd": 0.034928,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-02",
+      "tags": [
+        "multi_turn"
+      ],
+      "expected": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Could you send over the updated media budget allocation?",
+          "owner": null,
+          "recipient": "client",
+          "action": "send the updated media budget allocation",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        },
+        {
+          "turn_index": 1,
+          "label": "COMMITMENT",
+          "quote": "I'll get that over to you by end of day.",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "send the updated media budget allocation",
+          "due_raw": "by end of day",
+          "due_resolved": "2026-11-11",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 3577,
+      "cost_usd": 0.007312,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-03",
+      "tags": [],
+      "expected": [
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "COMMITMENT",
+          "quote": "Leave the redlines with me, I'll handle the revisions before your board meeting.",
+          "owner": "account_manager",
+          "recipient": "buyer",
+          "action": "handle the redline revisions",
+          "due_raw": "before your board meeting",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 4191,
+      "cost_usd": 0.005036,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-04",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "REPORTED"
+      ],
+      "predicted": [
+        "REPORTED"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REPORTED",
+          "quote": "Our lead developer Marcus promised he would fix the tracking pixels by yesterday.",
+          "owner": "Marcus",
+          "recipient": null,
+          "action": "fix the tracking pixels",
+          "due_raw": "by yesterday",
+          "due_resolved": null,
+          "precision": "vague",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 4461,
+      "cost_usd": 0.008436,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-05",
+      "tags": [],
+      "expected": [
+        "CONDITIONAL"
+      ],
+      "predicted": [
+        "CONDITIONAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "CONDITIONAL",
+          "quote": "As long as the PO is approved by noon tomorrow, Marcus will set up the staging environment by end of next week.",
+          "owner": "Marcus",
+          "recipient": "buyer",
+          "action": "set up the staging environment",
+          "due_raw": "by end of next week",
+          "due_resolved": "2026-11-20",
+          "precision": "day",
+          "condition": "the PO is approved by noon tomorrow"
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 3363,
+      "cost_usd": 0.005516,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-06",
+      "tags": [
+        "multi_turn"
+      ],
+      "expected": [
+        "SUGGESTION"
+      ],
+      "predicted": [
+        "SUGGESTION",
+        "SUGGESTION"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "SUGGESTION",
+          "quote": "We should probably revisit the brand guidelines before starting the video edit.",
+          "owner": null,
+          "recipient": null,
+          "action": "revisit the brand guidelines",
+          "due_raw": "before starting the video edit",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        },
+        {
+          "turn_index": 1,
+          "label": "SUGGESTION",
+          "quote": "Agreed, let's look at that.",
+          "owner": null,
+          "recipient": null,
+          "action": "look at the brand guidelines",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 5686,
+      "cost_usd": 0.012176,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-07",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "REFUSAL"
+      ],
+      "predicted": [
+        "REFUSAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REFUSAL",
+          "quote": "I can't promise the campaign will go live on the 15th.",
+          "owner": "account_manager",
+          "recipient": "buyer",
+          "action": "launch the campaign",
+          "due_raw": "on the 15th",
+          "due_resolved": "2026-11-15",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2722,
+      "cost_usd": 0.004684,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-08",
+      "tags": [],
+      "expected": [
+        "HEDGED"
+      ],
+      "predicted": [
+        "HEDGED"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "HEDGED",
+          "quote": "We should be able to get the analytics dashboard configured by next week, hopefully.",
+          "owner": "account_manager",
+          "recipient": "buyer",
+          "action": "configure the analytics dashboard",
+          "due_raw": "by next week",
+          "due_resolved": "2026-11-16",
+          "precision": "week",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2954,
+      "cost_usd": 0.005032,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-09",
+      "tags": [],
+      "expected": [
+        "REQUEST"
+      ],
+      "predicted": [
+        "REQUEST"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Could you ask your design lead if she can export the raw vector assets for us?",
+          "owner": null,
+          "recipient": "client",
+          "action": "ask the design lead to export the raw vector assets",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2197,
+      "cost_usd": 0.004712,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-10",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "Our standard agency SLA is four hours for urgent production bugs.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2485,
+      "cost_usd": 0.0044,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-11",
+      "tags": [],
+      "expected": [
+        "REPORTED"
+      ],
+      "predicted": [
+        "REPORTED"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REPORTED",
+          "quote": "Sarah said she'd send the updated SEO keyword strategy document by tomorrow morning.",
+          "owner": "Sarah",
+          "recipient": null,
+          "action": "send the updated SEO keyword strategy document",
+          "due_raw": "by tomorrow morning",
+          "due_resolved": "2026-11-12",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2681,
+      "cost_usd": 0.005136,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-12",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "Honestly, at this rate, I suppose you'll have the entire redesign done by tonight!",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2733,
+      "cost_usd": 0.00482,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-13",
+      "tags": [],
+      "expected": [
+        "CONDITIONAL"
+      ],
+      "predicted": [
+        "CONDITIONAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "CONDITIONAL",
+          "quote": "We will provide the updated product photography as soon as legal signs off on the release.",
+          "owner": "client",
+          "recipient": null,
+          "action": "provide the updated product photography",
+          "due_raw": "as soon as legal signs off on the release",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": "legal signs off on the release"
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 4761,
+      "cost_usd": 0.009832,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-14",
+      "tags": [
+        "multi_turn"
+      ],
+      "expected": [
+        "REQUEST",
+        "HEDGED"
+      ],
+      "predicted": [
+        "REQUEST",
+        "HEDGED"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Can you have the performance report ready by Friday?",
+          "owner": null,
+          "recipient": "client",
+          "action": "have the performance report ready",
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "precision": "day",
+          "condition": null
+        },
+        {
+          "turn_index": 1,
+          "label": "HEDGED",
+          "quote": "We'll circle back on that once we see the final ad spend figures.",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "follow up on the performance report request",
+          "due_raw": "once we see the final ad spend figures",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 6729,
+      "cost_usd": 0.014764,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-15",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "Last quarter I promised a 10% rebate on media management fees and we delivered it on time.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2008,
+      "cost_usd": 0.004528,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-16",
+      "tags": [],
+      "expected": [
+        "REQUEST"
+      ],
+      "predicted": [
+        "REQUEST"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Would you be able to audit our current email automation sequences?",
+          "owner": null,
+          "recipient": "client",
+          "action": "audit the client's email automation sequences",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1962,
+      "cost_usd": 0.004408,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-17",
+      "tags": [],
+      "expected": [
+        "SUGGESTION"
+      ],
+      "predicted": [
+        "SUGGESTION"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "SUGGESTION",
+          "quote": "It might make sense to delay the paid search launch until after the website migration.",
+          "owner": null,
+          "recipient": null,
+          "action": "delay the paid search launch",
+          "due_raw": "until after the website migration",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2117,
+      "cost_usd": 0.004676,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-18",
+      "tags": [],
+      "expected": [
+        "REFUSAL"
+      ],
+      "predicted": [
+        "REFUSAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REFUSAL",
+          "quote": "We cannot absorb the extra cost of custom illustrations for this release.",
+          "owner": "account_manager",
+          "recipient": null,
+          "action": "absorb the extra cost of custom illustrations",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 3931,
+      "cost_usd": 0.006684,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-19",
+      "tags": [],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "Our quarterly performance review took place last Wednesday in the Chicago office.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1857,
+      "cost_usd": 0.00434,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-20",
+      "tags": [],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "We had a really productive session reviewing the social media analytics yesterday.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2037,
+      "cost_usd": 0.00428,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-21",
+      "tags": [
+        "multi_turn"
+      ],
+      "expected": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Could we look at updating the homepage banner design next?",
+          "owner": null,
+          "recipient": "client",
+          "action": "update the homepage banner design",
+          "due_raw": "next",
+          "due_resolved": null,
+          "precision": "vague",
+          "condition": null
+        },
+        {
+          "turn_index": 1,
+          "label": "COMMITMENT",
+          "quote": "I will send over the revised contract scope by Monday.",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "send the revised contract scope",
+          "due_raw": "by Monday",
+          "due_resolved": "2026-11-16",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 5098,
+      "cost_usd": 0.011212,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-22",
+      "tags": [
+        "ambiguous"
+      ],
+      "expected": [
+        "HEDGED"
+      ],
+      "predicted": [
+        "HEDGED"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "HEDGED",
+          "quote": "I'll try to review the landing page variants at some point.",
+          "owner": "account_manager",
+          "recipient": null,
+          "action": "review the landing page variants",
+          "due_raw": "at some point",
+          "due_resolved": null,
+          "precision": "vague",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2256,
+      "cost_usd": 0.004756,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-23",
+      "tags": [],
+      "expected": [
+        "REQUEST"
+      ],
+      "predicted": [
+        "REQUEST"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Can you provide a breakdown of the Q4 ad spend by the 1st?",
+          "owner": null,
+          "recipient": "client",
+          "action": "provide a breakdown of the Q4 ad spend",
+          "due_raw": "by the 1st",
+          "due_resolved": "2026-12-01",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2115,
+      "cost_usd": 0.004924,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-24",
+      "tags": [],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "The project management software we use updated its pricing tiers last month.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1853,
+      "cost_usd": 0.004272,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-25",
+      "tags": [],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "We finished migrating the domain servers earlier this morning.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2474,
+      "cost_usd": 0.004204,
+      "served_by": "claude-opus-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    }
+  ],
+  "by_provenance": {
+    "gemini-2.5-high": {
+      "items": 25,
+      "scored_items": 24,
+      "ledger_f1": 1.0,
+      "ledger_precision": 1.0,
+      "ledger_recall": 1.0,
+      "accuracy": 0.9642857142857143
+    }
+  },
+  "two_stage": null,
+  "audio": null
+}
