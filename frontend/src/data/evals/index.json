@@ -1,7 +1,69 @@
 {
   "agreement": {
-    "generators": [],
-    "labels": []
+    "generators": [
+      {
+        "agreement": 0.892857,
+        "kappa": 0.871951,
+        "key": "gemini-2.5-high",
+        "spans": 28
+      },
+      {
+        "agreement": 0.892857,
+        "kappa": 0.871951,
+        "key": "all",
+        "spans": 28
+      }
+    ],
+    "labels": [
+      {
+        "agreement": 1.0,
+        "kappa": null,
+        "key": "COMMITMENT",
+        "spans": 4
+      },
+      {
+        "agreement": 0.666667,
+        "kappa": null,
+        "key": "HEDGED",
+        "spans": 3
+      },
+      {
+        "agreement": 0.5,
+        "kappa": null,
+        "key": "CONDITIONAL",
+        "spans": 2
+      },
+      {
+        "agreement": 1.0,
+        "kappa": null,
+        "key": "SUGGESTION",
+        "spans": 2
+      },
+      {
+        "agreement": 1.0,
+        "kappa": null,
+        "key": "REQUEST",
+        "spans": 6
+      },
+      {
+        "agreement": 1.0,
+        "kappa": null,
+        "key": "REPORTED",
+        "spans": 2
+      },
+      {
+        "agreement": 0.5,
+        "kappa": null,
+        "key": "REFUSAL",
+        "spans": 2
+      },
+      {
+        "agreement": 1.0,
+        "kappa": null,
+        "key": "NONE",
+        "spans": 7
+      }
+    ]
   },
   "audio": [],
   "results": {
@@ -36,9 +98,139 @@
         "stages": {},
         "started_at": "2026-10-22T04:01:45.187091+00:00"
       }
+    ],
+    "test": [
+      {
+        "accuracy": 0.928571,
+        "configuration": "haiku",
+        "cost_usd": 0.004924,
+        "effort": "medium",
+        "escalation_rate": null,
+        "failed_items": 0,
+        "fields": {
+          "action": 1.0,
+          "due": 1.0,
+          "owner": 1.0
+        },
+        "items": 25,
+        "latency_p50_ms": 1424,
+        "latency_p95_ms": 1991,
+        "ledger_f1": 0.941176,
+        "ledger_precision": 0.888889,
+        "ledger_recall": 1.0,
+        "legacy": false,
+        "macro_f1": 0.911111,
+        "model": "claude-haiku-5-5",
+        "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
+        "prompt_version": "v1",
+        "run": "20261026T023315Z-claude-haiku-5-5-v1",
+        "screen_misses": null,
+        "set": "test",
+        "set_sha256": "6094cd09e4cc6e47a5faa3657e85ed5cad2e6fa51b3e715d3b6c565346ec4d9f",
+        "stages": {
+          "extract": "claude-haiku-5-5"
+        },
+        "started_at": "2026-10-26T02:33:15.439400+00:00"
+      },
+      {
+        "accuracy": 0.964286,
+        "configuration": "opus",
+        "cost_usd": 0.185068,
+        "effort": "medium",
+        "escalation_rate": null,
+        "failed_items": 0,
+        "fields": {
+          "action": 1.0,
+          "due": 1.0,
+          "owner": 1.0
+        },
+        "items": 25,
+        "latency_p50_ms": 2722,
+        "latency_p95_ms": 5686,
+        "ledger_f1": 1.0,
+        "ledger_precision": 1.0,
+        "ledger_recall": 1.0,
+        "legacy": false,
+        "macro_f1": 0.966667,
+        "model": "claude-opus-5-5",
+        "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
+        "prompt_version": "v1",
+        "run": "20261026T023059Z-claude-opus-5-5-v1",
+        "screen_misses": null,
+        "set": "test",
+        "set_sha256": "6094cd09e4cc6e47a5faa3657e85ed5cad2e6fa51b3e715d3b6c565346ec4d9f",
+        "stages": {
+          "extract": "claude-opus-5-5"
+        },
+        "started_at": "2026-10-26T02:30:59.106704+00:00"
+      }
     ]
   },
   "runs": [
+    {
+      "accuracy": 0.928571,
+      "configuration": "haiku",
+      "cost_usd": 0.004924,
+      "effort": "medium",
+      "escalation_rate": null,
+      "failed_items": 0,
+      "fields": {
+        "action": 1.0,
+        "due": 1.0,
+        "owner": 1.0
+      },
+      "items": 25,
+      "latency_p50_ms": 1424,
+      "latency_p95_ms": 1991,
+      "ledger_f1": 0.941176,
+      "ledger_precision": 0.888889,
+      "ledger_recall": 1.0,
+      "legacy": false,
+      "macro_f1": 0.911111,
+      "model": "claude-haiku-5-5",
+      "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
+      "prompt_version": "v1",
+      "run": "20261026T023315Z-claude-haiku-5-5-v1",
+      "screen_misses": null,
+      "set": "test",
+      "set_sha256": "6094cd09e4cc6e47a5faa3657e85ed5cad2e6fa51b3e715d3b6c565346ec4d9f",
+      "stages": {
+        "extract": "claude-haiku-5-5"
+      },
+      "started_at": "2026-10-26T02:33:15.439400+00:00"
+    },
+    {
+      "accuracy": 0.964286,
+      "configuration": "opus",
+      "cost_usd": 0.185068,
+      "effort": "medium",
+      "escalation_rate": null,
+      "failed_items": 0,
+      "fields": {
+        "action": 1.0,
+        "due": 1.0,
+        "owner": 1.0
+      },
+      "items": 25,
+      "latency_p50_ms": 2722,
+      "latency_p95_ms": 5686,
+      "ledger_f1": 1.0,
+      "ledger_precision": 1.0,
+      "ledger_recall": 1.0,
+      "legacy": false,
+      "macro_f1": 0.966667,
+      "model": "claude-opus-5-5",
+      "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
+      "prompt_version": "v1",
+      "run": "20261026T023059Z-claude-opus-5-5-v1",
+      "screen_misses": null,
+      "set": "test",
+      "set_sha256": "6094cd09e4cc6e47a5faa3657e85ed5cad2e6fa51b3e715d3b6c565346ec4d9f",
+      "stages": {
+        "extract": "claude-opus-5-5"
+      },
+      "started_at": "2026-10-26T02:30:59.106704+00:00"
+    },
     {
       "accuracy": 1.0,
       "configuration": "haiku",
@@ -88,40 +280,55 @@
       "description": "Development set: the spec's 24 seed utterances plus later dev items. Prompts are tuned on it; its score is never a headline.",
       "error": null,
       "gated": false,
-      "items": 24,
+      "items": 34,
       "kind": "text",
       "labels": {
-        "COMMITMENT": 7,
-        "CONDITIONAL": 2,
-        "HEDGED": 4,
-        "NONE": 4,
-        "REFUSAL": 2,
-        "REPORTED": 2,
-        "REQUEST": 3,
-        "SUGGESTION": 2
+        "COMMITMENT": 13,
+        "CONDITIONAL": 6,
+        "HEDGED": 6,
+        "NONE": 23,
+        "REFUSAL": 6,
+        "REPORTED": 5,
+        "REQUEST": 14,
+        "SUGGESTION": 6
       },
       "name": "dev",
       "provenance": {
+        "hand-written": 10,
         "spec": 24
       },
       "review": {
-        "accepted": 24
+        "accepted": 34
       },
       "role": "dev",
-      "sha256": "69836e7e08697be27d1634a3f8e81c8fa32dbff1c3c1dffd6588d27e252b9271"
+      "sha256": "f24bf5252630b40370557185abd7e8362e78ac5025ad4705ef2eb004dde9aa90"
     },
     {
       "description": "Held-out headline set: reviewed drafts from non-Claude models plus hand-written items.",
       "error": null,
       "gated": true,
-      "items": 0,
+      "items": 25,
       "kind": "text",
-      "labels": {},
+      "labels": {
+        "COMMITMENT": 4,
+        "CONDITIONAL": 2,
+        "HEDGED": 3,
+        "NONE": 7,
+        "REFUSAL": 2,
+        "REPORTED": 2,
+        "REQUEST": 6,
+        "SUGGESTION": 2
+      },
       "name": "test",
-      "provenance": {},
-      "review": {},
+      "provenance": {
+        "gemini-2.5-high": 25
+      },
+      "review": {
+        "accepted": 24,
+        "edited": 1
+      },
       "role": "test",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "sha256": "6094cd09e4cc6e47a5faa3657e85ed5cad2e6fa51b3e715d3b6c565346ec4d9f"
     }
   ]
 }

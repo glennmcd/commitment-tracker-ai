@@ -1,5 +1,5 @@
-"""The evaluation dataset: the dev set matches the spec's 24 seed utterances, and the loader rejects
-malformed items with the line number."""
+"""The evaluation dataset: the dev set starts with the spec's 24 seed utterances, and the loader
+rejects malformed items with the line number."""
 
 import json
 from datetime import date
@@ -28,9 +28,10 @@ def dev() -> dict[str, EvalItem]:
 # --- The dev set ---------------------------------------------------------------------------------
 
 
-def test_dev_set_has_the_24_spec_items_in_order(dev: dict[str, EvalItem]) -> None:
-    assert list(dev) == [f"spec-{n:02d}" for n in range(1, 25)]
-    assert all(item.call_date == CALL_DATE for item in dev.values())
+def test_dev_set_starts_with_the_24_spec_items_in_order(dev: dict[str, EvalItem]) -> None:
+    spec = [item for item in dev.values() if item.id.startswith("spec-")]
+    assert list(dev)[:24] == [item.id for item in spec] == [f"spec-{n:02d}" for n in range(1, 25)]
+    assert all(item.call_date == CALL_DATE for item in spec)
 
 
 def test_spec_items_are_accepted_with_spec_provenance(dev: dict[str, EvalItem]) -> None:
