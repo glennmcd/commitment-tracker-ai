@@ -1,18 +1,18 @@
 {
   "sets": {
     "test": {
-      "set_sha256": "6094cd09e4cc6e47a5faa3657e85ed5cad2e6fa51b3e715d3b6c565346ec4d9f",
+      "set_sha256": "6cd5dd1ad6a909959de6fa73b38e68d6dd9b0a00b3e2926884fe1048771b847d",
       "configurations": {
         "opus": {
           "model": "claude-opus-5-5",
           "effort": "medium",
           "prompt_version": "v1",
           "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
-          "report": "eval/reports/test/20261026T023059Z-claude-opus-5-5-v1.json",
+          "report": "eval/reports/test/20261026T045624Z-claude-opus-5-5-v1.json",
           "ledger_f1": 1.0,
           "field_accuracy": {
             "owner": 1.0,
-            "action": 1.0,
+            "action": 0.9166666666666666,
             "due": 1.0
           },
           "failed_items": 0
@@ -22,11 +22,11 @@
           "effort": "medium",
           "prompt_version": "v1",
           "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
-          "report": "eval/reports/test/20261026T023315Z-claude-haiku-5-5-v1.json",
-          "ledger_f1": 0.9411764705882353,
+          "report": "eval/reports/test/20261026T045917Z-claude-haiku-5-5-v1.json",
+          "ledger_f1": 0.9615384615384616,
           "field_accuracy": {
             "owner": 1.0,
-            "action": 1.0,
+            "action": 0.9166666666666666,
             "due": 1.0
           },
           "failed_items": 0

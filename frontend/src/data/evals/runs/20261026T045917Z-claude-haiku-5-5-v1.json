@@ -1,0 +1,4482 @@
+{
+  "audio": false,
+  "audio_scores": null,
+  "by_provenance": {
+    "chatgpt-5.6-luna-high": {
+      "accuracy": 0.961538,
+      "items": 21,
+      "ledger_f1": 1.0,
+      "ledger_precision": 1.0,
+      "ledger_recall": 1.0,
+      "scored_items": 21
+    },
+    "chatgpt-5.6-luna-low": {
+      "accuracy": 0.875,
+      "items": 22,
+      "ledger_f1": 0.933333,
+      "ledger_precision": 0.875,
+      "ledger_recall": 1.0,
+      "scored_items": 22
+    },
+    "gemini-2.5-high": {
+      "accuracy": 0.928571,
+      "items": 25,
+      "ledger_f1": 0.941176,
+      "ledger_precision": 0.888889,
+      "ledger_recall": 1.0,
+      "scored_items": 24
+    }
+  },
+  "configuration": "haiku",
+  "id": "20261026T045917Z-claude-haiku-5-5-v1",
+  "items": [
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000879,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "ad",
+            "copy"
+          ],
+          "condition": null,
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "I'll make sure the updated ad copy deck is delivered to your inbox by Friday.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-01",
+      "latency_ms": 1600,
+      "note": "Clear commitment with a specific day deadline relative to Wednesday call date.",
+      "predicted": [
+        {
+          "action": "deliver the updated ad copy deck to inbox",
+          "condition": null,
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "I'll make sure the updated ad copy deck is delivered to your inbox by Friday.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "COMMITMENT"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "I'll make sure the updated ad copy deck is delivered to your inbox by Friday."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000226,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "media",
+            "budget"
+          ],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "none",
+          "quote": "Could you send over the updated media budget allocation?",
+          "recipient": "client",
+          "turn_index": 0
+        },
+        {
+          "action_keywords": [
+            "budget"
+          ],
+          "condition": null,
+          "due_raw": "end of day",
+          "due_resolved": "2026-11-11",
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "Yeah, so, um, I'll get that over to you by end of day.",
+          "recipient": "client",
+          "turn_index": 1
+        }
+      ],
+      "expected_labels": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-02",
+      "latency_ms": 2473,
+      "note": "Request followed immediately by a commitment with conversational filler.",
+      "predicted": [
+        {
+          "action": "send the updated media budget allocation",
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "none",
+          "quote": "Could you send over the updated media budget allocation?",
+          "recipient": "client",
+          "turn_index": 0
+        },
+        {
+          "action": "send the updated media budget allocation",
+          "condition": null,
+          "due_raw": "by end of day",
+          "due_resolved": "2026-11-11",
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "I'll get that over to you by end of day.",
+          "recipient": "client",
+          "turn_index": 1
+        }
+      ],
+      "predicted_labels": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [
+        "multi_turn"
+      ],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Could you send over the updated media budget allocation?"
+        },
+        {
+          "speaker": "account_manager",
+          "text": "Yeah, so, um, I'll get that over to you by end of day."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000157,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "revisions"
+          ],
+          "condition": null,
+          "due_raw": "before your board meeting",
+          "due_resolved": null,
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "event",
+          "quote": "Leave the redlines with me, I'll handle the revisions before your board meeting.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-03",
+      "latency_ms": 1424,
+      "note": "Commitment without standard trigger words, using an event-based due date.",
+      "predicted": [
+        {
+          "action": "handle the revisions to the redlines",
+          "condition": null,
+          "due_raw": "before your board meeting",
+          "due_resolved": null,
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "event",
+          "quote": "I'll handle the revisions before your board meeting.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "COMMITMENT"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "Leave the redlines with me, I'll handle the revisions before your board meeting."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000162,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "fix",
+            "pixels"
+          ],
+          "condition": null,
+          "due_raw": "by yesterday",
+          "due_resolved": null,
+          "label": "REPORTED",
+          "owner": "Marcus",
+          "precision": "none",
+          "quote": "Our lead developer Marcus promised he would fix the tracking pixels by yesterday.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REPORTED"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-04",
+      "latency_ms": 1991,
+      "note": "Contains 'promised' but refers to a third party's past action.",
+      "predicted": [
+        {
+          "action": "fix the tracking pixels",
+          "condition": null,
+          "due_raw": "by yesterday",
+          "due_resolved": null,
+          "label": "REPORTED",
+          "owner": "Marcus",
+          "precision": "vague",
+          "quote": "Our lead developer Marcus promised he would fix the tracking pixels by yesterday.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REPORTED"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Our lead developer Marcus promised he would fix the tracking pixels by yesterday."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000177,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "staging",
+            "environment"
+          ],
+          "condition": "PO is approved by noon tomorrow",
+          "due_raw": "end of next week",
+          "due_resolved": "2026-11-20",
+          "label": "CONDITIONAL",
+          "owner": "Marcus",
+          "precision": "day",
+          "quote": "As long as the PO is approved by noon tomorrow, Marcus will set up the staging environment by end of next week.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "CONDITIONAL"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-05",
+      "latency_ms": 1897,
+      "note": "Conditional commitment dependent on PO approval with an end of next week deadline.",
+      "predicted": [
+        {
+          "action": "set up the staging environment",
+          "condition": "the PO is approved by noon tomorrow",
+          "due_raw": "by end of next week",
+          "due_resolved": "2026-11-20",
+          "label": "CONDITIONAL",
+          "owner": "Marcus",
+          "precision": "day",
+          "quote": "As long as the PO is approved by noon tomorrow, Marcus will set up the staging environment by end of next week.",
+          "recipient": "buyer",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "CONDITIONAL"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "As long as the PO is approved by noon tomorrow, Marcus will set up the staging environment by end of next week."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": false,
+      "cost_usd": 0.000238,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "brand",
+            "guidelines"
+          ],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "SUGGESTION",
+          "owner": null,
+          "precision": "none",
+          "quote": "We should probably revisit the brand guidelines before starting the video edit.",
+          "recipient": "account_manager",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "SUGGESTION"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-06",
+      "latency_ms": 1674,
+      "note": "An unassigned proposal suggested by the client in a multi-turn exchange.",
+      "predicted": [
+        {
+          "action": "revisit the brand guidelines",
+          "condition": null,
+          "due_raw": "before starting the video edit",
+          "due_resolved": null,
+          "label": "SUGGESTION",
+          "owner": null,
+          "precision": "event",
+          "quote": "We should probably revisit the brand guidelines before starting the video edit.",
+          "recipient": "account_manager",
+          "turn_index": 0
+        },
+        {
+          "action": "look at the brand guidelines",
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "none",
+          "quote": "Agreed, let's look at that.",
+          "recipient": "client",
+          "turn_index": 1
+        }
+      ],
+      "predicted_labels": [
+        "SUGGESTION",
+        "COMMITMENT"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [
+        "multi_turn"
+      ],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "We should probably revisit the brand guidelines before starting the video edit."
+        },
+        {
+          "speaker": "account_manager",
+          "text": "Agreed, let's look at that."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000158,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REFUSAL",
+          "owner": "account_manager",
+          "precision": "none",
+          "quote": "I can't promise the campaign will go live on the 15th.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REFUSAL"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-07",
+      "latency_ms": 1825,
+      "note": "Explicit refusal containing the keyword 'promise'.",
+      "predicted": [
+        {
+          "action": "guarantee the campaign goes live on the 15th",
+          "condition": null,
+          "due_raw": "on the 15th",
+          "due_resolved": "2026-11-15",
+          "label": "REFUSAL",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "I can't promise the campaign will go live on the 15th.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REFUSAL"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "I can't promise the campaign will go live on the 15th."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000164,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "analytics",
+            "dashboard"
+          ],
+          "condition": null,
+          "due_raw": "next week",
+          "due_resolved": "2026-11-16",
+          "label": "HEDGED",
+          "owner": "account_manager",
+          "precision": "week",
+          "quote": "We should be able to get the analytics dashboard configured by next week, hopefully.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "HEDGED"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-08",
+      "latency_ms": 1318,
+      "note": "Hedged commitment softened by 'should be able to' and 'hopefully'.",
+      "predicted": [
+        {
+          "action": "get the analytics dashboard configured",
+          "condition": null,
+          "due_raw": "by next week",
+          "due_resolved": "2026-11-16",
+          "label": "HEDGED",
+          "owner": "account_manager",
+          "precision": "week",
+          "quote": "We should be able to get the analytics dashboard configured by next week, hopefully.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "HEDGED"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "We should be able to get the analytics dashboard configured by next week, hopefully."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.00016,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "export",
+            "assets"
+          ],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "none",
+          "quote": "Could you ask your design lead if she can export the raw vector assets for us?",
+          "recipient": "account_manager",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REQUEST"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-09",
+      "latency_ms": 1315,
+      "note": "A clear request from client to account manager.",
+      "predicted": [
+        {
+          "action": "ask the design lead to export the raw vector assets",
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "none",
+          "quote": "Could you ask your design lead if she can export the raw vector assets for us?",
+          "recipient": "seller",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REQUEST"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Could you ask your design lead if she can export the raw vector assets for us?"
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000144,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Our standard agency SLA is four hours for urgent production bugs.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-10",
+      "latency_ms": 1135,
+      "note": "Statement of general agency policy, not a specific action commitment.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Our standard agency SLA is four hours for urgent production bugs.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "Our standard agency SLA is four hours for urgent production bugs."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000164,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "seo",
+            "strategy"
+          ],
+          "condition": null,
+          "due_raw": "by tomorrow morning",
+          "due_resolved": "2026-11-12",
+          "label": "REPORTED",
+          "owner": "Sarah",
+          "precision": "day",
+          "quote": "Sarah said she'd send the updated SEO keyword strategy document by tomorrow morning.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REPORTED"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-11",
+      "latency_ms": 1292,
+      "note": "Retelling a promise made by a third party.",
+      "predicted": [
+        {
+          "action": "send the updated SEO keyword strategy document",
+          "condition": null,
+          "due_raw": "by tomorrow morning",
+          "due_resolved": "2026-11-12",
+          "label": "REPORTED",
+          "owner": "Sarah",
+          "precision": "day",
+          "quote": "Sarah said she'd send the updated SEO keyword strategy document by tomorrow morning.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REPORTED"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "Sarah said she'd send the updated SEO keyword strategy document by tomorrow morning."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000152,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Honestly, at this rate, I suppose you'll have the entire redesign done by tonight!",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-12",
+      "latency_ms": 1278,
+      "note": "Obvious sarcastic remark rather than a genuine expectation or commitment.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Honestly, at this rate, I suppose you'll have the entire redesign done by tonight!",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Honestly, at this rate, I suppose you'll have the entire redesign done by tonight!"
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000164,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "product",
+            "photography"
+          ],
+          "condition": "legal signs off on the release",
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "CONDITIONAL",
+          "owner": "client",
+          "precision": "none",
+          "quote": "We will provide the updated product photography as soon as legal signs off on the release.",
+          "recipient": "account_manager",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "CONDITIONAL"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-13",
+      "latency_ms": 1329,
+      "note": "Conditional commitment owned by the client dependent on legal sign-off.",
+      "predicted": [
+        {
+          "action": "provide the updated product photography",
+          "condition": "legal signs off on the release",
+          "due_raw": "as soon as legal signs off on the release",
+          "due_resolved": null,
+          "label": "CONDITIONAL",
+          "owner": "client",
+          "precision": "event",
+          "quote": "We will provide the updated product photography as soon as legal signs off on the release.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "CONDITIONAL"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "We will provide the updated product photography as soon as legal signs off on the release."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": false,
+      "cost_usd": 0.000243,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "performance",
+            "report"
+          ],
+          "condition": null,
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "day",
+          "quote": "Can you have the performance report ready by Friday?",
+          "recipient": "account_manager",
+          "turn_index": 0
+        },
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "HEDGED",
+          "owner": "account_manager",
+          "precision": "vague",
+          "quote": "We'll circle back on that once we see the final ad spend figures.",
+          "recipient": "client",
+          "turn_index": 1
+        }
+      ],
+      "expected_labels": [
+        "REQUEST",
+        "HEDGED"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-14",
+      "latency_ms": 1764,
+      "note": "Request answered by a hedged response that circles back without concrete action keywords.",
+      "predicted": [
+        {
+          "action": "have the performance report ready",
+          "condition": null,
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "day",
+          "quote": "Can you have the performance report ready by Friday?",
+          "recipient": "account_manager",
+          "turn_index": 0
+        },
+        {
+          "action": "circle back on the performance report",
+          "condition": "once they see the final ad spend figures",
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "CONDITIONAL",
+          "owner": "account_manager",
+          "precision": "none",
+          "quote": "We'll circle back on that once we see the final ad spend figures.",
+          "recipient": "client",
+          "turn_index": 1
+        }
+      ],
+      "predicted_labels": [
+        "REQUEST",
+        "CONDITIONAL"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [
+        "multi_turn"
+      ],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Can you have the performance report ready by Friday?"
+        },
+        {
+          "speaker": "account_manager",
+          "text": "We'll circle back on that once we see the final ad spend figures."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000154,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Last quarter I promised a 10% rebate on media management fees and we delivered it on time.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-15",
+      "latency_ms": 1478,
+      "note": "Uses 'promised' but refers to an already-fulfilled past action.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": "account_manager",
+          "precision": "none",
+          "quote": "Last quarter I promised a 10% rebate on media management fees and we delivered it on time.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "Last quarter I promised a 10% rebate on media management fees and we delivered it on time."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.00015,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "audit",
+            "email"
+          ],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "none",
+          "quote": "Would you be able to audit our current email automation sequences?",
+          "recipient": "account_manager",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REQUEST"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-16",
+      "latency_ms": 1596,
+      "note": "Standard polite request asking for client sequence auditing.",
+      "predicted": [
+        {
+          "action": "audit the current email automation sequences",
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "none",
+          "quote": "Would you be able to audit our current email automation sequences?",
+          "recipient": "seller",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REQUEST"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Would you be able to audit our current email automation sequences?"
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000155,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "delay",
+            "paid",
+            "search"
+          ],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "SUGGESTION",
+          "owner": null,
+          "precision": "none",
+          "quote": "It might make sense to delay the paid search launch until after the website migration.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "SUGGESTION"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-17",
+      "latency_ms": 1245,
+      "note": "Suggestion framed as an option without binding anyone.",
+      "predicted": [
+        {
+          "action": "delay the paid search launch until after the website migration",
+          "condition": null,
+          "due_raw": "until after the website migration",
+          "due_resolved": null,
+          "label": "SUGGESTION",
+          "owner": null,
+          "precision": "event",
+          "quote": "It might make sense to delay the paid search launch until after the website migration.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "SUGGESTION"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "It might make sense to delay the paid search launch until after the website migration."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000159,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REFUSAL",
+          "owner": "account_manager",
+          "precision": "none",
+          "quote": "We cannot absorb the extra cost of custom illustrations for this release.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REFUSAL"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-18",
+      "latency_ms": 1938,
+      "note": "Explicit decline to take on an additional task or cost.",
+      "predicted": [
+        {
+          "action": "absorb the extra cost of custom illustrations for this release",
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REFUSAL",
+          "owner": "account_manager",
+          "precision": "none",
+          "quote": "We cannot absorb the extra cost of custom illustrations for this release.",
+          "recipient": "buyer",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REFUSAL"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "We cannot absorb the extra cost of custom illustrations for this release."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000144,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Our quarterly performance review took place last Wednesday in the Chicago office.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-19",
+      "latency_ms": 1186,
+      "note": "Statement of factual past events.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Our quarterly performance review took place last Wednesday in the Chicago office.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Our quarterly performance review took place last Wednesday in the Chicago office."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000141,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "We had a really productive session reviewing the social media analytics yesterday.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-20",
+      "latency_ms": 1146,
+      "note": "General conversational commentary on past events.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "We had a really productive session reviewing the social media analytics yesterday.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "We had a really productive session reviewing the social media analytics yesterday."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000238,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "homepage",
+            "banner"
+          ],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "none",
+          "quote": "Could we look at updating the homepage banner design next?",
+          "recipient": "account_manager",
+          "turn_index": 0
+        },
+        {
+          "action_keywords": [
+            "contract",
+            "scope"
+          ],
+          "condition": null,
+          "due_raw": "by Monday",
+          "due_resolved": "2026-11-16",
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "I will send over the revised contract scope by Monday.",
+          "recipient": "client",
+          "turn_index": 1
+        }
+      ],
+      "expected_labels": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-21",
+      "latency_ms": 1749,
+      "note": "Multi-turn exchange where an inquiry leads to an unrelated firm commitment.",
+      "predicted": [
+        {
+          "action": "look at updating the homepage banner design",
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "none",
+          "quote": "Could we look at updating the homepage banner design next?",
+          "recipient": "account_manager",
+          "turn_index": 0
+        },
+        {
+          "action": "send the revised contract scope",
+          "condition": null,
+          "due_raw": "by Monday",
+          "due_resolved": "2026-11-16",
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "I will send over the revised contract scope by Monday.",
+          "recipient": "client",
+          "turn_index": 1
+        }
+      ],
+      "predicted_labels": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [
+        "multi_turn"
+      ],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Could we look at updating the homepage banner design next?"
+        },
+        {
+          "speaker": "account_manager",
+          "text": "I will send over the revised contract scope by Monday."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000153,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "review",
+            "landing",
+            "page"
+          ],
+          "condition": null,
+          "due_raw": "at some point",
+          "due_resolved": null,
+          "label": "HEDGED",
+          "owner": "account_manager",
+          "precision": "vague",
+          "quote": "I'll try to review the landing page variants at some point.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "HEDGED"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-22",
+      "latency_ms": 1316,
+      "note": "Borderline between hedged commitment and vague intent; labeled hedged due to explicit 'I'll try'.",
+      "predicted": [
+        {
+          "action": "review the landing page variants",
+          "condition": null,
+          "due_raw": "at some point",
+          "due_resolved": null,
+          "label": "HEDGED",
+          "owner": "account_manager",
+          "precision": "vague",
+          "quote": "I'll try to review the landing page variants at some point.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "HEDGED"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [
+        "ambiguous"
+      ],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "I'll try to review the landing page variants at some point."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000159,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "breakdown",
+            "ad",
+            "spend"
+          ],
+          "condition": null,
+          "due_raw": "by the 1st",
+          "due_resolved": "2026-12-01",
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "day",
+          "quote": "Can you provide a breakdown of the Q4 ad spend by the 1st?",
+          "recipient": "account_manager",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REQUEST"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-23",
+      "latency_ms": 1326,
+      "note": "Request with relative day deadline resolving to the 1st of next month.",
+      "predicted": [
+        {
+          "action": "provide a breakdown of the Q4 ad spend",
+          "condition": null,
+          "due_raw": "by the 1st",
+          "due_resolved": "2026-12-01",
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "day",
+          "quote": "Can you provide a breakdown of the Q4 ad spend by the 1st?",
+          "recipient": "seller",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REQUEST"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Can you provide a breakdown of the Q4 ad spend by the 1st?"
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000144,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "The project management software we use updated its pricing tiers last month.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-24",
+      "latency_ms": 1152,
+      "note": "Factual background information.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "The project management software we use updated its pricing tiers last month.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "The project management software we use updated its pricing tiers last month."
+        }
+      ]
+    },
+    {
+      "cached": true,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000138,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "We finished migrating the domain servers earlier this morning.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gem01-25",
+      "latency_ms": 1740,
+      "note": "Report of a completed task.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "We finished migrating the domain servers earlier this morning.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "gemini-2.5-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "We finished migrating the domain servers earlier this morning."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000863,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "The revised homepage wireframes are in the shared folder now, and the team reviewed them yesterday.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-01",
+      "latency_ms": 1828,
+      "note": "Reports completed work and a past review without creating a new obligation.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "The revised homepage wireframes are in the shared folder now, and the team reviewed them yesterday.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "The revised homepage wireframes are in the shared folder now, and the team reviewed them yesterday."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000152,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "send",
+            "budget",
+            "split"
+          ],
+          "condition": null,
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "day",
+          "quote": "Could you send the revised media budget with the regional split by Friday?",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REQUEST"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-02",
+      "latency_ms": 1226,
+      "note": "The deadline is explicit, but the question asks the other speaker to act rather than binding the client.",
+      "predicted": [
+        {
+          "action": "send the revised media budget with the regional split",
+          "condition": null,
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "day",
+          "quote": "Could you send the revised media budget with the regional split by Friday?",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REQUEST"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Could you send the revised media budget with the regional split by Friday?"
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.00023,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "deliver",
+            "findings",
+            "audit"
+          ],
+          "condition": null,
+          "due_raw": "before your steering committee meets",
+          "due_resolved": null,
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "event",
+          "quote": "Leave the accessibility audit with me; you'll have the findings before your steering committee meets.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-03",
+      "latency_ms": 1813,
+      "note": "The speaker explicitly takes ownership without using a conventional promise phrase, and the deadline is event-based.",
+      "predicted": [
+        {
+          "action": "deliver the accessibility audit findings",
+          "condition": null,
+          "due_raw": "before your steering committee meets",
+          "due_resolved": null,
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "event",
+          "quote": "you'll have the findings before your steering committee meets.",
+          "recipient": "buyer",
+          "turn_index": 0
+        },
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Leave the accessibility audit with me",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "COMMITMENT",
+        "NONE"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "Leave the accessibility audit with me; you'll have the findings before your steering committee meets."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000148,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Our procurement rule has always required three bids for any external production vendor, so that part isn't new.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-04",
+      "latency_ms": 1706,
+      "note": "Describes an existing policy rather than committing to obtain bids for this project.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Our procurement rule has always required three bids for any external production vendor, so that part isn't new.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Our procurement rule has always required three bids for any external production vendor, so that part isn't new."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000171,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "confirm",
+            "referral",
+            "prototype"
+          ],
+          "condition": null,
+          "due_raw": "before we approve the prototype",
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "event",
+          "quote": "Please confirm whether the revised onboarding flow includes the optional referral step before we approve the prototype.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REQUEST"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-05",
+      "latency_ms": 1295,
+      "note": "Requests confirmation from the other party; the event phrase supplies timing but does not turn the request into a commitment.",
+      "predicted": [
+        {
+          "action": "confirm whether the revised onboarding flow includes the optional referral step",
+          "condition": null,
+          "due_raw": "before we approve the prototype",
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "event",
+          "quote": "Please confirm whether the revised onboarding flow includes the optional referral step before we approve the prototype.",
+          "recipient": "seller",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REQUEST"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Please confirm whether the revised onboarding flow includes the optional referral step before we approve the prototype."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000175,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "swap",
+            "landing-page",
+            "copy"
+          ],
+          "condition": "legal clearance of testimonial language",
+          "due_raw": "by Monday",
+          "due_resolved": "2026-11-16",
+          "label": "CONDITIONAL",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "If legal clears the updated testimonial language, I'll have the landing-page copy swapped in by Monday.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "CONDITIONAL"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-06",
+      "latency_ms": 1519,
+      "note": "The concrete action and deadline are binding only if legal clears the language.",
+      "predicted": [
+        {
+          "action": "swap in the updated landing-page copy",
+          "condition": "legal clears the updated testimonial language",
+          "due_raw": "by Monday",
+          "due_resolved": "2026-11-16",
+          "label": "CONDITIONAL",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "If legal clears the updated testimonial language, I'll have the landing-page copy swapped in by Monday.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "CONDITIONAL"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "If legal clears the updated testimonial language, I'll have the landing-page copy swapped in by Monday."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000157,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "The phrase 'guaranteed lift' caused a mess in the last campaign, so our compliance team will flag it again if it appears in the draft.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-07",
+      "latency_ms": 1226,
+      "note": "The warning describes a likely compliance response under policy, not a newly undertaken project deliverable.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "so our compliance team will flag it again if it appears in the draft.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "The phrase 'guaranteed lift' caused a mess in the last campaign, so our compliance team will flag it again if it appears in the draft."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.00016,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "test",
+            "signup",
+            "form"
+          ],
+          "condition": null,
+          "due_raw": "before rolling it out to everyone",
+          "due_resolved": null,
+          "label": "SUGGESTION",
+          "owner": null,
+          "precision": "event",
+          "quote": "We should probably test the shorter signup form with a small mobile-only audience before rolling it out to everyone.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "SUGGESTION"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-08",
+      "latency_ms": 1081,
+      "note": "The qualified wording proposes an experiment without assigning a binding owner.",
+      "predicted": [
+        {
+          "action": "test the shorter signup form with a small mobile-only audience",
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "SUGGESTION",
+          "owner": null,
+          "precision": "none",
+          "quote": "We should probably test the shorter signup form with a small mobile-only audience before rolling it out to everyone.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "SUGGESTION"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "We should probably test the shorter signup form with a small mobile-only audience before rolling it out to everyone."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000159,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "commit",
+            "shoot"
+          ],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REFUSAL",
+          "owner": "client",
+          "precision": "none",
+          "quote": "I can't commit to the 18th for the product shoot until the venue confirms its access hours.",
+          "recipient": "account_manager",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REFUSAL"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-09",
+      "latency_ms": 1710,
+      "note": "Explicitly withholds a commitment; mentioning a date and a condition does not create a conditional promise.",
+      "predicted": [
+        {
+          "action": "commit to the 18th for the product shoot",
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REFUSAL",
+          "owner": "client",
+          "precision": "none",
+          "quote": "I can't commit to the 18th for the product shoot until the venue confirms its access hours.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REFUSAL"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "I can't commit to the 18th for the product shoot until the venue confirms its access hours."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000159,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "send",
+            "icon",
+            "exports"
+          ],
+          "condition": null,
+          "due_raw": "after the design review",
+          "due_resolved": null,
+          "label": "REPORTED",
+          "owner": "Mina",
+          "precision": "event",
+          "quote": "Mina said she'd send the final icon exports after the design review, but I haven't seen them come through.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REPORTED"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-10",
+      "latency_ms": 1603,
+      "note": "Relays Mina's undertaking rather than making the account manager responsible for the exports.",
+      "predicted": [
+        {
+          "action": "send the final icon exports",
+          "condition": null,
+          "due_raw": "after the design review",
+          "due_resolved": null,
+          "label": "REPORTED",
+          "owner": "Mina",
+          "precision": "event",
+          "quote": "Mina said she'd send the final icon exports after the design review, but I haven't seen them come through.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REPORTED"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "Mina said she'd send the final icon exports after the design review, but I haven't seen them come through."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000173,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "return",
+            "comments",
+            "stakeholder"
+          ],
+          "condition": null,
+          "due_raw": "by the end of next week",
+          "due_resolved": "2026-11-20",
+          "label": "HEDGED",
+          "owner": "client",
+          "precision": "day",
+          "quote": "I'll try to get the consolidated stakeholder comments back to you by the end of next week, though two reviewers are traveling.",
+          "recipient": "account_manager",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "HEDGED"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-11",
+      "latency_ms": 2142,
+      "note": "Names a concrete deliverable and deadline, but 'I'll try' softens the obligation.",
+      "predicted": [
+        {
+          "action": "return the consolidated stakeholder comments",
+          "condition": null,
+          "due_raw": "by the end of next week",
+          "due_resolved": "2026-11-20",
+          "label": "HEDGED",
+          "owner": "client",
+          "precision": "day",
+          "quote": "I'll try to get the consolidated stakeholder comments back to you by the end of next week, though two reviewers are traveling.",
+          "recipient": "seller",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "HEDGED"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "I'll try to get the consolidated stakeholder comments back to you by the end of next week, though two reviewers are traveling."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000161,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "check",
+            "analytics",
+            "events"
+          ],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "none",
+          "quote": "Could you check whether the analytics sandbox still has the old conversion events enabled?",
+          "recipient": "account_manager",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REQUEST"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-12",
+      "latency_ms": 1168,
+      "note": "The first sentence asks the client to investigate; the explanation in the second sentence adds context rather than a separate commitment.",
+      "predicted": [
+        {
+          "action": "check whether the analytics sandbox still has the old conversion events enabled",
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "none",
+          "quote": "Could you check whether the analytics sandbox still has the old conversion events enabled?",
+          "recipient": "buyer",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REQUEST"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "Could you check whether the analytics sandbox still has the old conversion events enabled? We don't want those polluting the launch report."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000153,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Our SLA is four business hours for a first response, and the ticketing dashboard shows that today's queue is within target.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-13",
+      "latency_ms": 1049,
+      "note": "An existing service policy and current status are not a new project-specific commitment.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Our SLA is four business hours for a first response, and the ticketing dashboard shows that today's queue is within target.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "Our SLA is four business hours for a first response, and the ticketing dashboard shows that today's queue is within target."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000168,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "authorize",
+            "motion-design",
+            "pass"
+          ],
+          "condition": "finance releases the second tranche",
+          "due_raw": "the same day",
+          "due_resolved": null,
+          "label": "CONDITIONAL",
+          "owner": "client",
+          "precision": "event",
+          "quote": "If finance releases the second tranche, we'll authorize the extra motion-design pass the same day.",
+          "recipient": "account_manager",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "CONDITIONAL"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-14",
+      "latency_ms": 1333,
+      "note": "The client undertakes a specific approval action, but only after the funding condition is met.",
+      "predicted": [
+        {
+          "action": "authorize the extra motion-design pass",
+          "condition": "finance releases the second tranche",
+          "due_raw": "the same day",
+          "due_resolved": null,
+          "label": "CONDITIONAL",
+          "owner": "client",
+          "precision": "vague",
+          "quote": "If finance releases the second tranche, we'll authorize the extra motion-design pass the same day.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "CONDITIONAL"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "If finance releases the second tranche, we'll authorize the extra motion-design pass the same day."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": false,
+      "cost_usd": 0.000187,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "send",
+            "email",
+            "previews"
+          ],
+          "condition": null,
+          "due_raw": "tomorrow morning",
+          "due_resolved": "2026-11-12",
+          "label": "HEDGED",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "Yeah, so, um, I should be able to get the localized email previews across to you tomorrow morning, assuming the rendering job behaves.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "HEDGED"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-15",
+      "latency_ms": 1769,
+      "note": "The delivery sounds concrete but 'should be able to' makes the obligation uncertain; the rendering caveat does not clearly establish a firm conditional commitment.",
+      "predicted": [
+        {
+          "action": "send the localized email previews",
+          "condition": "the rendering job behaves",
+          "due_raw": "tomorrow morning",
+          "due_resolved": "2026-11-12",
+          "label": "CONDITIONAL",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "I should be able to get the localized email previews across to you tomorrow morning, assuming the rendering job behaves.",
+          "recipient": "buyer",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "CONDITIONAL"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "Yeah, so, um, I should be able to get the localized email previews across to you tomorrow morning, assuming the rendering job behaves."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000165,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "add",
+            "approval",
+            "dashboard"
+          ],
+          "condition": null,
+          "due_raw": "before our review on the 24th",
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "event",
+          "quote": "Would you be able to add a second approval state to the campaign dashboard before our review on the 24th?",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REQUEST"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-16",
+      "latency_ms": 1899,
+      "note": "Despite its polite capability framing, this is a request to the account manager, and the deadline is tied to a review event.",
+      "predicted": [
+        {
+          "action": "add a second approval state to the campaign dashboard",
+          "condition": null,
+          "due_raw": "before our review on the 24th",
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "event",
+          "quote": "Would you be able to add a second approval state to the campaign dashboard before our review on the 24th?",
+          "recipient": "seller",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REQUEST"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Would you be able to add a second approval state to the campaign dashboard before our review on the 24th?"
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000209,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Honestly, the client portal redesign has been a bit of a maze, but at least the new navigation labels are approved.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-17",
+      "latency_ms": 1506,
+      "note": "Expresses an opinion and reports an approval already obtained without promising further action.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "but at least the new navigation labels are approved.",
+          "recipient": null,
+          "turn_index": 0
+        },
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Honestly, the client portal redesign has been a bit of a maze",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE",
+        "NONE"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "Honestly, the client portal redesign has been a bit of a maze, but at least the new navigation labels are approved."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.00016,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "put",
+            "pricing",
+            "comparison"
+          ],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "SUGGESTION",
+          "owner": null,
+          "precision": "none",
+          "quote": "We should probably put the pricing comparison on the same page as the feature matrix; people keep missing the connection.",
+          "recipient": "account_manager",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "SUGGESTION"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-18",
+      "latency_ms": 1632,
+      "note": "Suggests a layout change but does not clearly commit either speaker to making it.",
+      "predicted": [
+        {
+          "action": "put the pricing comparison on the same page as the feature matrix",
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "SUGGESTION",
+          "owner": null,
+          "precision": "none",
+          "quote": "We should probably put the pricing comparison on the same page as the feature matrix; people keep missing the connection.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "SUGGESTION"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "We should probably put the pricing comparison on the same page as the feature matrix; people keep missing the connection."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": false,
+      "cost_usd": 0.000156,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Our CEO promised a faster turnaround during the kickoff, but that was about the old creative workflow, not this new landing-page sprint.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-20",
+      "latency_ms": 1104,
+      "note": "Refers to a historical promise in another project context, not a current undertaking.",
+      "predicted": [
+        {
+          "action": "provide a faster turnaround",
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REPORTED",
+          "owner": "Our CEO",
+          "precision": "none",
+          "quote": "Our CEO promised a faster turnaround during the kickoff",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REPORTED"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Our CEO promised a faster turnaround during the kickoff, but that was about the old creative workflow, not this new landing-page sprint."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": false,
+      "cost_usd": 0.000238,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "ask",
+            "provision",
+            "instructions"
+          ],
+          "condition": null,
+          "due_raw": "by Thursday",
+          "due_resolved": "2026-11-12",
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "I'll ask Priya to provision the staging account and send you the login instructions by Thursday.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-21",
+      "latency_ms": 2347,
+      "note": "The explicit commitment is to ask Priya; the sentence does not unambiguously establish that Priya herself has been assigned or accepted the work.",
+      "predicted": [
+        {
+          "action": "send the login instructions",
+          "condition": null,
+          "due_raw": "by Thursday",
+          "due_resolved": "2026-11-12",
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "send you the login instructions by Thursday.",
+          "recipient": "buyer",
+          "turn_index": 0
+        },
+        {
+          "action": "provision the staging account",
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "COMMITMENT",
+          "owner": "Priya",
+          "precision": "none",
+          "quote": "I'll ask Priya to provision the staging account",
+          "recipient": "buyer",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "COMMITMENT",
+        "COMMITMENT"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "I'll ask Priya to provision the staging account and send you the login instructions by Thursday."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000346,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "recorded",
+            "sign-off",
+            "tracker"
+          ],
+          "condition": null,
+          "due_raw": "before the staging freeze",
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "event",
+          "quote": "Can we get the accessibility sign-off recorded in the release tracker before the staging freeze?",
+          "recipient": "client",
+          "turn_index": 0
+        },
+        {
+          "action_keywords": [
+            "update",
+            "record",
+            "sign-off"
+          ],
+          "condition": null,
+          "due_raw": "before the freeze",
+          "due_resolved": null,
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "event",
+          "quote": "I'll own the tracker update and make sure the sign-off is recorded before the freeze.",
+          "recipient": "client",
+          "turn_index": 1
+        }
+      ],
+      "expected_labels": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-22",
+      "latency_ms": 2191,
+      "note": "The reply takes explicit ownership; the final turn provides tentative context rather than changing the event-based deadline into a fixed date.",
+      "predicted": [
+        {
+          "action": "record the accessibility sign-off in the release tracker",
+          "condition": null,
+          "due_raw": "before the staging freeze",
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "event",
+          "quote": "Can we get the accessibility sign-off recorded in the release tracker before the staging freeze?",
+          "recipient": "account_manager",
+          "turn_index": 0
+        },
+        {
+          "action": "update the release tracker with the sign-off",
+          "condition": null,
+          "due_raw": "before the freeze",
+          "due_resolved": null,
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "event",
+          "quote": "I'll own the tracker update and make sure the sign-off is recorded before the freeze.",
+          "recipient": "client",
+          "turn_index": 1
+        },
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Great, the staging freeze is currently penciled in for the 19th, although operations may move it.",
+          "recipient": null,
+          "turn_index": 2
+        }
+      ],
+      "predicted_labels": [
+        "REQUEST",
+        "COMMITMENT",
+        "NONE"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [
+        "multi_turn"
+      ],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Can we get the accessibility sign-off recorded in the release tracker before the staging freeze?"
+        },
+        {
+          "speaker": "account_manager",
+          "text": "I'll own the tracker update and make sure the sign-off is recorded before the freeze."
+        },
+        {
+          "speaker": "client",
+          "text": "Great, the staging freeze is currently penciled in for the 19th, although operations may move it."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000148,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "The paid-social tests last week produced a much lower cost per lead than the search campaign, which is encouraging.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gpt01-24",
+      "latency_ms": 1329,
+      "note": "Reports past test results and an evaluation without creating a new obligation.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "The paid-social tests last week produced a much lower cost per lead than the search campaign, which is encouraging.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "The paid-social tests last week produced a much lower cost per lead than the search campaign, which is encouraging."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000155,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "The revised brand guidelines landed yesterday, and the design team has already replaced the outdated color swatches in the shared library.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-01",
+      "latency_ms": 1246,
+      "note": "Reports completed work rather than creating a new obligation.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "The revised brand guidelines landed yesterday, and the design team has already replaced the outdated color swatches in the shared library.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "The revised brand guidelines landed yesterday, and the design team has already replaced the outdated color swatches in the shared library."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": false,
+      "cost_usd": 0.000242,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "cleaned-up",
+            "contract",
+            "copy"
+          ],
+          "condition": null,
+          "due_raw": "before the approval meeting",
+          "due_resolved": null,
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "event",
+          "quote": "Leave the final redlines with me; you'll have the cleaned-up contract copy before the approval meeting.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-03",
+      "latency_ms": 2050,
+      "note": "Taking the redlines and specifying a deliverable binds the account manager despite the absence of a conventional promise phrase.",
+      "predicted": [
+        {
+          "action": "send the cleaned-up contract copy",
+          "condition": null,
+          "due_raw": "before the approval meeting",
+          "due_resolved": null,
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "event",
+          "quote": "you'll have the cleaned-up contract copy before the approval meeting.",
+          "recipient": "buyer",
+          "turn_index": 0
+        },
+        {
+          "action": "take over the final redlines",
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "none",
+          "quote": "Leave the final redlines with me",
+          "recipient": "account_manager",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "COMMITMENT",
+        "REQUEST"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "Leave the final redlines with me; you'll have the cleaned-up contract copy before the approval meeting."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000158,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "We promised a much faster approval process during the spring campaign, and we did deliver it then; this launch has a different review structure.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-04",
+      "latency_ms": 1322,
+      "note": "The promise is historical and fulfilled, so it does not create a current commitment.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": "client",
+          "precision": "none",
+          "quote": "We promised a much faster approval process during the spring campaign, and we did deliver it then; this launch has a different review structure.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "We promised a much faster approval process during the spring campaign, and we did deliver it then; this launch has a different review structure."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000258,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "send",
+            "sitemap",
+            "inventory"
+          ],
+          "condition": null,
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "day",
+          "quote": "Could you send the refreshed sitemap and page inventory to the production lead by Friday?",
+          "recipient": "client",
+          "turn_index": 0
+        },
+        {
+          "action_keywords": [
+            "send",
+            "production",
+            "lead"
+          ],
+          "condition": null,
+          "due_raw": "by Friday afternoon",
+          "due_resolved": "2026-11-13",
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "Yes, I'll send both to the production lead by Friday afternoon.",
+          "recipient": "client",
+          "turn_index": 1
+        }
+      ],
+      "expected_labels": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-05",
+      "latency_ms": 1675,
+      "note": "The reply converts the client's request into a firm commitment and supplies a slightly more specific deadline.",
+      "predicted": [
+        {
+          "action": "send the refreshed sitemap and page inventory to the production lead",
+          "condition": null,
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "day",
+          "quote": "Could you send the refreshed sitemap and page inventory to the production lead by Friday?",
+          "recipient": "client",
+          "turn_index": 0
+        },
+        {
+          "action": "send the refreshed sitemap and page inventory to the production lead",
+          "condition": null,
+          "due_raw": "by Friday afternoon",
+          "due_resolved": "2026-11-13",
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "Yes, I'll send both to the production lead by Friday afternoon.",
+          "recipient": "client",
+          "turn_index": 1
+        }
+      ],
+      "predicted_labels": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [
+        "multi_turn"
+      ],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Could you send the refreshed sitemap and page inventory to the production lead by Friday?"
+        },
+        {
+          "speaker": "account_manager",
+          "text": "Yes, I'll send both to the production lead by Friday afternoon."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000168,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "hero-video",
+            "cut"
+          ],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REFUSAL",
+          "owner": "account_manager",
+          "precision": "none",
+          "quote": "I can't promise the complete hero-video cut will be ready by the 18th while we're still waiting on the footage license.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REFUSAL"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-06",
+      "latency_ms": 1686,
+      "note": "The speaker explicitly declines to guarantee delivery rather than making a conditional commitment.",
+      "predicted": [
+        {
+          "action": "have the complete hero-video cut ready",
+          "condition": null,
+          "due_raw": "by the 18th",
+          "due_resolved": "2026-11-18",
+          "label": "REFUSAL",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "I can't promise the complete hero-video cut will be ready by the 18th while we're still waiting on the footage license.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REFUSAL"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "I can't promise the complete hero-video cut will be ready by the 18th while we're still waiting on the footage license."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000153,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Our standard change-control policy requires written approval for additions over ten hours; that rule has been in place since the agency relationship began.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-07",
+      "latency_ms": 1030,
+      "note": "Describes an existing policy without undertaking a new project action.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Our standard change-control policy requires written approval for additions over ten hours; that rule has been in place since the agency relationship began.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Our standard change-control policy requires written approval for additions over ten hours; that rule has been in place since the agency relationship began."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000162,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "group",
+            "revisions",
+            "review"
+          ],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "SUGGESTION",
+          "owner": null,
+          "precision": "none",
+          "quote": "It might make sense to group the three product-detail revisions into one review round rather than sending the client three separate approval requests.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "SUGGESTION"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-08",
+      "latency_ms": 1362,
+      "note": "The proposed workflow change has no explicitly bound owner.",
+      "predicted": [
+        {
+          "action": "group the three product-detail revisions into one review round",
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "SUGGESTION",
+          "owner": null,
+          "precision": "none",
+          "quote": "It might make sense to group the three product-detail revisions into one review round rather than sending the client three separate approval requests.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "SUGGESTION"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "It might make sense to group the three product-detail revisions into one review round rather than sending the client three separate approval requests."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.00017,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "publish",
+            "design-system",
+            "changelog"
+          ],
+          "condition": "brand team approval of new color tokens",
+          "due_raw": "on Thursday",
+          "due_resolved": "2026-11-12",
+          "label": "CONDITIONAL",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "Provided the brand team approves the new color tokens, we'll publish the design-system changelog on Thursday.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "CONDITIONAL"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-09",
+      "latency_ms": 2001,
+      "note": "The account manager commits to publishing the changelog only if the brand team approves the tokens.",
+      "predicted": [
+        {
+          "action": "publish the design-system changelog",
+          "condition": "the brand team approves the new color tokens",
+          "due_raw": "on Thursday",
+          "due_resolved": "2026-11-12",
+          "label": "CONDITIONAL",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "Provided the brand team approves the new color tokens, we'll publish the design-system changelog on Thursday.",
+          "recipient": "buyer",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "CONDITIONAL"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "Provided the brand team approves the new color tokens, we'll publish the design-system changelog on Thursday."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000166,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "send",
+            "channel-attribution",
+            "notes"
+          ],
+          "condition": null,
+          "due_raw": "soon",
+          "due_resolved": null,
+          "label": "HEDGED",
+          "owner": "account_manager",
+          "precision": "vague",
+          "quote": "I'll see if I can get the corrected channel-attribution notes over to you soon; the analytics export is still shifting.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "HEDGED"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-11",
+      "latency_ms": 1817,
+      "note": "The delivery action is identifiable, but 'I'll see if I can' and 'soon' make the obligation weak and the timing vague.",
+      "predicted": [
+        {
+          "action": "send corrected channel-attribution notes",
+          "condition": null,
+          "due_raw": "soon",
+          "due_resolved": null,
+          "label": "HEDGED",
+          "owner": "account_manager",
+          "precision": "vague",
+          "quote": "I'll see if I can get the corrected channel-attribution notes over to you soon",
+          "recipient": "buyer",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "HEDGED"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "I'll see if I can get the corrected channel-attribution notes over to you soon; the analytics export is still shifting."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000152,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Fantastic, another four versions of the same banner; that's exactly how we'll save time on this project.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-12",
+      "latency_ms": 1073,
+      "note": "The sarcasm criticizes repeated revisions rather than committing the client to an action.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Fantastic, another four versions of the same banner; that's exactly how we'll save time on this project.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Fantastic, another four versions of the same banner; that's exactly how we'll save time on this project."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000147,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Both usability sessions stalled at the shipping estimator, and neither participant reached the payment step.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-15",
+      "latency_ms": 1597,
+      "note": "Reports research findings and does not promise a follow-up action.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "Both usability sessions stalled at the shipping estimator, and neither participant reached the payment step.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Both usability sessions stalled at the shipping estimator, and neither participant reached the payment step."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000174,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "authorize",
+            "photography",
+            "session"
+          ],
+          "condition": "procurement clearance of stock-photo invoice",
+          "due_raw": "for Friday morning",
+          "due_resolved": "2026-11-13",
+          "label": "CONDITIONAL",
+          "owner": "client",
+          "precision": "day",
+          "quote": "As long as procurement clears the stock-photo invoice today, we'll authorize the extra photography session for Friday morning.",
+          "recipient": "account_manager",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "CONDITIONAL"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-16",
+      "latency_ms": 1172,
+      "note": "The client binds itself to authorization only if procurement clears the invoice.",
+      "predicted": [
+        {
+          "action": "authorize the extra photography session",
+          "condition": "procurement clears the stock-photo invoice today",
+          "due_raw": "for Friday morning",
+          "due_resolved": "2026-11-13",
+          "label": "CONDITIONAL",
+          "owner": "client",
+          "precision": "day",
+          "quote": "As long as procurement clears the stock-photo invoice today, we'll authorize the extra photography session for Friday morning.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "CONDITIONAL"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "As long as procurement clears the stock-photo invoice today, we'll authorize the extra photography session for Friday morning."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000166,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "export",
+            "logo",
+            "files"
+          ],
+          "condition": null,
+          "due_raw": "after the rights check",
+          "due_resolved": null,
+          "label": "REPORTED",
+          "owner": "Dorian",
+          "precision": "event",
+          "quote": "Dorian told me he would export the editable logo files for you after the rights check,",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REPORTED"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-17",
+      "latency_ms": 1135,
+      "note": "The account manager reports Dorian's undertaking instead of assuming ownership of the export.",
+      "predicted": [
+        {
+          "action": "export the editable logo files",
+          "condition": null,
+          "due_raw": "after the rights check",
+          "due_resolved": null,
+          "label": "REPORTED",
+          "owner": "Dorian",
+          "precision": "event",
+          "quote": "Dorian told me he would export the editable logo files for you after the rights check, but he hasn't confirmed the timing.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REPORTED"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "Dorian told me he would export the editable logo files for you after the rights check, but he hasn't confirmed the timing."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000248,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "add",
+            "mobile",
+            "breakpoint"
+          ],
+          "condition": null,
+          "due_raw": "before the handoff to developers",
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "event",
+          "quote": "Can you add the missing mobile breakpoint to the prototype before the handoff to developers?",
+          "recipient": "account_manager",
+          "turn_index": 0
+        },
+        {
+          "action_keywords": [
+            "add",
+            "mobile",
+            "breakpoint"
+          ],
+          "condition": null,
+          "due_raw": "before the handoff to developers",
+          "due_resolved": null,
+          "label": "COMMITMENT",
+          "owner": "client",
+          "precision": "event",
+          "quote": "Will do.",
+          "recipient": "account_manager",
+          "turn_index": 1
+        }
+      ],
+      "expected_labels": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-18",
+      "latency_ms": 1742,
+      "note": "The otherwise underspecified 'Will do' becomes a commitment because the preceding request identifies the action and deadline.",
+      "predicted": [
+        {
+          "action": "add the missing mobile breakpoint to the prototype",
+          "condition": null,
+          "due_raw": "before the handoff to developers",
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "event",
+          "quote": "Can you add the missing mobile breakpoint to the prototype before the handoff to developers?",
+          "recipient": "client",
+          "turn_index": 0
+        },
+        {
+          "action": "add the missing mobile breakpoint to the prototype",
+          "condition": null,
+          "due_raw": "before the handoff to developers",
+          "due_resolved": null,
+          "label": "COMMITMENT",
+          "owner": "client",
+          "precision": "event",
+          "quote": "Will do.",
+          "recipient": "account_manager",
+          "turn_index": 1
+        }
+      ],
+      "predicted_labels": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [
+        "multi_turn"
+      ],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "Can you add the missing mobile breakpoint to the prototype before the handoff to developers?"
+        },
+        {
+          "speaker": "client",
+          "text": "Will do."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000232,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "motion",
+            "package"
+          ],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "REFUSAL",
+          "owner": "account_manager",
+          "precision": "none",
+          "quote": "I can't promise the full motion package will be ready by Monday,",
+          "recipient": "client",
+          "turn_index": 0
+        },
+        {
+          "action_keywords": [
+            "deliver",
+            "title",
+            "cards"
+          ],
+          "condition": null,
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "but I can give you the finished title cards by Friday.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REFUSAL",
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-19",
+      "latency_ms": 1735,
+      "note": "The speaker refuses to guarantee the complete package while making a separate firm counter-offer for the title cards.",
+      "predicted": [
+        {
+          "action": "have the full motion package ready",
+          "condition": null,
+          "due_raw": "by Monday",
+          "due_resolved": "2026-11-16",
+          "label": "REFUSAL",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "I can't promise the full motion package will be ready by Monday",
+          "recipient": null,
+          "turn_index": 0
+        },
+        {
+          "action": "deliver the finished title cards",
+          "condition": null,
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "I can give you the finished title cards by Friday",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REFUSAL",
+        "COMMITMENT"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "I can't promise the full motion package will be ready by Monday, but I can give you the finished title cards by Friday."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000149,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "The retainer covered six rounds of creative last quarter, and the seventh round was invoiced separately.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-20",
+      "latency_ms": 1348,
+      "note": "Describes past commercial terms and invoicing rather than a current commitment.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "The retainer covered six rounds of creative last quarter, and the seventh round was invoiced separately.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "The retainer covered six rounds of creative last quarter, and the seventh round was invoiced separately."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000171,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "prepare",
+            "subject-line",
+            "variants"
+          ],
+          "condition": null,
+          "due_raw": "before the approval meeting",
+          "due_resolved": null,
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "event",
+          "quote": "I'll take the subject-line test plan off your plate and have two variants ready for your review before the approval meeting.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-21",
+      "latency_ms": 1269,
+      "note": "The speaker explicitly takes ownership of a deliverable and ties it to a project event.",
+      "predicted": [
+        {
+          "action": "prepare two subject-line test variants for review",
+          "condition": null,
+          "due_raw": "before the approval meeting",
+          "due_resolved": null,
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "event",
+          "quote": "I'll take the subject-line test plan off your plate and have two variants ready for your review before the approval meeting.",
+          "recipient": "buyer",
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "COMMITMENT"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "I'll take the subject-line test plan off your plate and have two variants ready for your review before the approval meeting."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000246,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "add",
+            "alt",
+            "text"
+          ],
+          "condition": null,
+          "due_raw": "before the Friday handoff",
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "event",
+          "quote": "Can you add alt text to the five launch graphics before the Friday handoff?",
+          "recipient": "client",
+          "turn_index": 0
+        },
+        {
+          "action_keywords": [
+            "add",
+            "post",
+            "files"
+          ],
+          "condition": null,
+          "due_raw": "before the Friday handoff",
+          "due_resolved": null,
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "event",
+          "quote": "I'll handle those and post the updated files in the review folder.",
+          "recipient": "client",
+          "turn_index": 1
+        }
+      ],
+      "expected_labels": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-22",
+      "latency_ms": 2352,
+      "note": "The account manager accepts the requested work, and the preceding turn supplies the implied action and event-based deadline.",
+      "predicted": [
+        {
+          "action": "add alt text to the five launch graphics",
+          "condition": null,
+          "due_raw": "before the Friday handoff",
+          "due_resolved": null,
+          "label": "REQUEST",
+          "owner": null,
+          "precision": "event",
+          "quote": "Can you add alt text to the five launch graphics before the Friday handoff?",
+          "recipient": "account_manager",
+          "turn_index": 0
+        },
+        {
+          "action": "add alt text to the five launch graphics and post the updated files in the review folder",
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "none",
+          "quote": "I'll handle those and post the updated files in the review folder.",
+          "recipient": "client",
+          "turn_index": 1
+        }
+      ],
+      "predicted_labels": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [
+        "multi_turn"
+      ],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "Can you add alt text to the five launch graphics before the Friday handoff?"
+        },
+        {
+          "speaker": "account_manager",
+          "text": "I'll handle those and post the updated files in the review folder."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000159,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "lock",
+            "placements"
+          ],
+          "condition": null,
+          "due_raw": "last week",
+          "due_resolved": null,
+          "label": "REPORTED",
+          "owner": "Nessa",
+          "precision": "none",
+          "quote": "Our media buyer Nessa said she'd lock the placements last week,",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "REPORTED"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-23",
+      "latency_ms": 1324,
+      "note": "The reported undertaking belongs to Nessa, and its past deadline is not a new commitment by the account manager.",
+      "predicted": [
+        {
+          "action": "lock the placements",
+          "condition": null,
+          "due_raw": "last week",
+          "due_resolved": null,
+          "label": "REPORTED",
+          "owner": "Nessa",
+          "precision": "vague",
+          "quote": "Our media buyer Nessa said she'd lock the placements last week, but the booking remains open.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "REPORTED"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [
+        "keyword_trap"
+      ],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "Our media buyer Nessa said she'd lock the placements last week, but the booking remains open."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000163,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [
+            "upload",
+            "campaign",
+            "archive"
+          ],
+          "condition": null,
+          "due_raw": "in two weeks",
+          "due_resolved": "2026-11-25",
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "We will upload the final campaign archive to the handoff drive in two weeks.",
+          "recipient": "client",
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "COMMITMENT"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-24",
+      "latency_ms": 1994,
+      "note": "The explicit team commitment is owned by the account manager, and two weeks after the call resolves to November 25, 2026.",
+      "predicted": [
+        {
+          "action": "upload the final campaign archive to the handoff drive",
+          "condition": null,
+          "due_raw": "in two weeks",
+          "due_resolved": "2026-11-25",
+          "label": "COMMITMENT",
+          "owner": "account_manager",
+          "precision": "day",
+          "quote": "We will upload the final campaign archive to the handoff drive in two weeks.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "COMMITMENT"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "account_manager",
+          "text": "We will upload the final campaign archive to the handoff drive in two weeks."
+        }
+      ]
+    },
+    {
+      "cached": false,
+      "call_date": "2026-11-11",
+      "correct": true,
+      "cost_usd": 0.000155,
+      "dropped_quotes": 0,
+      "error": null,
+      "expected": [
+        {
+          "action_keywords": [],
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "The dashboard's attribution window is seven days, and the latest export includes the same settings as the version we reviewed on Monday.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "expected_labels": [
+        "NONE"
+      ],
+      "flagged_turns": null,
+      "id": "gpt02-25",
+      "latency_ms": 1828,
+      "note": "States current configuration and past review context without undertaking any new work.",
+      "predicted": [
+        {
+          "action": null,
+          "condition": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "label": "NONE",
+          "owner": null,
+          "precision": "none",
+          "quote": "The dashboard's attribution window is seven days, and the latest export includes the same settings as the version we reviewed on Monday.",
+          "recipient": null,
+          "turn_index": 0
+        }
+      ],
+      "predicted_labels": [
+        "NONE"
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "tags": [],
+      "turns": [
+        {
+          "speaker": "client",
+          "text": "The dashboard's attribution window is seven days, and the latest export includes the same settings as the version we reviewed on Monday."
+        }
+      ]
+    }
+  ],
+  "legacy": false,
+  "run": {
+    "configuration": "haiku",
+    "dataset": "test",
+    "duration_seconds": 18.830804,
+    "effort": "medium",
+    "model": "claude-haiku-5-5",
+    "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
+    "prompt_version": "v1",
+    "served_by": [
+      "claude-haiku-5-5"
+    ],
+    "set_items": 68,
+    "set_name": "test",
+    "set_sha256": "6cd5dd1ad6a909959de6fa73b38e68d6dd9b0a00b3e2926884fe1048771b847d",
+    "stages": {
+      "extract": "claude-haiku-5-5"
+    },
+    "started_at": "2026-10-26T04:59:17.728564Z"
+  },
+  "scores": {
+    "accuracy": 0.923077,
+    "ambiguous": [
+      {
+        "expected": "HEDGED",
+        "item_id": "gem01-22",
+        "predicted": "HEDGED"
+      }
+    ],
+    "cache_hits": 25,
+    "confusion": {
+      "labels": [
+        "COMMITMENT",
+        "HEDGED",
+        "CONDITIONAL",
+        "SUGGESTION",
+        "REQUEST",
+        "REPORTED",
+        "REFUSAL",
+        "NONE"
+      ],
+      "rows": [
+        [
+          14,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          5,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          14,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          5,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          5,
+          0
+        ],
+        [
+          2,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          20
+        ]
+      ]
+    },
+    "cost_usd": 0.013359,
+    "failed_items": [],
+    "fields": {
+      "action": {
+        "accuracy": 0.916667,
+        "correct": 22,
+        "total": 24
+      },
+      "due": {
+        "accuracy": 1.0,
+        "correct": 25,
+        "total": 25
+      },
+      "owner": {
+        "accuracy": 1.0,
+        "correct": 25,
+        "total": 25
+      }
+    },
+    "items": 68,
+    "labels": {
+      "COMMITMENT": {
+        "f1": 0.933333,
+        "precision": 0.875,
+        "recall": 1.0,
+        "support": 14
+      },
+      "CONDITIONAL": {
+        "f1": 0.857143,
+        "precision": 0.75,
+        "recall": 1.0,
+        "support": 6
+      },
+      "HEDGED": {
+        "f1": 0.75,
+        "precision": 1.0,
+        "recall": 0.6,
+        "support": 5
+      },
+      "NONE": {
+        "f1": 0.909091,
+        "precision": 1.0,
+        "recall": 0.833333,
+        "support": 24
+      },
+      "REFUSAL": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 5
+      },
+      "REPORTED": {
+        "f1": 0.909091,
+        "precision": 0.833333,
+        "recall": 1.0,
+        "support": 5
+      },
+      "REQUEST": {
+        "f1": 0.965517,
+        "precision": 0.933333,
+        "recall": 1.0,
+        "support": 14
+      },
+      "SUGGESTION": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 5
+      }
+    },
+    "latency_ms": {
+      "p50": 1506,
+      "p95": 2191
+    },
+    "ledger": {
+      "f1": 0.961538,
+      "false_negatives": 0,
+      "false_positives": 2,
+      "precision": 0.925926,
+      "recall": 1.0,
+      "true_positives": 25
+    },
+    "macro_f1": 0.915522,
+    "quote_failures": 0,
+    "retried_items": 0,
+    "scored_items": 67
+  },
+  "set": "test",
+  "two_stage": null
+}

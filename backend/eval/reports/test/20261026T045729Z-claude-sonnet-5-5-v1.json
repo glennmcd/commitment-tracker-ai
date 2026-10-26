@@ -1,0 +1,3012 @@
+{
+  "run": {
+    "model": "claude-sonnet-5-5",
+    "prompt_version": "v1",
+    "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
+    "effort": "medium",
+    "dataset": "test",
+    "started_at": "2026-10-26T04:57:29.174869Z",
+    "duration_seconds": 38.008901500026695,
+    "served_by": [
+      "claude-sonnet-5-5"
+    ],
+    "set_name": "test",
+    "set_sha256": "6cd5dd1ad6a909959de6fa73b38e68d6dd9b0a00b3e2926884fe1048771b847d",
+    "set_items": 68,
+    "configuration": "sonnet",
+    "stages": {
+      "extract": "claude-sonnet-5-5"
+    }
+  },
+  "scores": {
+    "items": 68,
+    "scored_items": 67,
+    "accuracy": 0.935064935064935,
+    "macro_f1": 0.91513430935544,
+    "labels": {
+      "COMMITMENT": {
+        "precision": 0.9333333333333333,
+        "recall": 1.0,
+        "f1": 0.9655172413793104,
+        "support": 14
+      },
+      "HEDGED": {
+        "precision": 1.0,
+        "recall": 0.6,
+        "f1": 0.75,
+        "support": 5
+      },
+      "CONDITIONAL": {
+        "precision": 0.75,
+        "recall": 1.0,
+        "f1": 0.8571428571428571,
+        "support": 6
+      },
+      "SUGGESTION": {
+        "precision": 0.8333333333333334,
+        "recall": 1.0,
+        "f1": 0.9090909090909091,
+        "support": 5
+      },
+      "REQUEST": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 14
+      },
+      "REPORTED": {
+        "precision": 0.8333333333333334,
+        "recall": 1.0,
+        "f1": 0.9090909090909091,
+        "support": 5
+      },
+      "REFUSAL": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 5
+      },
+      "NONE": {
+        "precision": 1.0,
+        "recall": 0.8695652173913043,
+        "f1": 0.9302325581395349,
+        "support": 23
+      }
+    },
+    "confusion": {
+      "labels": [
+        "COMMITMENT",
+        "HEDGED",
+        "CONDITIONAL",
+        "SUGGESTION",
+        "REQUEST",
+        "REPORTED",
+        "REFUSAL",
+        "NONE"
+      ],
+      "rows": [
+        [
+          14,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          5,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          14,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          5,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          5,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          20
+        ]
+      ]
+    },
+    "ledger": {
+      "precision": 0.9615384615384616,
+      "recall": 1.0,
+      "f1": 0.9803921568627451,
+      "true_positives": 25,
+      "false_positives": 1,
+      "false_negatives": 0
+    },
+    "fields": {
+      "owner": {
+        "correct": 25,
+        "total": 25,
+        "accuracy": 1.0
+      },
+      "action": {
+        "correct": 22,
+        "total": 24,
+        "accuracy": 0.9166666666666666
+      },
+      "due": {
+        "correct": 24,
+        "total": 25,
+        "accuracy": 0.96
+      }
+    },
+    "ambiguous": [
+      {
+        "item_id": "gem01-22",
+        "expected": "HEDGED",
+        "predicted": "HEDGED"
+      }
+    ],
+    "failed_items": [],
+    "quote_failures": 0,
+    "retried_items": 0,
+    "cache_hits": 0,
+    "latency_ms": {
+      "p50": 2029,
+      "p95": 2955
+    },
+    "cost_usd": 0.21099
+  },
+  "items": [
+    {
+      "item_id": "gem01-01",
+      "tags": [],
+      "expected": [
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "COMMITMENT",
+          "quote": "I'll make sure the updated ad copy deck is delivered to your inbox by Friday.",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "deliver the updated ad copy deck",
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2055,
+      "cost_usd": 0.017424,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-02",
+      "tags": [
+        "multi_turn"
+      ],
+      "expected": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Could you send over the updated media budget allocation?",
+          "owner": null,
+          "recipient": "client",
+          "action": "send the updated media budget allocation",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        },
+        {
+          "turn_index": 1,
+          "label": "COMMITMENT",
+          "quote": "I'll get that over to you by end of day.",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "send the updated media budget allocation",
+          "due_raw": "by end of day",
+          "due_resolved": "2026-11-11",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2353,
+      "cost_usd": 0.003696,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-03",
+      "tags": [],
+      "expected": [
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "COMMITMENT",
+          "quote": "Leave the redlines with me, I'll handle the revisions before your board meeting.",
+          "owner": "account_manager",
+          "recipient": "buyer",
+          "action": "handle the redline revisions",
+          "due_raw": "before your board meeting",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1942,
+      "cost_usd": 0.002528,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-04",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "REPORTED"
+      ],
+      "predicted": [
+        "REPORTED"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REPORTED",
+          "quote": "Our lead developer Marcus promised he would fix the tracking pixels by yesterday.",
+          "owner": "Marcus",
+          "recipient": null,
+          "action": "fix the tracking pixels",
+          "due_raw": "by yesterday",
+          "due_resolved": null,
+          "precision": "vague",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2971,
+      "cost_usd": 0.002488,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-05",
+      "tags": [],
+      "expected": [
+        "CONDITIONAL"
+      ],
+      "predicted": [
+        "CONDITIONAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "CONDITIONAL",
+          "quote": "As long as the PO is approved by noon tomorrow, Marcus will set up the staging environment by end of next week.",
+          "owner": "Marcus",
+          "recipient": "customer",
+          "action": "set up the staging environment",
+          "due_raw": "by end of next week",
+          "due_resolved": "2026-11-20",
+          "precision": "day",
+          "condition": "the PO is approved by noon tomorrow"
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1935,
+      "cost_usd": 0.002758,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-06",
+      "tags": [
+        "multi_turn"
+      ],
+      "expected": [
+        "SUGGESTION"
+      ],
+      "predicted": [
+        "SUGGESTION",
+        "SUGGESTION"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "SUGGESTION",
+          "quote": "We should probably revisit the brand guidelines before starting the video edit.",
+          "owner": null,
+          "recipient": null,
+          "action": "revisit the brand guidelines",
+          "due_raw": "before starting the video edit",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        },
+        {
+          "turn_index": 1,
+          "label": "SUGGESTION",
+          "quote": "Agreed, let's look at that.",
+          "owner": null,
+          "recipient": "client",
+          "action": "look at the brand guidelines",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2548,
+      "cost_usd": 0.004028,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-07",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "REFUSAL"
+      ],
+      "predicted": [
+        "REFUSAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REFUSAL",
+          "quote": "I can't promise the campaign will go live on the 15th.",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "guarantee the campaign goes live",
+          "due_raw": "on the 15th",
+          "due_resolved": "2026-11-15",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1632,
+      "cost_usd": 0.002362,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-08",
+      "tags": [],
+      "expected": [
+        "HEDGED"
+      ],
+      "predicted": [
+        "HEDGED"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "HEDGED",
+          "quote": "We should be able to get the analytics dashboard configured by next week, hopefully.",
+          "owner": "account_manager",
+          "recipient": "customer",
+          "action": "configure the analytics dashboard",
+          "due_raw": "by next week",
+          "due_resolved": "2026-11-16",
+          "precision": "week",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 3815,
+      "cost_usd": 0.002556,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-09",
+      "tags": [],
+      "expected": [
+        "REQUEST"
+      ],
+      "predicted": [
+        "REQUEST"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Could you ask your design lead if she can export the raw vector assets for us?",
+          "owner": null,
+          "recipient": "client",
+          "action": "ask the design lead to export the raw vector assets",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2502,
+      "cost_usd": 0.002416,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-10",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "Our standard agency SLA is four hours for urgent production bugs.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2240,
+      "cost_usd": 0.00221,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-11",
+      "tags": [],
+      "expected": [
+        "REPORTED"
+      ],
+      "predicted": [
+        "REPORTED"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REPORTED",
+          "quote": "Sarah said she'd send the updated SEO keyword strategy document by tomorrow morning.",
+          "owner": "Sarah",
+          "recipient": null,
+          "action": "send the updated SEO keyword strategy document",
+          "due_raw": "by tomorrow morning",
+          "due_resolved": "2026-11-12",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1819,
+      "cost_usd": 0.002578,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-12",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "Honestly, at this rate, I suppose you'll have the entire redesign done by tonight!",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2120,
+      "cost_usd": 0.00259,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-13",
+      "tags": [],
+      "expected": [
+        "CONDITIONAL"
+      ],
+      "predicted": [
+        "CONDITIONAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "CONDITIONAL",
+          "quote": "We will provide the updated product photography as soon as legal signs off on the release.",
+          "owner": "client",
+          "recipient": "seller",
+          "action": "provide the updated product photography",
+          "due_raw": "as soon as legal signs off on the release",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": "legal signs off on the release"
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1755,
+      "cost_usd": 0.002566,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-14",
+      "tags": [
+        "multi_turn"
+      ],
+      "expected": [
+        "REQUEST",
+        "HEDGED"
+      ],
+      "predicted": [
+        "REQUEST",
+        "CONDITIONAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Can you have the performance report ready by Friday?",
+          "owner": null,
+          "recipient": "client",
+          "action": "have the performance report ready",
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "precision": "day",
+          "condition": null
+        },
+        {
+          "turn_index": 1,
+          "label": "CONDITIONAL",
+          "quote": "We'll circle back on that once we see the final ad spend figures.",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "circle back on the report timing",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": "the final ad spend figures are available"
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2454,
+      "cost_usd": 0.003962,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-15",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "Last quarter I promised a 10% rebate on media management fees and we delivered it on time.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1656,
+      "cost_usd": 0.002294,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-16",
+      "tags": [],
+      "expected": [
+        "REQUEST"
+      ],
+      "predicted": [
+        "REQUEST"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Would you be able to audit our current email automation sequences?",
+          "owner": null,
+          "recipient": "client",
+          "action": "audit the client's current email automation sequences",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1702,
+      "cost_usd": 0.002214,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-17",
+      "tags": [],
+      "expected": [
+        "SUGGESTION"
+      ],
+      "predicted": [
+        "SUGGESTION"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "SUGGESTION",
+          "quote": "It might make sense to delay the paid search launch until after the website migration.",
+          "owner": null,
+          "recipient": "client",
+          "action": "delay the paid search launch until after the website migration",
+          "due_raw": "until after the website migration",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2681,
+      "cost_usd": 0.002358,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-18",
+      "tags": [],
+      "expected": [
+        "REFUSAL"
+      ],
+      "predicted": [
+        "REFUSAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REFUSAL",
+          "quote": "We cannot absorb the extra cost of custom illustrations for this release.",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "absorb the extra cost of custom illustrations",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1642,
+      "cost_usd": 0.002442,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-19",
+      "tags": [],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "Our quarterly performance review took place last Wednesday in the Chicago office.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1603,
+      "cost_usd": 0.00224,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-20",
+      "tags": [],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "We had a really productive session reviewing the social media analytics yesterday.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1749,
+      "cost_usd": 0.00215,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-21",
+      "tags": [
+        "multi_turn"
+      ],
+      "expected": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Could we look at updating the homepage banner design next?",
+          "owner": null,
+          "recipient": "client",
+          "action": "update the homepage banner design",
+          "due_raw": "next",
+          "due_resolved": null,
+          "precision": "vague",
+          "condition": null
+        },
+        {
+          "turn_index": 1,
+          "label": "COMMITMENT",
+          "quote": "I will send over the revised contract scope by Monday.",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "send revised contract scope",
+          "due_raw": "by Monday",
+          "due_resolved": "2026-11-16",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 2347,
+      "cost_usd": 0.003976,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-22",
+      "tags": [
+        "ambiguous"
+      ],
+      "expected": [
+        "HEDGED"
+      ],
+      "predicted": [
+        "HEDGED"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "HEDGED",
+          "quote": "I'll try to review the landing page variants at some point.",
+          "owner": "account_manager",
+          "recipient": null,
+          "action": "review the landing page variants",
+          "due_raw": "at some point",
+          "due_resolved": null,
+          "precision": "vague",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1750,
+      "cost_usd": 0.002358,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-23",
+      "tags": [],
+      "expected": [
+        "REQUEST"
+      ],
+      "predicted": [
+        "REQUEST"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Can you provide a breakdown of the Q4 ad spend by the 1st?",
+          "owner": null,
+          "recipient": "client",
+          "action": "provide a breakdown of the Q4 ad spend",
+          "due_raw": "by the 1st",
+          "due_resolved": "2026-12-01",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1786,
+      "cost_usd": 0.002492,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-24",
+      "tags": [],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "The project management software we use updated its pricing tiers last month.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1438,
+      "cost_usd": 0.002126,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gem01-25",
+      "tags": [],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "We finished migrating the domain servers earlier this morning.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "gemini-2.5-high",
+      "latency_ms": 1843,
+      "cost_usd": 0.002132,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-01",
+      "tags": [],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "The revised homepage wireframes are in the shared folder now, and the team reviewed them yesterday.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 2145,
+      "cost_usd": 0.00234,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-02",
+      "tags": [],
+      "expected": [
+        "REQUEST"
+      ],
+      "predicted": [
+        "REQUEST"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Could you send the revised media budget with the regional split by Friday?",
+          "owner": null,
+          "recipient": "client",
+          "action": "send the revised media budget with the regional split",
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 2044,
+      "cost_usd": 0.00234,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-03",
+      "tags": [],
+      "expected": [
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "COMMITMENT",
+          "quote": "Leave the accessibility audit with me; you'll have the findings before your steering committee meets.",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "deliver the accessibility audit findings",
+          "due_raw": "before your steering committee meets",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 1661,
+      "cost_usd": 0.002644,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-04",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "Our procurement rule has always required three bids for any external production vendor, so that part isn't new.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 1702,
+      "cost_usd": 0.002238,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-05",
+      "tags": [],
+      "expected": [
+        "REQUEST"
+      ],
+      "predicted": [
+        "REQUEST"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Please confirm whether the revised onboarding flow includes the optional referral step before we approve the prototype.",
+          "owner": null,
+          "recipient": "client",
+          "action": "confirm whether the revised onboarding flow includes the optional referral step",
+          "due_raw": "before we approve the prototype",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 1843,
+      "cost_usd": 0.002726,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-06",
+      "tags": [],
+      "expected": [
+        "CONDITIONAL"
+      ],
+      "predicted": [
+        "CONDITIONAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "CONDITIONAL",
+          "quote": "If legal clears the updated testimonial language, I'll have the landing-page copy swapped in by Monday.",
+          "owner": "account_manager",
+          "recipient": null,
+          "action": "swap in the updated landing-page copy",
+          "due_raw": "by Monday",
+          "due_resolved": "2026-11-16",
+          "precision": "day",
+          "condition": "legal clears the updated testimonial language"
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 2848,
+      "cost_usd": 0.002734,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-07",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "The phrase 'guaranteed lift' caused a mess in the last campaign, so our compliance team will flag it again if it appears in the draft.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 1833,
+      "cost_usd": 0.002652,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-08",
+      "tags": [],
+      "expected": [
+        "SUGGESTION"
+      ],
+      "predicted": [
+        "SUGGESTION"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "SUGGESTION",
+          "quote": "We should probably test the shorter signup form with a small mobile-only audience before rolling it out to everyone.",
+          "owner": null,
+          "recipient": null,
+          "action": "test the shorter signup form with a small mobile-only audience before full rollout",
+          "due_raw": "before rolling it out to everyone",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 1666,
+      "cost_usd": 0.002722,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-09",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "REFUSAL"
+      ],
+      "predicted": [
+        "REFUSAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REFUSAL",
+          "quote": "I can't commit to the 18th for the product shoot until the venue confirms its access hours.",
+          "owner": "client",
+          "recipient": null,
+          "action": "commit to the 18th for the product shoot",
+          "due_raw": "the 18th",
+          "due_resolved": "2026-11-18",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 2068,
+      "cost_usd": 0.002526,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-10",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "REPORTED"
+      ],
+      "predicted": [
+        "REPORTED",
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REPORTED",
+          "quote": "Mina said she'd send the final icon exports after the design review",
+          "owner": "Mina",
+          "recipient": null,
+          "action": "send the final icon exports",
+          "due_raw": "after the design review",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        },
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "but I haven't seen them come through.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 2029,
+      "cost_usd": 0.003436,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-11",
+      "tags": [],
+      "expected": [
+        "HEDGED"
+      ],
+      "predicted": [
+        "HEDGED",
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "HEDGED",
+          "quote": "I'll try to get the consolidated stakeholder comments back to you by the end of next week",
+          "owner": "client",
+          "recipient": "seller",
+          "action": "send back the consolidated stakeholder comments",
+          "due_raw": "by the end of next week",
+          "due_resolved": "2026-11-20",
+          "precision": "day",
+          "condition": null
+        },
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "two reviewers are traveling",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 2467,
+      "cost_usd": 0.003888,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-12",
+      "tags": [],
+      "expected": [
+        "REQUEST"
+      ],
+      "predicted": [
+        "REQUEST",
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Could you check whether the analytics sandbox still has the old conversion events enabled?",
+          "owner": null,
+          "recipient": "account_manager",
+          "action": "check whether the analytics sandbox still has the old conversion events enabled",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        },
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "We don't want those polluting the launch report.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 2411,
+      "cost_usd": 0.003744,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-13",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "Our SLA is four business hours for a first response, and the ticketing dashboard shows that today's queue is within target.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 1667,
+      "cost_usd": 0.002398,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-14",
+      "tags": [],
+      "expected": [
+        "CONDITIONAL"
+      ],
+      "predicted": [
+        "CONDITIONAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "CONDITIONAL",
+          "quote": "If finance releases the second tranche, we'll authorize the extra motion-design pass the same day.",
+          "owner": "client",
+          "recipient": "seller",
+          "action": "authorize the extra motion-design pass",
+          "due_raw": "the same day",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": "finance releases the second tranche"
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 1609,
+      "cost_usd": 0.0026,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-15",
+      "tags": [],
+      "expected": [
+        "HEDGED"
+      ],
+      "predicted": [
+        "CONDITIONAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "CONDITIONAL",
+          "quote": "I should be able to get the localized email previews across to you tomorrow morning, assuming the rendering job behaves.",
+          "owner": "account_manager",
+          "recipient": "buyer",
+          "action": "send localized email previews",
+          "due_raw": "tomorrow morning",
+          "due_resolved": "2026-11-12",
+          "precision": "day",
+          "condition": "the rendering job behaves"
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 2045,
+      "cost_usd": 0.002794,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-16",
+      "tags": [],
+      "expected": [
+        "REQUEST"
+      ],
+      "predicted": [
+        "REQUEST"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Would you be able to add a second approval state to the campaign dashboard before our review on the 24th?",
+          "owner": null,
+          "recipient": "client",
+          "action": "add a second approval state to the campaign dashboard",
+          "due_raw": "before our review on the 24th",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 2955,
+      "cost_usd": 0.00251,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-17",
+      "tags": [],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "Honestly, the client portal redesign has been a bit of a maze, but at least the new navigation labels are approved.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 2146,
+      "cost_usd": 0.002378,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-18",
+      "tags": [],
+      "expected": [
+        "SUGGESTION"
+      ],
+      "predicted": [
+        "SUGGESTION",
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "SUGGESTION",
+          "quote": "We should probably put the pricing comparison on the same page as the feature matrix",
+          "owner": null,
+          "recipient": null,
+          "action": "put the pricing comparison on the same page as the feature matrix",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        },
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "people keep missing the connection.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 2242,
+      "cost_usd": 0.003666,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-20",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "REPORTED",
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REPORTED",
+          "quote": "Our CEO promised a faster turnaround during the kickoff",
+          "owner": "CEO",
+          "recipient": "client",
+          "action": "deliver a faster turnaround",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        },
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "but that was about the old creative workflow, not this new landing-page sprint.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 2555,
+      "cost_usd": 0.003758,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-21",
+      "tags": [],
+      "expected": [
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "COMMITMENT",
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "COMMITMENT",
+          "quote": "I'll ask Priya to provision the staging account",
+          "owner": "account_manager",
+          "recipient": "customer",
+          "action": "ask Priya to provision the staging account",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        },
+        {
+          "turn_index": 0,
+          "label": "COMMITMENT",
+          "quote": "send you the login instructions by Thursday",
+          "owner": "account_manager",
+          "recipient": "customer",
+          "action": "send the login instructions",
+          "due_raw": "by Thursday",
+          "due_resolved": "2026-11-12",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 2548,
+      "cost_usd": 0.003874,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-22",
+      "tags": [
+        "multi_turn"
+      ],
+      "expected": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "REQUEST",
+        "COMMITMENT",
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Can we get the accessibility sign-off recorded in the release tracker before the staging freeze?",
+          "owner": null,
+          "recipient": "client",
+          "action": "record the accessibility sign-off in the release tracker",
+          "due_raw": "before the staging freeze",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        },
+        {
+          "turn_index": 1,
+          "label": "COMMITMENT",
+          "quote": "I'll own the tracker update and make sure the sign-off is recorded before the freeze.",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "update the tracker and record the accessibility sign-off",
+          "due_raw": "before the freeze",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        },
+        {
+          "turn_index": 2,
+          "label": "NONE",
+          "quote": "Great, the staging freeze is currently penciled in for the 19th, although operations may move it.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 3091,
+      "cost_usd": 0.005932,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt01-24",
+      "tags": [],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "The paid-social tests last week produced a much lower cost per lead than the search campaign, which is encouraging.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-low",
+      "latency_ms": 2366,
+      "cost_usd": 0.002328,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-01",
+      "tags": [],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "The revised brand guidelines landed yesterday, and the design team has already replaced the outdated color swatches in the shared library.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 1570,
+      "cost_usd": 0.002384,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-03",
+      "tags": [],
+      "expected": [
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "COMMITMENT",
+          "quote": "Leave the final redlines with me; you'll have the cleaned-up contract copy before the approval meeting.",
+          "owner": "account_manager",
+          "recipient": "customer",
+          "action": "handle the final redlines and deliver the cleaned-up contract copy",
+          "due_raw": "before the approval meeting",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 1952,
+      "cost_usd": 0.002814,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-04",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE",
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "We promised a much faster approval process during the spring campaign, and we did deliver it then",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        },
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "this launch has a different review structure.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 2246,
+      "cost_usd": 0.003424,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-05",
+      "tags": [
+        "multi_turn"
+      ],
+      "expected": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Could you send the refreshed sitemap and page inventory to the production lead by Friday?",
+          "owner": null,
+          "recipient": "client",
+          "action": "send the refreshed sitemap and page inventory to the production lead",
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "precision": "day",
+          "condition": null
+        },
+        {
+          "turn_index": 1,
+          "label": "COMMITMENT",
+          "quote": "Yes, I'll send both to the production lead by Friday afternoon.",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "send the sitemap and page inventory to the production lead",
+          "due_raw": "by Friday afternoon",
+          "due_resolved": "2026-11-13",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 2686,
+      "cost_usd": 0.004264,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-06",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "REFUSAL"
+      ],
+      "predicted": [
+        "REFUSAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REFUSAL",
+          "quote": "I can't promise the complete hero-video cut will be ready by the 18th while we're still waiting on the footage license.",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "deliver the complete hero-video cut by the 18th",
+          "due_raw": "by the 18th",
+          "due_resolved": "2026-11-18",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 1812,
+      "cost_usd": 0.002748,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-07",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "Our standard change-control policy requires written approval for additions over ten hours; that rule has been in place since the agency relationship began.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 2565,
+      "cost_usd": 0.002398,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-08",
+      "tags": [],
+      "expected": [
+        "SUGGESTION"
+      ],
+      "predicted": [
+        "SUGGESTION"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "SUGGESTION",
+          "quote": "It might make sense to group the three product-detail revisions into one review round rather than sending the client three separate approval requests.",
+          "owner": null,
+          "recipient": null,
+          "action": "group the three product-detail revisions into one review round",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 1702,
+      "cost_usd": 0.002496,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-09",
+      "tags": [],
+      "expected": [
+        "CONDITIONAL"
+      ],
+      "predicted": [
+        "CONDITIONAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "CONDITIONAL",
+          "quote": "Provided the brand team approves the new color tokens, we'll publish the design-system changelog on Thursday.",
+          "owner": "account_manager",
+          "recipient": null,
+          "action": "publish the design-system changelog",
+          "due_raw": "on Thursday",
+          "due_resolved": "2026-11-12",
+          "precision": "day",
+          "condition": "the brand team approves the new color tokens"
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 1631,
+      "cost_usd": 0.002654,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-11",
+      "tags": [],
+      "expected": [
+        "HEDGED"
+      ],
+      "predicted": [
+        "HEDGED",
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "HEDGED",
+          "quote": "I'll see if I can get the corrected channel-attribution notes over to you soon",
+          "owner": "account_manager",
+          "recipient": "buyer",
+          "action": "send corrected channel-attribution notes",
+          "due_raw": "soon",
+          "due_resolved": null,
+          "precision": "vague",
+          "condition": null
+        },
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "the analytics export is still shifting.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 2773,
+      "cost_usd": 0.00378,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-12",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "Fantastic, another four versions of the same banner; that's exactly how we'll save time on this project.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 1691,
+      "cost_usd": 0.002462,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-15",
+      "tags": [],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "Both usability sessions stalled at the shipping estimator, and neither participant reached the payment step.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 1515,
+      "cost_usd": 0.002282,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-16",
+      "tags": [],
+      "expected": [
+        "CONDITIONAL"
+      ],
+      "predicted": [
+        "CONDITIONAL"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "CONDITIONAL",
+          "quote": "As long as procurement clears the stock-photo invoice today, we'll authorize the extra photography session for Friday morning.",
+          "owner": "client",
+          "recipient": "seller",
+          "action": "authorize the extra photography session",
+          "due_raw": "for Friday morning",
+          "due_resolved": "2026-11-13",
+          "precision": "day",
+          "condition": "procurement clears the stock-photo invoice today"
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 1762,
+      "cost_usd": 0.002776,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-17",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "REPORTED"
+      ],
+      "predicted": [
+        "REPORTED",
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REPORTED",
+          "quote": "Dorian told me he would export the editable logo files for you after the rights check",
+          "owner": "Dorian",
+          "recipient": "buyer",
+          "action": "export the editable logo files",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": "after the rights check"
+        },
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "he hasn't confirmed the timing",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 2302,
+      "cost_usd": 0.00381,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-18",
+      "tags": [
+        "multi_turn"
+      ],
+      "expected": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Can you add the missing mobile breakpoint to the prototype before the handoff to developers?",
+          "owner": null,
+          "recipient": "client",
+          "action": "add the missing mobile breakpoint to the prototype",
+          "due_raw": "before the handoff to developers",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        },
+        {
+          "turn_index": 1,
+          "label": "COMMITMENT",
+          "quote": "Will do.",
+          "owner": "client",
+          "recipient": "account_manager",
+          "action": "add the missing mobile breakpoint to the prototype",
+          "due_raw": "before the handoff to developers",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 2556,
+      "cost_usd": 0.004068,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-19",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "REFUSAL",
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "REFUSAL",
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REFUSAL",
+          "quote": "I can't promise the full motion package will be ready by Monday",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "deliver the full motion package",
+          "due_raw": "by Monday",
+          "due_resolved": "2026-11-16",
+          "precision": "day",
+          "condition": null
+        },
+        {
+          "turn_index": 0,
+          "label": "COMMITMENT",
+          "quote": "I can give you the finished title cards by Friday.",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "deliver the finished title cards",
+          "due_raw": "by Friday",
+          "due_resolved": "2026-11-13",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 2397,
+      "cost_usd": 0.003886,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-20",
+      "tags": [],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "The retainer covered six rounds of creative last quarter, and the seventh round was invoiced separately.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 1784,
+      "cost_usd": 0.002324,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-21",
+      "tags": [],
+      "expected": [
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "COMMITMENT",
+          "quote": "I'll take the subject-line test plan off your plate and have two variants ready for your review before the approval meeting.",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "take over the subject-line test plan and prepare two variants for review",
+          "due_raw": "before the approval meeting",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 1662,
+      "cost_usd": 0.002754,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-22",
+      "tags": [
+        "multi_turn"
+      ],
+      "expected": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "REQUEST",
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REQUEST",
+          "quote": "Can you add alt text to the five launch graphics before the Friday handoff?",
+          "owner": null,
+          "recipient": "client",
+          "action": "add alt text to the five launch graphics",
+          "due_raw": "before the Friday handoff",
+          "due_resolved": null,
+          "precision": "event",
+          "condition": null
+        },
+        {
+          "turn_index": 1,
+          "label": "COMMITMENT",
+          "quote": "I'll handle those and post the updated files in the review folder.",
+          "owner": "account_manager",
+          "recipient": "client",
+          "action": "add alt text to the launch graphics and post updated files in the review folder",
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 2480,
+      "cost_usd": 0.004056,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-23",
+      "tags": [
+        "keyword_trap"
+      ],
+      "expected": [
+        "REPORTED"
+      ],
+      "predicted": [
+        "REPORTED",
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "REPORTED",
+          "quote": "Our media buyer Nessa said she'd lock the placements last week",
+          "owner": "Nessa",
+          "recipient": null,
+          "action": "lock the placements",
+          "due_raw": "last week",
+          "due_resolved": null,
+          "precision": "vague",
+          "condition": null
+        },
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "but the booking remains open.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 2220,
+      "cost_usd": 0.003456,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-24",
+      "tags": [],
+      "expected": [
+        "COMMITMENT"
+      ],
+      "predicted": [
+        "COMMITMENT"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "COMMITMENT",
+          "quote": "We will upload the final campaign archive to the handoff drive in two weeks.",
+          "owner": "account_manager",
+          "recipient": null,
+          "action": "upload the final campaign archive to the handoff drive",
+          "due_raw": "in two weeks",
+          "due_resolved": "2026-11-25",
+          "precision": "day",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 1861,
+      "cost_usd": 0.002514,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    },
+    {
+      "item_id": "gpt02-25",
+      "tags": [],
+      "expected": [
+        "NONE"
+      ],
+      "predicted": [
+        "NONE"
+      ],
+      "error": null,
+      "cached": false,
+      "attempts": 1,
+      "dropped_quotes": 0,
+      "spans": [
+        {
+          "turn_index": 0,
+          "label": "NONE",
+          "quote": "The dashboard's attribution window is seven days, and the latest export includes the same settings as the version we reviewed on Monday.",
+          "owner": null,
+          "recipient": null,
+          "action": null,
+          "due_raw": null,
+          "due_resolved": null,
+          "precision": "none",
+          "condition": null
+        }
+      ],
+      "provenance": "chatgpt-5.6-luna-high",
+      "latency_ms": 1628,
+      "cost_usd": 0.002468,
+      "served_by": "claude-sonnet-5-5",
+      "turns": null,
+      "flagged_turns": null,
+      "stages": null,
+      "transcript": null
+    }
+  ],
+  "by_provenance": {
+    "chatgpt-5.6-luna-high": {
+      "items": 21,
+      "scored_items": 21,
+      "ledger_f1": 1.0,
+      "ledger_precision": 1.0,
+      "ledger_recall": 1.0,
+      "accuracy": 1.0
+    },
+    "chatgpt-5.6-luna-low": {
+      "items": 22,
+      "scored_items": 22,
+      "ledger_f1": 0.9333333333333333,
+      "ledger_precision": 0.875,
+      "ledger_recall": 1.0,
+      "accuracy": 0.875
+    },
+    "gemini-2.5-high": {
+      "items": 25,
+      "scored_items": 24,
+      "ledger_f1": 1.0,
+      "ledger_precision": 1.0,
+      "ledger_recall": 1.0,
+      "accuracy": 0.9285714285714286
+    }
+  },
+  "two_stage": null,
+  "audio": null
+}

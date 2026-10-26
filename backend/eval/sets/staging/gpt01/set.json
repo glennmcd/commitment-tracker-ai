@@ -1,0 +1,19 @@
+{
+  "name": "staging/gpt01",
+  "description": "Imported from chatgpt-5.6-luna-low.jsonl; awaiting blind review.",
+  "role": "staging",
+  "gated": false,
+  "kind": "text",
+  "items_from": null,
+  "sources": [
+    {
+      "batch": "gpt01",
+      "provenance": "chatgpt-5.6-luna-low",
+      "generation_prompt": "prompt-v1",
+      "call_date": "2026-11-11",
+      "imported": "2026-10-25",
+      "promoted": null,
+      "items": 22
+    }
+  ]
+}
