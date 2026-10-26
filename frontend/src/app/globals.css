@@ -694,8 +694,18 @@ button.secondary {
 }
 
 .evals a,
-.intro a {
+.intro a,
+.top-results a {
   color: var(--accent);
+}
+
+/* The landing page's top test results, above the password form. */
+.top-results {
+  margin-bottom: 1.5rem;
+}
+
+.top-results h2 {
+  margin-top: 0;
 }
 
 .table-scroll {

@@ -2,7 +2,18 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import indexJson from "@/data/evals/index.json";
-import { compareRuns, filterItems, NO_FILTER, pairSpans, parseIndex, parseRun, share, signed } from "@/lib/evals";
+import {
+  compareRuns,
+  type EvalIndex,
+  filterItems,
+  NO_FILTER,
+  pairSpans,
+  parseIndex,
+  parseRun,
+  share,
+  signed,
+  topResults,
+} from "@/lib/evals";
 import { row, singleRun, twoStageRun } from "@/test/evalFixtures";
 
 const RUNS = path.resolve(import.meta.dirname, "../data/evals/runs");
@@ -22,6 +33,27 @@ describe("the committed export", () => {
     expect(() => parseIndex({ sets: [], runs: [] })).toThrow(/missing results/);
     const { items: _items, ...noItems } = singleRun;
     expect(() => parseRun(noItems)).toThrow(/missing items/);
+  });
+});
+
+describe("top results", () => {
+  const index = {
+    results: {
+      test: [
+        row("a", "haiku", { ledger_f1: 0.9, accuracy: 0.8 }),
+        row("b", "opus", { ledger_f1: 1, accuracy: 0.9 }),
+        row("c", "sonnet", { ledger_f1: 0.95, accuracy: 0.9 }),
+        row("d", "two-stage", { ledger_f1: 0.9, accuracy: 0.85 }),
+      ],
+    },
+  } as unknown as EvalIndex;
+
+  it("keeps the best three on the test set by ledger F1, label accuracy breaking ties", () => {
+    expect(topResults(index).map((r) => r.configuration)).toEqual(["opus", "sonnet", "two-stage"]);
+  });
+
+  it("is empty for a set with no runs", () => {
+    expect(topResults(index, "dev")).toEqual([]);
   });
 });
 

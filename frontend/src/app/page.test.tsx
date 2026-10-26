@@ -26,6 +26,15 @@ describe("the home page", () => {
     expect(screen.getByText(/who promised what, to whom, and by when/i)).toBeInTheDocument();
   });
 
+  it("shows the top three test results while asking for the password", async () => {
+    render(<Home />);
+
+    const table = await screen.findByRole("table", { name: /best configurations by ledger F1/i });
+    const rows = table.querySelectorAll("tbody tr");
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.length).toBeLessThanOrEqual(3);
+  });
+
   it("links to the evaluation results, which need no password", () => {
     render(<Home />);
 

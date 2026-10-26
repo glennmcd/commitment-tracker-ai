@@ -253,6 +253,13 @@ export function parseRun(data: unknown): EvalRun {
 
 // ---- Formatting -----------------------------------------------------------------------------------------------
 
+/** The best `count` configurations on a set by ledger F1, label accuracy breaking ties. */
+export function topResults(index: EvalIndex, set = "test", count = 3): RunRow[] {
+  return [...(index.results[set] ?? [])]
+    .sort((a, b) => b.ledger_f1 - a.ledger_f1 || b.accuracy - a.accuracy)
+    .slice(0, count);
+}
+
 export function score(value: number | null | undefined): string {
   return value === null || value === undefined ? "n/a" : value.toFixed(3);
 }
