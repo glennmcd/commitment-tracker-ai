@@ -1,0 +1,10 @@
+{
+  "type": "node",
+  "request": "launch",
+  "name": "Debug current test file",
+  "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+  "args": ["run", "${relativeFile}", "--no-file-parallelism"],
+  "autoAttachChildProcesses": true,
+  "smartStep": true,
+  "console": "integratedTerminal"
+}
