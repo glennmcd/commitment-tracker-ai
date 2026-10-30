@@ -12,15 +12,15 @@ export interface EvalRunStatus {
   report: EvalRun | null; // when done: the same shape as src/data/evals/runs/*.json
 }
 
-export async function startEvalRun(
-  client: ApiClient,
-  choice: { set: string; configuration: string; offline: boolean },
-): Promise<JobResult> {
-  try {
-    const { data, error, response } = await client.POST("/eval-runs", { body: choice });
-    if (data) return { ok: true, job: data };
-    return { ok: false, message: explain(codeOf(error), response.headers.get("retry-after")) };
-  } catch {
-    return { ok: false, message: NETWORK };
-  }
-}
+// export async function startEvalRun(
+//   client: ApiClient,
+//   choice: { set: string; configuration: string; offline: boolean },
+// ): Promise<JobResult> {
+//   try {
+//     const { data, error, response } = await client.POST("/eval-runs", { body: choice });
+//     if (data) return { ok: true, job: data };
+//     return { ok: false, message: explain(codeOf(error), response.headers.get("retry-after")) };
+//   } catch {
+//     return { ok: false, message: NETWORK };
+//   }
+// }
