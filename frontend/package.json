@@ -7,7 +7,7 @@
     "build": "next build",
     "gen:api": "openapi-typescript ../openapi.json -o src/api/schema.d.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "vitest": "vitest run",
     "e2e": "node e2e/run.mjs",
     "test:browser": "vitest"
   },

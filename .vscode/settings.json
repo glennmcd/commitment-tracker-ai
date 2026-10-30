@@ -1,0 +1,10 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/Scripts/python.exe",
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.cwd": "${workspaceFolder}/backend",
+  "python.testing.pytestArgs": ["tests"],
+  "vitest.rootConfig": "${workspaceFolder}/frontend/vitest.config.ts",
+  "python.analysis.exclude": ["**/.venv", "**/node_modules", "**/cdk.out", "**/build", "**/dist"],
+  "jestrunner.enableTestExplorer": true
+}

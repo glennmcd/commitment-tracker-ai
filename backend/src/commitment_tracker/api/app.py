@@ -5,19 +5,31 @@ Handlers are async so the app can run on Lambda behind an ASGI adapter later. Er
 transcript text, and validation errors drop the input values FastAPI would otherwise echo.
 """
 
+from datetime import date
 import logging
 import re
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from typing import Annotated, Any, Literal
+from pathlib import Path as plibPath
 
 import boto3
+from commitment_tracker.evaluation.sets import SETS_DIR
 from fastapi import Depends, FastAPI, Path, Request, Response
 from fastapi.concurrency import run_in_threadpool
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from commitment_tracker.evaluation.importer import (ImportReport,
+                                                    check_batch, 
+                                                    import_batch, 
+                                                    BatchError, 
+                                                    BatchExists,
+                                                    BatchDisabled,
+                                                    BatchInvalidImportOptions,
+                                                    BatchEmpty,
+                                                    BatchValidationError)
 from commitment_tracker.extractor.errors import (
     ExtractionError,
     ModelOutputInvalid,
@@ -117,6 +129,12 @@ class JobResponse(BaseModel):
     error_code: str | None = None
     latency_ms: Latency
 
+class ImportRequest(BaseModel): 
+    source:str # kept as `source` in import.json
+    content:str # the JSONL text
+    batch:str
+    provenance:str
+    generation_prompt: str | None = None   # null = the latest; ignored for hand-written
 
 class SampleSummary(BaseModel):
     id: str
@@ -197,6 +215,19 @@ JOB_ERRORS: dict[type[Exception], tuple[int, str, str]] = {
     FeedbackJobNotFound: (404, "job_not_found", "No job with that id. It may have expired."),
     JobNotFinished: (409, "job_not_finished", "The job has no results to give feedback on."),
     FeedbackSpanNotFound: (404, "span_not_found", "The job has no span with that index."),
+}
+IMPORT_RESPONSES: dict[int | str, dict[str, object]] = {
+    404: {"model": ErrorResponse, "description": "Imports are disabled"},
+    409: {"model": ErrorResponse, "description": "The batch already exists"},
+    422: {"model": ErrorResponse, "description": "Invalid request, or the import was refused"},
+}
+IMPORT_ERRORS: dict[type[Exception], tuple[int, str, str]] = {
+    BatchExists: (409, "batch_exists", "The batch already exists"),
+    BatchInvalidImportOptions: (422, "invalid_import_options", "The batch name or provenance breaks a rule"),
+    BatchEmpty: (422, "batch_empty", "The batch is empty"),
+    BatchValidationError: (422, "validation_error", "A field is missing or the content is over the size cap"),
+    BatchDisabled: (404, "imports_disabled", "Imports are disabled"),
+    # NothingToImport: (422, "nothing_to_import", "Invalid request, or the import was refused"),
 }
 FEEDBACK_RESPONSES: dict[int | str, dict[str, object]] = {
     404: {"model": ErrorResponse, "description": "The job or the span does not exist"},
@@ -324,6 +355,7 @@ def create_app(
     limiter: RateLimiter | None = None,
     spend: SpendCap | None = None,
     feedback: FeedbackService | None = None,
+    sets_dir: plibPath | None = None
 ) -> FastAPI:
     """With no extractor, the lifespan builds the Anthropic one, and the upload signer when an
     audio bucket is configured, from settings at startup."""
@@ -340,6 +372,7 @@ def create_app(
             app.state.limiter = limiter or build_limiter(active_settings)
             app.state.spend = spend_cap
             app.state.feedback = feedback or build_feedback_service(active_settings)
+            app.state.sets_dir = SETS_DIR if active_settings.eval_imports_enabled else None
         yield
 
     app = FastAPI(
@@ -356,7 +389,8 @@ def create_app(
     app.state.feedback = feedback
     if extractor is not None:
         app.state.extractor = extractor
-
+    app.state.sets_dir = sets_dir if settings and settings.eval_imports_enabled else None
+        
     @app.middleware("http")
     async def _log_source(
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
@@ -422,6 +456,26 @@ def create_app(
             JOB_ERRORS[cls] for cls in type(exc).__mro__ if cls in JOB_ERRORS
         )
         logger.info("job_rejected path=%s code=%s", request.url.path, code)
+        return _error(status, code, message)
+
+    @app.exception_handler(BatchDisabled)
+    @app.exception_handler(BatchExists)
+    @app.exception_handler(BatchInvalidImportOptions)
+    @app.exception_handler(BatchEmpty)
+    @app.exception_handler(BatchValidationError)
+    async def _batch_invalid(request: Request, exc: Exception) -> JSONResponse:
+        status, code, message = next(
+                    IMPORT_ERRORS[cls] for cls in type(exc).__mro__ if cls in IMPORT_ERRORS
+                )
+        logger.info("import_error path=%s code=%s", request.url.path, code)
+        return _error(status, code, message)
+
+    @app.exception_handler(BatchEmpty)
+    async def _batch_empty(request: Request, exc: BatchEmpty) -> JSONResponse:
+        status, code, message = IMPORT_ERRORS.get(
+            type(exc), (422, "batch_empty", "The batch is empty")
+        )
+        logger.info("batch_empty path=%s code=%s", request.url.path, code)
         return _error(status, code, message)
 
     @app.get("/health")
@@ -533,6 +587,57 @@ def create_app(
         clips = _jobs(request).samples().all()
         return [SampleSummary(id=c.id, title=c.title, duration_ms=c.duration_ms) for c in clips]
 
+    @app.post(
+        "/eval-imports/check",
+        response_model=ImportReport,
+        responses=IMPORT_RESPONSES)
+    async def check_import(body: ImportRequest, request: Request) -> ImportReport | JSONResponse:
+        sets_dir: str | None = getattr(request.app.state, "sets_dir", None)
+        if sets_dir is None:
+            return _error(404, "imports_disabled", "Imports are disabled")
+       
+        try:
+            report, _ = check_batch(
+                body.content.splitlines(),
+                body.source,
+                batch=body.batch,
+                provenance=body.provenance,
+                generation_prompt=body.generation_prompt,
+                root=plibPath(sets_dir),
+                today=date.today(),
+            )
+            return report
+        except BatchExists as e:
+            return _error(400, "batch_exists", str(e))
+        except BatchError as e:
+            
+            return _error(400, "batch_error", str(e))
+                
+    @app.post("/eval-imports",
+              status_code=201,
+              response_model=ImportReport,
+              responses=IMPORT_RESPONSES)
+    async def create_import(body: ImportRequest, request: Request) -> ImportReport | JSONResponse:
+        sets_dir: str | None = getattr(request.app.state, "sets_dir", None)
+        if sets_dir is None:
+            return _error(404, "imports_disabled", "Imports are disabled")
+               
+        try:
+            _, report = import_batch(
+                plibPath(body.source),
+                batch=body.batch,
+                provenance=body.provenance,
+                generation_prompt=body.generation_prompt,
+                root=plibPath(sets_dir),
+                today=date.today(),
+            )
+            return report
+        except BatchExists as e:
+            return _error(400, "batch_exists", str(e))
+        except BatchError as e:
+            return _error(400, "batch_error", str(e))
+    
+    
     return app
 
 

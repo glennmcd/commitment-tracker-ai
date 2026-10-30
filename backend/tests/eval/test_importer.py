@@ -5,19 +5,26 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from commitment_tracker.evaluation.dataset import EvalItem, jsonl_lines
 import pytest
+import logging
+
+
 
 from commitment_tracker.evaluation import cli
 from commitment_tracker.evaluation.importer import (
     BatchError,
+    ImportReport,
+    ImportResult,
     import_batch,
+    check_batch,
     latest_generation_prompt,
 )
 from commitment_tracker.evaluation.sets import load_set
 from tests.eval.test_set_loading import write_set
 
 TODAY = date(2026, 10, 25)
-
+logger = logging.getLogger(__name__)
 
 def draft(item_id: str, text: str = "I'll send it Friday.", **overrides: Any) -> dict[str, Any]:
     """A line as a generator writes it: no provenance, no review."""
@@ -46,8 +53,11 @@ def draft(item_id: str, text: str = "I'll send it Friday.", **overrides: Any) ->
     return data
 
 
+# this fixture sets up a root directory with a dev set containing one item 
+# and is passed into the test functions
 @pytest.fixture
 def root(tmp_path: Path) -> Path:
+    logger.debug("Setting up root directory at %s", tmp_path)
     sets = tmp_path / "sets"
     write_set(
         sets,
@@ -78,7 +88,7 @@ def write_source(tmp_path: Path, *lines: str) -> Path:
     return path
 
 
-def run(source: Path, root: Path, **overrides: Any) -> Any:
+def standard_options(root: Path, **overrides: Any) -> dict[str, Any]:
     options: dict[str, Any] = {
         "batch": "gem01",
         "provenance": "gemini-3-pro",
@@ -87,8 +97,23 @@ def run(source: Path, root: Path, **overrides: Any) -> Any:
         "today": TODAY,
     }
     options.update(overrides)
-    return import_batch(source, **options)
+    return options
 
+def run_check(jsonl_lines: list[str], source_name: str, root: Path, **overrides: Any) -> tuple[ImportReport, list[tuple[EvalItem, str]]]:
+    options = standard_options(root, **overrides)
+    return check_batch(jsonl_lines,source_name=source_name, **options)
+
+def run(source: Path, root: Path, **overrides: Any) -> ImportResult:
+    options = standard_options(root, **overrides)
+    import_result,_ = import_batch(source, **options)
+    return import_result
+
+# splitting out check_batch from import_batch
+# the tests use a common run function to call import_batch with consistent options
+def test_check_batch_returns_import_report(tmp_path: Path, root: Path) -> None:
+    source = write_source(tmp_path, "```jsonl", "", json.dumps(draft("gem01-01")), "```")
+    report, accepted = run_check(jsonl_lines(source), source.name, root)
+    assert report.imported == 1
 
 def test_valid_lines_land_in_staging_unreviewed(tmp_path: Path, root: Path) -> None:
     source = write_source(

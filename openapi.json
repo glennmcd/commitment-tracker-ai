@@ -408,6 +408,122 @@
           }
         }
       }
+    },
+    "/eval-imports/check": {
+      "post": {
+        "summary": "Check Import",
+        "operationId": "check_import_eval_imports_check_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportReport"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Imports are disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The batch already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request, or the import was refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/eval-imports": {
+      "post": {
+        "summary": "Create Import",
+        "operationId": "create_import_eval_imports_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportReport"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Imports are disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The batch already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request, or the import was refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -471,6 +587,50 @@
           "metadata"
         ],
         "title": "AnalyzeResponse"
+      },
+      "DateDisagreement": {
+        "properties": {
+          "item": {
+            "type": "string",
+            "title": "Item"
+          },
+          "span": {
+            "type": "integer",
+            "title": "Span"
+          },
+          "generator": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generator"
+          },
+          "resolver": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolver"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item",
+          "span",
+          "generator",
+          "resolver"
+        ],
+        "title": "DateDisagreement"
       },
       "Due": {
         "properties": {
@@ -673,6 +833,115 @@
           "prompt_version"
         ],
         "title": "HealthResponse"
+      },
+      "ImportReport": {
+        "properties": {
+          "batch": {
+            "type": "string",
+            "title": "Batch"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "provenance": {
+            "type": "string",
+            "title": "Provenance"
+          },
+          "generation_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generation Prompt"
+          },
+          "imported_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Imported On"
+          },
+          "imported": {
+            "type": "integer",
+            "title": "Imported"
+          },
+          "rejections": {
+            "items": {
+              "$ref": "#/components/schemas/Rejection"
+            },
+            "type": "array",
+            "title": "Rejections"
+          },
+          "date_disagreements": {
+            "items": {
+              "$ref": "#/components/schemas/DateDisagreement"
+            },
+            "type": "array",
+            "title": "Date Disagreements"
+          },
+          "near_duplicates": {
+            "items": {
+              "$ref": "#/components/schemas/NearDuplicate"
+            },
+            "type": "array",
+            "title": "Near Duplicates"
+          }
+        },
+        "type": "object",
+        "required": [
+          "batch",
+          "source",
+          "provenance",
+          "generation_prompt",
+          "imported_on",
+          "imported",
+          "rejections",
+          "date_disagreements",
+          "near_duplicates"
+        ],
+        "title": "ImportReport"
+      },
+      "ImportRequest": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "batch": {
+            "type": "string",
+            "title": "Batch"
+          },
+          "provenance": {
+            "type": "string",
+            "title": "Provenance"
+          },
+          "generation_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generation Prompt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "content",
+          "batch",
+          "provenance"
+        ],
+        "title": "ImportRequest"
       },
       "JobRequest": {
         "properties": {
@@ -959,6 +1228,29 @@
         ],
         "title": "Metadata"
       },
+      "NearDuplicate": {
+        "properties": {
+          "item": {
+            "type": "string",
+            "title": "Item"
+          },
+          "of": {
+            "type": "string",
+            "title": "Of"
+          },
+          "ratio": {
+            "type": "number",
+            "title": "Ratio"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item",
+          "of",
+          "ratio"
+        ],
+        "title": "NearDuplicate"
+      },
       "Precision": {
         "type": "string",
         "enum": [
@@ -969,6 +1261,24 @@
           "none"
         ],
         "title": "Precision"
+      },
+      "Rejection": {
+        "properties": {
+          "line": {
+            "type": "integer",
+            "title": "Line"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "line",
+          "reason"
+        ],
+        "title": "Rejection"
       },
       "SampleSummary": {
         "properties": {
