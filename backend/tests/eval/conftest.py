@@ -1,10 +1,10 @@
 """Fixtures shared by the evaluation tests."""
 
-import json
-from datetime import date
 import logging
+from datetime import date
 from pathlib import Path
 from typing import Any
+
 import pytest
 
 from commitment_tracker.evaluation import cli
@@ -12,11 +12,12 @@ from commitment_tracker.extractor.extractor import Extractor
 from commitment_tracker.extractor.prompt import load_prompt
 from commitment_tracker.settings import Settings
 from tests.eval.test_runner import all_none
-from tests.fakes import FunctionAdapter
 from tests.eval.test_set_loading import write_set
+from tests.fakes import FunctionAdapter
 
 TODAY = date(2026, 10, 25)
 logger = logging.getLogger(__name__)
+
 
 def draft(item_id: str, text: str = "I'll send it Friday.", **overrides: Any) -> dict[str, Any]:
     """A line as a generator writes it: no provenance, no review."""
@@ -45,7 +46,7 @@ def draft(item_id: str, text: str = "I'll send it Friday.", **overrides: Any) ->
     return data
 
 
-# this fixture sets up a root directory with a dev set containing one item 
+# this fixture sets up a root directory with a dev set containing one item
 # and is passed into the test functions
 @pytest.fixture
 def root(tmp_path: Path) -> Path:

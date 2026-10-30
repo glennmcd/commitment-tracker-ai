@@ -315,6 +315,8 @@ export interface components {
             provenance: string;
             /** Generation Prompt */
             generation_prompt?: string | null;
+            /** Today */
+            today: string;
         };
         /**
          * JobRequest

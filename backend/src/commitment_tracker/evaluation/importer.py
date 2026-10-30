@@ -51,20 +51,26 @@ HAND_WRITTEN = "hand-written"
 class BatchError(ValueError):
     pass
 
+
 class BatchDisabled(BatchError):
     pass
+
 
 class BatchExists(BatchError):
     pass
 
+
 class BatchInvalidImportOptions(BatchError):
     pass
+
 
 class BatchEmpty(BatchError):
     pass
 
+
 class BatchValidationError(BatchError):
     pass
+
 
 class Rejection(BaseModel):
     line: int
@@ -155,7 +161,9 @@ def _date_checks(item: EvalItem) -> list[DateDisagreement]:
 
 def _check_options(batch: str, provenance: str, root: Path) -> Path:
     if not BATCH.fullmatch(batch):
-        raise BatchValidationError(f"batch must be lower-case letters, digits and dashes, not {batch!r}")
+        raise BatchValidationError(
+            f"batch must be lower-case letters, digits and dashes, not {batch!r}"
+        )
     if not re.fullmatch(PROVENANCE, provenance) or provenance == "spec":
         raise BatchValidationError(
             f"provenance must be hand-written or <family>-<model>, not {provenance!r}"
@@ -166,6 +174,7 @@ def _check_options(batch: str, provenance: str, root: Path) -> Path:
         raise BatchExists(f"batch {batch} already exists at {directory}")
     return directory
 
+
 def check_batch(
     jsonl_lines: list[str],
     source_name: str,
@@ -174,10 +183,11 @@ def check_batch(
     provenance: str,
     generation_prompt: str | None,
     root: Path,
-    today: date,) -> tuple[ImportReport, list[tuple[EvalItem, str]]]:
-    
+    today: date,
+) -> tuple[ImportReport, list[tuple[EvalItem, str]]]:
+
     _check_options(batch, provenance, root)
-        
+
     prompt = None if provenance == HAND_WRITTEN else generation_prompt
     transcripts, ids = _existing(root)
 
@@ -223,20 +233,20 @@ def check_batch(
 
     if not accepted:  # nothing is written; the caller reports the rejections
         return ImportReport(
-        batch=batch,
-        source=source_name,
-        provenance=provenance,
-        generation_prompt=prompt,
-        imported_on=today,
-        imported=0,
-        rejections=rejections,
-        date_disagreements=[],
-        near_duplicates=near,
-    ),accepted
+            batch=batch,
+            source=source_name,
+            provenance=provenance,
+            generation_prompt=prompt,
+            imported_on=today,
+            imported=0,
+            rejections=rejections,
+            date_disagreements=[],
+            near_duplicates=near,
+        ), accepted
 
     items = [item for item, _ in accepted]
     disagreements = [d for item in items for d in _date_checks(item)]
-    
+
     report = ImportReport(
         batch=batch,
         source=source_name,
@@ -250,6 +260,7 @@ def check_batch(
     )
     return report, accepted
 
+
 def import_batch(
     source: Path,
     *,
@@ -261,7 +272,7 @@ def import_batch(
 ) -> tuple[ImportResult, ImportReport]:
     directory = _check_options(batch, provenance, root)
     prompt = None if provenance == HAND_WRITTEN else generation_prompt
-    report:ImportReport
+    report: ImportReport
     accepted: list[tuple[EvalItem, str]]
     report, accepted = check_batch(
         jsonl_lines(source),
@@ -273,7 +284,9 @@ def import_batch(
         today=today,
     )
     if not accepted:
-        return ImportResult(directory, [], report.rejections, report.date_disagreements, report.near_duplicates), report
+        return ImportResult(
+            directory, [], report.rejections, report.date_disagreements, report.near_duplicates
+        ), report
 
     items = [item for item, _ in accepted]
     disagreements = [d for item in items for d in _date_checks(item)]
@@ -291,7 +304,7 @@ def import_batch(
                 call_date=call_dates.pop() if len(call_dates) == 1 else None,
                 imported=today,
                 items=len(items),
-            )   
+            )
         ],
     )
     directory.mkdir(parents=True)
@@ -304,7 +317,7 @@ def import_batch(
         rejections=report.rejections,
         date_disagreements=report.date_disagreements,
         near_duplicates=report.near_duplicates,
-    ),report
+    ), report
 
 
 def item_line(item: EvalItem) -> str:

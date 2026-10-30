@@ -263,7 +263,7 @@ def _import(argv: list[str]) -> int:
     parser.add_argument("--sets-dir", type=Path, default=SETS_DIR)
     args = parser.parse_args(argv)
     try:
-        result,_ = import_batch(
+        result, _ = import_batch(
             args.file,
             batch=args.batch,
             provenance=args.provenance,
