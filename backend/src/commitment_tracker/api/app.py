@@ -632,6 +632,8 @@ def create_app(
             root=plibPath(sets_dir),
             today=date.fromisoformat(body.today),
         )
+        if report.imported == 0:
+            raise BatchEmpty()
         return report
 
     return app

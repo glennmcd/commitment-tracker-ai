@@ -6,8 +6,8 @@ import logging
 from typing import Any
 from pathlib import Path 
 
-from commitment_tracker.evaluation.importer import ImportReport, _check_options
-from commitment_tracker.evaluation.sets import SETS_DIR, load_set
+from commitment_tracker.evaluation.importer import ImportReport
+from commitment_tracker.evaluation.sets import  STAGING, load_set
 import pytest
 from fastapi.testclient import TestClient
 
@@ -18,7 +18,6 @@ from commitment_tracker.jobs.memory import MemoryJobStore
 # from commitment_tracker.jobs.record import JobStatus, JobUpdate
 from commitment_tracker.jobs.samples import SampleCatalog, SampleClip
 from commitment_tracker.jobs.service import JobService
-from commitment_tracker.schemas import Turn
 from commitment_tracker.transcription.fake import FakeTranscriber
 
 from commitment_tracker.settings import Settings
@@ -76,7 +75,7 @@ def test_eval_imports_check_enabled(tmp_path: Path, root: Path) -> None:
                                             generation_prompt=options["generation_prompt"],
                                             today=TODAY.isoformat())
     sets_dir = options["root"]
-    directory = _check_options(request.batch,request.provenance,sets_dir)
+    directory = root/STAGING/options["batch"]
     rig = Rig(eval_imports_enabled=True, sets_dir=sets_dir)
     result = rig.client.post("/eval-imports/check", json=request.model_dump())
     assert result.status_code == 200
@@ -123,7 +122,7 @@ def test_eval_imports_import_enabled(tmp_path: Path, root: Path) -> None:
                                            generation_prompt=options["generation_prompt"],
                                            today=TODAY.isoformat())
     sets_dir = options["root"]
-    directory = _check_options(request.batch, request.provenance, sets_dir)
+    directory = root/STAGING/options["batch"]
     rig = Rig(eval_imports_enabled=True, sets_dir=sets_dir)
     result = rig.client.post("/eval-imports", json=request.model_dump())
     ir: ImportReport = ImportReport(**result.json())
@@ -161,3 +160,47 @@ def test_eval_imports_bad_batch_name(tmp_path: Path, root: Path) -> None:
     result = rig.client.post("/eval-imports", json=request.model_dump())
     assert result.status_code == 422
 
+def test_eval_imports_batch_exists(tmp_path: Path, root: Path) -> None:
+    source_data = write_source(tmp_path, "```jsonl", "", json.dumps(draft("gem01-01")), "```")
+    content_data = source_data.read_text(encoding="utf-8")
+    ov = {"generation_prompt": "prompt-v1"}
+    options = standard_options(root,**ov)
+    request: ImportRequest = ImportRequest(source=str(source_data),
+                                           content=content_data,
+                                           batch=options["batch"],
+                                           provenance=options["provenance"],
+                                           generation_prompt=options["generation_prompt"],
+                                           today=TODAY.isoformat())
+    sets_dir = options["root"]
+    rig = Rig(eval_imports_enabled=True, sets_dir=sets_dir)
+    # First import should succeed
+    result = rig.client.post("/eval-imports", json=request.model_dump())
+    assert result.status_code == 201
+    # Second import with the same batch should fail
+    result = rig.client.post("/eval-imports", json=request.model_dump())
+    assert result.status_code == 409
+    
+def test_eval_imports_nothing_valid(tmp_path: Path, root: Path) -> None:
+    source_data = write_source(tmp_path, "```jsonl", "", "invalid json", "```")
+    content_data = source_data.read_text(encoding="utf-8")
+    ov = {"generation_prompt": "prompt-v1"}
+    options = standard_options(root,**ov)
+    request: ImportRequest = ImportRequest(source=str(source_data),
+                                           content=content_data,
+                                           batch=options["batch"],
+                                           provenance=options["provenance"],
+                                           generation_prompt=options["generation_prompt"],
+                                           today=TODAY.isoformat())
+    sets_dir = options["root"]
+    directory = root/STAGING/options["batch"]
+    rig = Rig(eval_imports_enabled=True, sets_dir=sets_dir)
+    result = rig.client.post("/eval-imports/check", json=request.model_dump())
+    ir: ImportReport = ImportReport(**result.json())
+    assert result.status_code == 200
+    assert ir.imported == 0
+
+    result = rig.client.post("/eval-imports", json=request.model_dump())
+    assert result.status_code == 422
+    #assert "nothing_to_import" in result.text
+    assert directory.exists() == False
+    
