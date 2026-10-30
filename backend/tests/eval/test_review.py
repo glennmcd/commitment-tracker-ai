@@ -14,7 +14,7 @@ from commitment_tracker.evaluation.importer import import_batch
 from commitment_tracker.evaluation.review import ReviewIO, load_reviews, review_batch
 from commitment_tracker.evaluation.sets import load_set
 from commitment_tracker.schemas import Label
-from tests.eval.test_importer import draft
+from tests.eval.conftest import draft
 from tests.eval.test_set_loading import write_set
 
 NOTE = "generator note: the reply binds the seller"

@@ -52,6 +52,26 @@ class BatchError(ValueError):
     pass
 
 
+class BatchDisabled(BatchError):
+    pass
+
+
+class BatchExists(BatchError):
+    pass
+
+
+class BatchInvalidImportOptions(BatchError):
+    pass
+
+
+class BatchEmpty(BatchError):
+    pass
+
+
+class BatchValidationError(BatchError):
+    pass
+
+
 class Rejection(BaseModel):
     line: int
     reason: str
@@ -141,35 +161,40 @@ def _date_checks(item: EvalItem) -> list[DateDisagreement]:
 
 def _check_options(batch: str, provenance: str, root: Path) -> Path:
     if not BATCH.fullmatch(batch):
-        raise BatchError(f"batch must be lower-case letters, digits and dashes, not {batch!r}")
+        raise BatchValidationError(
+            f"batch must be lower-case letters, digits and dashes, not {batch!r}"
+        )
     if not re.fullmatch(PROVENANCE, provenance) or provenance == "spec":
-        raise BatchError(
+        raise BatchValidationError(
             f"provenance must be hand-written or <family>-<model>, not {provenance!r}"
             + (" (spec is reserved for the spec's seed items)" if provenance == "spec" else "")
         )
     directory = set_dir(f"{STAGING}/{batch}", root)
     if directory.exists():
-        raise BatchError(f"batch {batch} already exists at {directory}")
+        raise BatchExists(f"batch {batch} already exists at {directory}")
     return directory
 
 
-def import_batch(
-    source: Path,
+def check_batch(
+    jsonl_lines: list[str],
+    source_name: str,
     *,
     batch: str,
     provenance: str,
     generation_prompt: str | None,
-    root: Path = SETS_DIR,
+    root: Path,
     today: date,
-) -> ImportResult:
-    directory = _check_options(batch, provenance, root)
+) -> tuple[ImportReport, list[tuple[EvalItem, str]]]:
+
+    _check_options(batch, provenance, root)
+
     prompt = None if provenance == HAND_WRITTEN else generation_prompt
     transcripts, ids = _existing(root)
 
     accepted: list[tuple[EvalItem, str]] = []  # item and its normalised transcript
     rejections: list[Rejection] = []
     near: list[NearDuplicate] = []
-    for number, raw in enumerate(jsonl_lines(source), start=1):
+    for number, raw in enumerate(jsonl_lines, start=1):
         line = raw.strip()
         if not line or line.startswith("```"):
             continue
@@ -207,10 +232,64 @@ def import_batch(
         accepted.append((item, key))
 
     if not accepted:  # nothing is written; the caller reports the rejections
-        return ImportResult(directory, [], rejections, [], near)
+        return ImportReport(
+            batch=batch,
+            source=source_name,
+            provenance=provenance,
+            generation_prompt=prompt,
+            imported_on=today,
+            imported=0,
+            rejections=rejections,
+            date_disagreements=[],
+            near_duplicates=near,
+        ), accepted
 
     items = [item for item, _ in accepted]
     disagreements = [d for item in items for d in _date_checks(item)]
+
+    report = ImportReport(
+        batch=batch,
+        source=source_name,
+        provenance=provenance,
+        generation_prompt=prompt,
+        imported_on=today,
+        imported=len(items),
+        rejections=rejections,
+        date_disagreements=disagreements,
+        near_duplicates=near,
+    )
+    return report, accepted
+
+
+def import_batch(
+    source: Path,
+    *,
+    batch: str,
+    provenance: str,
+    generation_prompt: str | None,
+    root: Path = SETS_DIR,
+    today: date,
+) -> tuple[ImportResult, ImportReport]:
+    directory = _check_options(batch, provenance, root)
+    prompt = None if provenance == HAND_WRITTEN else generation_prompt
+    report: ImportReport
+    accepted: list[tuple[EvalItem, str]]
+    report, accepted = check_batch(
+        jsonl_lines(source),
+        source.name,
+        batch=batch,
+        provenance=provenance,
+        generation_prompt=prompt,
+        root=root,
+        today=today,
+    )
+    if not accepted:
+        return ImportResult(
+            directory, [], report.rejections, report.date_disagreements, report.near_duplicates
+        ), report
+
+    items = [item for item, _ in accepted]
+    [d for item in items for d in _date_checks(item)]
     call_dates = {item.call_date for item in items}
     manifest = SetManifest(
         name=f"{STAGING}/{batch}",
@@ -228,17 +307,6 @@ def import_batch(
             )
         ],
     )
-    report = ImportReport(
-        batch=batch,
-        source=source.name,
-        provenance=provenance,
-        generation_prompt=prompt,
-        imported_on=today,
-        imported=len(items),
-        rejections=rejections,
-        date_disagreements=disagreements,
-        near_duplicates=near,
-    )
     directory.mkdir(parents=True)
     write_items(directory / "items.jsonl", items)
     write_json(directory / "set.json", manifest)
@@ -246,10 +314,10 @@ def import_batch(
     return ImportResult(
         directory=directory,
         imported=[item.id for item in items],
-        rejections=rejections,
-        date_disagreements=disagreements,
-        near_duplicates=near,
-    )
+        rejections=report.rejections,
+        date_disagreements=report.date_disagreements,
+        near_duplicates=report.near_duplicates,
+    ), report
 
 
 def item_line(item: EvalItem) -> str:

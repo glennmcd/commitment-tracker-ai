@@ -48,7 +48,6 @@ export function SamplePicker({ samples, problem, selected, onSelect, disabled = 
                 <strong>{sample.title}</strong> <span className="muted">· {length(sample.duration_ms)}</span>
               </span>
             </label>
-            {/* biome-ignore lint/a11y/useMediaCaption: synthetic speech with no captions; the analysis shows the words */}
             <audio controls preload="none" src={clipUrl(sample.id)} aria-label={`Play ${sample.title}`} />
           </li>
         ))}

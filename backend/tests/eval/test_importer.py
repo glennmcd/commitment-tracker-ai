@@ -1,6 +1,7 @@
 """`uv run eval import`: drafted items into a staging batch, with every rejection and date check."""
 
 import json
+import logging
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -8,86 +9,41 @@ from typing import Any
 import pytest
 
 from commitment_tracker.evaluation import cli
+from commitment_tracker.evaluation.dataset import EvalItem, jsonl_lines
 from commitment_tracker.evaluation.importer import (
     BatchError,
+    ImportReport,
+    ImportResult,
+    check_batch,
     import_batch,
     latest_generation_prompt,
 )
 from commitment_tracker.evaluation.sets import load_set
-from tests.eval.test_set_loading import write_set
 
-TODAY = date(2026, 10, 25)
+from .conftest import TODAY, draft, standard_options, write_source
 
-
-def draft(item_id: str, text: str = "I'll send it Friday.", **overrides: Any) -> dict[str, Any]:
-    """A line as a generator writes it: no provenance, no review."""
-    data: dict[str, Any] = {
-        "id": item_id,
-        "call_date": "2026-10-21",
-        "turns": [{"speaker": "seller", "text": text}],
-        "tags": [],
-        "expected": [
-            {
-                "turn_index": 0,
-                "label": "COMMITMENT",
-                "quote": text,
-                "owner": "seller",
-                "recipient": "buyer",
-                "action_keywords": ["send"],
-                "due_raw": "Friday",
-                "due_resolved": "2026-10-23",
-                "precision": "day",
-                "condition": None,
-            }
-        ],
-        "note": None,
-    }
-    data.update(overrides)
-    return data
+logger = logging.getLogger(__name__)
 
 
-@pytest.fixture
-def root(tmp_path: Path) -> Path:
-    sets = tmp_path / "sets"
-    write_set(
-        sets,
-        "dev",
-        [
-            {
-                **draft("d-01", "Our SLA is four hours for every priority one ticket."),
-                "expected": [
-                    {
-                        "turn_index": 0,
-                        "label": "NONE",
-                        "quote": "Our SLA is four hours for every priority one ticket.",
-                    }
-                ],
-                "provenance": "spec",
-                "review": "accepted",
-            }
-        ],
-        role="dev",
-        gated=False,
-    )
-    return sets
+def run_check(
+    jsonl_lines: list[str], source_name: str, root: Path, **overrides: Any
+) -> tuple[ImportReport, list[tuple[EvalItem, str]]]:
+    options = standard_options(root, **overrides)
+    return check_batch(jsonl_lines, source_name=source_name, **options)
 
 
-def write_source(tmp_path: Path, *lines: str) -> Path:
-    path = tmp_path / "gemini.jsonl"
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    return path
+def run(source: Path, root: Path, **overrides: Any) -> ImportResult:
+    options = standard_options(root, **overrides)
+    import_result, _ = import_batch(source, **options)
+    return import_result
 
 
-def run(source: Path, root: Path, **overrides: Any) -> Any:
-    options: dict[str, Any] = {
-        "batch": "gem01",
-        "provenance": "gemini-3-pro",
-        "generation_prompt": "prompt-v1",
-        "root": root,
-        "today": TODAY,
-    }
-    options.update(overrides)
-    return import_batch(source, **options)
+# splitting out check_batch from import_batch
+# the tests use a common run function to call import_batch with consistent options
+def test_check_batch_returns_import_report(tmp_path: Path, root: Path) -> None:
+    source = write_source(tmp_path, "```jsonl", "", json.dumps(draft("gem01-01")), "```")
+    report, accepted = run_check(jsonl_lines(source), source.name, root)
+    assert report.imported == 1
 
 
 def test_valid_lines_land_in_staging_unreviewed(tmp_path: Path, root: Path) -> None:

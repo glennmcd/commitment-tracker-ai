@@ -123,6 +123,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/eval-imports/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check Import */
+        post: operations["check_import_eval_imports_check_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/eval-imports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Import */
+        post: operations["create_import_eval_imports_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -148,6 +182,17 @@ export interface components {
             /** Spans */
             spans: components["schemas"]["Span"][];
             metadata: components["schemas"]["Metadata"];
+        };
+        /** DateDisagreement */
+        DateDisagreement: {
+            /** Item */
+            item: string;
+            /** Span */
+            span: number;
+            /** Generator */
+            generator: string | null;
+            /** Resolver */
+            resolver: string | null;
         };
         /** Due */
         Due: {
@@ -233,6 +278,45 @@ export interface components {
             model: string;
             /** Prompt Version */
             prompt_version: string;
+        };
+        /** ImportReport */
+        ImportReport: {
+            /** Batch */
+            batch: string;
+            /** Source */
+            source: string;
+            /** Provenance */
+            provenance: string;
+            /** Generation Prompt */
+            generation_prompt: string | null;
+            /**
+             * Imported On
+             * Format: date
+             */
+            imported_on: string;
+            /** Imported */
+            imported: number;
+            /** Rejections */
+            rejections: components["schemas"]["Rejection"][];
+            /** Date Disagreements */
+            date_disagreements: components["schemas"]["DateDisagreement"][];
+            /** Near Duplicates */
+            near_duplicates: components["schemas"]["NearDuplicate"][];
+        };
+        /** ImportRequest */
+        ImportRequest: {
+            /** Source */
+            source: string;
+            /** Content */
+            content: string;
+            /** Batch */
+            batch: string;
+            /** Provenance */
+            provenance: string;
+            /** Generation Prompt */
+            generation_prompt?: string | null;
+            /** Today */
+            today: string;
         };
         /**
          * JobRequest
@@ -336,11 +420,27 @@ export interface components {
              */
             dropped_quotes: number;
         };
+        /** NearDuplicate */
+        NearDuplicate: {
+            /** Item */
+            item: string;
+            /** Of */
+            of: string;
+            /** Ratio */
+            ratio: number;
+        };
         /**
          * Precision
          * @enum {string}
          */
         Precision: "day" | "week" | "event" | "vague" | "none";
+        /** Rejection */
+        Rejection: {
+            /** Line */
+            line: number;
+            /** Reason */
+            reason: string;
+        };
         /** SampleSummary */
         SampleSummary: {
             /** Id */
@@ -831,6 +931,108 @@ export interface operations {
             };
             /** @description Jobs are not configured, or the day's spending cap is reached */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    check_import_eval_imports_check_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportReport"];
+                };
+            };
+            /** @description Imports are disabled */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The batch already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Invalid request, or the import was refused */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    create_import_eval_imports_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportReport"];
+                };
+            };
+            /** @description Imports are disabled */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The batch already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Invalid request, or the import was refused */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -49,3 +49,5 @@ class Settings(BaseSettings):
     worker_function_name: str | None = Field(default=None, min_length=1)
     # The private bucket of evaluation clips (stack output EvalAudioBucketName); `eval-audio` only.
     eval_audio_bucket: str | None = Field(default=None, min_length=1)
+    # Only import sets when running locally
+    eval_imports_enabled: bool = Field(default=False)

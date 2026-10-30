@@ -98,7 +98,7 @@ jobs:
       # Biome lints and formats the frontend and infra together.
       - run: bunx biome ci .
       - run: bun run --cwd frontend typecheck
-      - run: bun run --cwd frontend test
+      - run: bun run --cwd frontend vitest
       # The repository's own tooling, such as the format-on-edit command.
       - run: bun test scripts
       # The typed client is generated from openapi.json; a stale one fails here.

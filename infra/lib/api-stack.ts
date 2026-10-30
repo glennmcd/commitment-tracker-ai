@@ -54,6 +54,8 @@ const API_ROUTES: readonly (readonly [HttpMethod, string])[] = [
   [HttpMethod.GET, "/jobs/{job_id}"],
   [HttpMethod.POST, "/feedback"],
   [HttpMethod.GET, "/samples"],
+  [HttpMethod.POST, "/eval-imports"],
+  [HttpMethod.POST, "/eval-imports/check"],
 ];
 
 /** The site and local development: the only origins the API and the upload bucket accept from a browser. */

@@ -35,7 +35,6 @@ export function Transcript({ turns, spans }: { turns: Turn[]; spans: Span[] }) {
           const own = spans.filter((span) => span.turn_index === index);
           return (
             // A finished transcript never reorders, so the position identifies a turn.
-            // biome-ignore lint/suspicious/noArrayIndexKey: fixed list, see above
             <li key={index}>
               <span className="speaker">
                 {turn.speaker}
