@@ -79,7 +79,7 @@ def test_frontend_lints_types_tests_and_checks_the_client() -> None:
         "bun install --frozen-lockfile",
         "bunx biome ci .",
         "bun run --cwd frontend typecheck",
-        "bun run --cwd frontend test",
+        "bun run --cwd frontend vitest",
         "bun test scripts",
         "bun run --cwd frontend gen:api",
         "git diff --exit-code",
