@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.11.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.10.0...v0.11.0) (2026-10-30)
+
+
+### Features
+
+* **api:** add 'today' field to ImportRequest and update related logic ([c44d384](https://github.com/glennmcd/commitment-tracker-ai/commit/c44d3842b9593c6a3ea9e09b30b0a388b644a994))
+* **eval:** start eval web ui tdd ([#27](https://github.com/glennmcd/commitment-tracker-ai/issues/27)) ([c44d384](https://github.com/glennmcd/commitment-tracker-ai/commit/c44d3842b9593c6a3ea9e09b30b0a388b644a994))
+* **frontend:** enhance landing page with top results preview ([#24](https://github.com/glennmcd/commitment-tracker-ai/issues/24)) ([ced2b5d](https://github.com/glennmcd/commitment-tracker-ai/commit/ced2b5da878e2303de7f0b8e307abe54f95db449))
+
+
+### Bug Fixes
+
+* adjust TypeScript imports for development environment ([ced2b5d](https://github.com/glennmcd/commitment-tracker-ai/commit/ced2b5da878e2303de7f0b8e307abe54f95db449))
+* **infra:** restore monthly budget and concurrency ([#26](https://github.com/glennmcd/commitment-tracker-ai/issues/26)) ([ca825cb](https://github.com/glennmcd/commitment-tracker-ai/commit/ca825cb0231d0811aa526576f1a05ea0bcbf80ff))
+
+
+### Documentation
+
+* add current progress state for evaluation ([ca825cb](https://github.com/glennmcd/commitment-tracker-ai/commit/ca825cb0231d0811aa526576f1a05ea0bcbf80ff))
+* add current progress state for evaluation ([ced2b5d](https://github.com/glennmcd/commitment-tracker-ai/commit/ced2b5da878e2303de7f0b8e307abe54f95db449))
+
 ## [0.10.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.9.0...v0.10.0) (2026-10-26)
 
 
