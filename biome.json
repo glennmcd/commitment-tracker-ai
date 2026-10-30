@@ -17,7 +17,8 @@
       "!**/cdk.out",
       "!**/dist",
       "!**/node_modules",
-      "!frontend/.vitest"
+      "!frontend/.vitest",
+      "!frontend/vitest.browser.config.ts"
     ]
   },
   "formatter": { "enabled": true, "indentStyle": "space", "indentWidth": 2, "lineWidth": 120 },
