@@ -289,7 +289,7 @@ def import_batch(
         ), report
 
     items = [item for item, _ in accepted]
-    disagreements = [d for item in items for d in _date_checks(item)]
+    [d for item in items for d in _date_checks(item)]
     call_dates = {item.call_date for item in items}
     manifest = SetManifest(
         name=f"{STAGING}/{batch}",

@@ -20,7 +20,7 @@ from commitment_tracker.settings import Settings
 from commitment_tracker.transcription.fake import FakeTranscriber
 from tests.fakes import FakeAdapter, FakeAudioStore, FakeDispatcher
 
-from .eval.conftest import TODAY, draft, standard_options, write_source
+from .eval.conftest import TODAY, draft, root, standard_options, write_source  # ruff: ignore[F401]
 
 NOW = 1_761_000_000.0
 SAMPLE = SampleClip(id="invoice", title="Resending an invoice", duration_ms=41_500, sha256="b" * 64)
@@ -73,7 +73,7 @@ def test_eval_imports_check_disabled() -> None:
     assert result.status_code == 404
 
 
-def test_eval_imports_check_enabled(tmp_path: Path, root: Path) -> None:
+def test_eval_imports_check_enabled(tmp_path: Path, root: Path) -> None:  # ruff: ignore[F811]
     source_data = write_source(tmp_path, "```jsonl", "", json.dumps(draft("gem01-01")), "```")
     content_data = source_data.read_text(encoding="utf-8")
     ov = {"generation_prompt": "prompt-v1"}
@@ -91,7 +91,7 @@ def test_eval_imports_check_enabled(tmp_path: Path, root: Path) -> None:
     rig = Rig(eval_imports_enabled=True, sets_dir=sets_dir)
     result = rig.client.post("/eval-imports/check", json=request.model_dump())
     assert result.status_code == 200
-    assert directory.exists() == False
+    assert not directory.exists()
 
 
 def test_eval_imports_batch_disabled() -> None:
@@ -108,7 +108,7 @@ def test_eval_imports_batch_disabled() -> None:
     assert result.status_code == 404
 
 
-def test_eval_imports_import_enabled(tmp_path: Path, root: Path) -> None:
+def test_eval_imports_import_enabled(tmp_path: Path, root: Path) -> None:  # ruff: ignore[F811]
     source_data = write_source(
         tmp_path,
         json.dumps(draft("gem01-01")),
@@ -146,7 +146,7 @@ def test_eval_imports_import_enabled(tmp_path: Path, root: Path) -> None:
     ir: ImportReport = ImportReport(**result.json())
 
     assert result.status_code == 201
-    assert directory.exists() == True
+    assert directory.exists()
     assert ir.imported == 2
     assert ir.rejections == []
     staged = load_set("staging/gem01", root)
@@ -162,7 +162,7 @@ def test_eval_imports_import_enabled(tmp_path: Path, root: Path) -> None:
     assert report["imported"] == 2
 
 
-def test_eval_imports_bad_batch_name(tmp_path: Path, root: Path) -> None:
+def test_eval_imports_bad_batch_name(tmp_path: Path, root: Path) -> None:  # ruff: ignore[F811]
     source_data = write_source(tmp_path, "```jsonl", "", json.dumps(draft("gem01-01")), "```")
     content_data = source_data.read_text(encoding="utf-8")
     ov = {"generation_prompt": "prompt-v1", "batch": "bad#batch"}
@@ -181,7 +181,7 @@ def test_eval_imports_bad_batch_name(tmp_path: Path, root: Path) -> None:
     assert result.status_code == 422
 
 
-def test_eval_imports_batch_exists(tmp_path: Path, root: Path) -> None:
+def test_eval_imports_batch_exists(tmp_path: Path, root: Path) -> None:  # ruff: ignore[F811]
     source_data = write_source(tmp_path, "```jsonl", "", json.dumps(draft("gem01-01")), "```")
     content_data = source_data.read_text(encoding="utf-8")
     ov = {"generation_prompt": "prompt-v1"}
@@ -204,7 +204,7 @@ def test_eval_imports_batch_exists(tmp_path: Path, root: Path) -> None:
     assert result.status_code == 409
 
 
-def test_eval_imports_nothing_valid(tmp_path: Path, root: Path) -> None:
+def test_eval_imports_nothing_valid(tmp_path: Path, root: Path) -> None:  # ruff: ignore[F811]
     source_data = write_source(tmp_path, "```jsonl", "", "invalid json", "```")
     content_data = source_data.read_text(encoding="utf-8")
     ov = {"generation_prompt": "prompt-v1"}
@@ -228,4 +228,4 @@ def test_eval_imports_nothing_valid(tmp_path: Path, root: Path) -> None:
     result = rig.client.post("/eval-imports", json=request.model_dump())
     assert result.status_code == 422
     # assert "nothing_to_import" in result.text
-    assert directory.exists() == False
+    assert not directory.exists()
