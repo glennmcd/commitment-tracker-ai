@@ -60,8 +60,25 @@ export function bundleCommands(outDir: string, requirementsFile: string): { comm
   ];
 }
 
-/** Parts of the package the Lambda never imports: the evaluation harness needs scikit-learn, which is not installed. */
-const EXCLUDED_FROM_PACKAGE = new Set(["evaluation", "__pycache__"]);
+/**
+ * The evaluation harness needs scikit-learn, which is not installed on the Lambda, so only the modules the API
+ * imports ship: `api/app.py` pulls in `importer`, which pulls in `sets`, `dataset` and `leaks`. None of them may
+ * import scikit-learn (see test/bundle.test.ts).
+ */
+export const EVALUATION_MODULES_IN_PACKAGE = new Set([
+  "__init__.py",
+  "importer.py",
+  "sets.py",
+  "dataset.py",
+  "leaks.py",
+]);
+
+function inPackage(source: string): boolean {
+  const name = path.basename(source);
+  if (name === "__pycache__") return false;
+  if (path.basename(path.dirname(source)) === "evaluation") return EVALUATION_MODULES_IN_PACKAGE.has(name);
+  return true;
+}
 
 /**
  * Builds the Lambda code directory: the locked runtime dependencies for Python 3.12 on arm64 plus the
@@ -77,7 +94,7 @@ export function bundleApi(outDir: string = DEFAULT_BUNDLE_DIR, runCommand: Run =
   }
   cpSync(path.join(backendRoot, "src", "commitment_tracker"), path.join(outDir, "commitment_tracker"), {
     recursive: true,
-    filter: (source) => !EXCLUDED_FROM_PACKAGE.has(path.basename(source)),
+    filter: inPackage,
   });
   return outDir;
 }
