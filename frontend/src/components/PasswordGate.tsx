@@ -27,7 +27,6 @@ export function PasswordGate({ children, preview }: { children: ReactNode; previ
 
   // Decided after mount: the static page can't know what this tab has stored or what the URL carries. A password in
   // the URL (`?password=...`) wins over a stored one and goes through the same check as a typed one.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: runs once, on mount.
   useEffect(() => {
     const { password, source } = takeLinkParams();
     if (source) setSource(source);

@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ApiClient } from "@/api/client";
+import { failure, fakeClient, ok } from "@/lib/testExports";
 import { type JobResult, pollJob, startTextJob } from "./jobs";
-import { fakeClient, ok, failure } from "@/lib/testExports";
+
 const ID = "a".repeat(64);
 const latency = { total_ms: null };
 const job = (status: string, extra: object = {}) => ({ job_id: ID, status, latency_ms: latency, ...extra });

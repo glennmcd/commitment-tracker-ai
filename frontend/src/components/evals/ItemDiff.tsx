@@ -74,7 +74,6 @@ export function ItemDiff({ item }: { item: RunItem }) {
       {item.turns ? (
         <ol className="plain turns" start={0}>
           {item.turns.map((turn, index) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: turns have no id and never reorder
             <li key={index}>
               <span className="muted">[{index}]</span> <span className="speaker">{turn.speaker}:</span> {turn.text}
             </li>
@@ -89,7 +88,6 @@ export function ItemDiff({ item }: { item: RunItem }) {
           {expected.length === 0 ? <p className="muted">{item.expected_labels.join(", ") || "–"}</p> : null}
           <ul className="plain">
             {expected.map(({ span, notes }, index) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: spans have no id; two can share turn and quote
               <li key={index} className="span-box">
                 <LabelBadge label={span.label} /> <span className="muted">turn {span.turn_index}</span>
                 <blockquote>{span.quote}</blockquote>
@@ -115,7 +113,6 @@ export function ItemDiff({ item }: { item: RunItem }) {
           <ul className="plain">
             {predicted.map((span, index) =>
               span.label === "NONE" && !paired.has(index) ? null : (
-                // biome-ignore lint/suspicious/noArrayIndexKey: spans have no id; two can share turn and quote
                 <li key={index} className="span-box">
                   <LabelBadge label={span.label} /> <span className="muted">turn {span.turn_index}</span>
                   <blockquote>{span.quote}</blockquote>
