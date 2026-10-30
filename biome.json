@@ -15,7 +15,9 @@
       "!**/.next",
       "!**/next-env.d.ts",
       "!**/cdk.out",
-      "!**/dist"
+      "!**/dist",
+      "!**/node_modules",
+      "!frontend/.vitest"
     ]
   },
   "formatter": { "enabled": true, "indentStyle": "space", "indentWidth": 2, "lineWidth": 120 },
