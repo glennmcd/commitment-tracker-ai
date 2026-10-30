@@ -135,6 +135,7 @@ class ImportRequest(BaseModel):
     batch:str
     provenance:str
     generation_prompt: str | None = None   # null = the latest; ignored for hand-written
+    today: str
 
 class SampleSummary(BaseModel):
     id: str
@@ -389,7 +390,11 @@ def create_app(
     app.state.feedback = feedback
     if extractor is not None:
         app.state.extractor = extractor
-    app.state.sets_dir = sets_dir if settings and settings.eval_imports_enabled else None
+        
+    if settings and settings.eval_imports_enabled:
+        app.state.sets_dir = sets_dir if sets_dir is not None else SETS_DIR
+    else:
+        app.state.sets_dir = None
         
     @app.middleware("http")
     async def _log_source(
@@ -470,13 +475,13 @@ def create_app(
         logger.info("import_error path=%s code=%s", request.url.path, code)
         return _error(status, code, message)
 
-    @app.exception_handler(BatchEmpty)
-    async def _batch_empty(request: Request, exc: BatchEmpty) -> JSONResponse:
-        status, code, message = IMPORT_ERRORS.get(
-            type(exc), (422, "batch_empty", "The batch is empty")
-        )
-        logger.info("batch_empty path=%s code=%s", request.url.path, code)
-        return _error(status, code, message)
+    # @app.exception_handler(BatchEmpty)
+    # async def _batch_empty(request: Request, exc: BatchEmpty) -> JSONResponse:
+    #     status, code, message = IMPORT_ERRORS.get(
+    #         type(exc), (422, "batch_empty", "The batch is empty")
+    #     )
+    #     logger.info("batch_empty path=%s code=%s", request.url.path, code)
+    #     return _error(status, code, message)
 
     @app.get("/health")
     async def health(request: Request) -> HealthResponse:
@@ -594,24 +599,20 @@ def create_app(
     async def check_import(body: ImportRequest, request: Request) -> ImportReport | JSONResponse:
         sets_dir: str | None = getattr(request.app.state, "sets_dir", None)
         if sets_dir is None:
-            return _error(404, "imports_disabled", "Imports are disabled")
+            #return _error(404, "imports_disabled", "Imports are disabled")
+            raise BatchDisabled()
        
-        try:
-            report, _ = check_batch(
-                body.content.splitlines(),
-                body.source,
-                batch=body.batch,
-                provenance=body.provenance,
-                generation_prompt=body.generation_prompt,
-                root=plibPath(sets_dir),
-                today=date.today(),
-            )
-            return report
-        except BatchExists as e:
-            return _error(400, "batch_exists", str(e))
-        except BatchError as e:
-            
-            return _error(400, "batch_error", str(e))
+        report, _ = check_batch(
+            body.content.splitlines(),
+            body.source,
+            batch=body.batch,
+            provenance=body.provenance,
+            generation_prompt=body.generation_prompt,
+            root=plibPath(sets_dir),
+            today=date.fromisoformat(body.today),
+        )
+        return report
+       
                 
     @app.post("/eval-imports",
               status_code=201,
@@ -620,24 +621,19 @@ def create_app(
     async def create_import(body: ImportRequest, request: Request) -> ImportReport | JSONResponse:
         sets_dir: str | None = getattr(request.app.state, "sets_dir", None)
         if sets_dir is None:
-            return _error(404, "imports_disabled", "Imports are disabled")
+            #return _error(404, "imports_disabled", "Imports are disabled")
+            raise BatchDisabled()
                
-        try:
-            _, report = import_batch(
-                plibPath(body.source),
-                batch=body.batch,
-                provenance=body.provenance,
-                generation_prompt=body.generation_prompt,
-                root=plibPath(sets_dir),
-                today=date.today(),
-            )
-            return report
-        except BatchExists as e:
-            return _error(400, "batch_exists", str(e))
-        except BatchError as e:
-            return _error(400, "batch_error", str(e))
-    
-    
+        _, report = import_batch(
+            plibPath(body.source),
+            batch=body.batch,
+            provenance=body.provenance,
+            generation_prompt=body.generation_prompt,
+            root=plibPath(sets_dir),
+            today=date.fromisoformat(body.today),
+        )
+        return report
+
     return app
 
 

@@ -155,9 +155,9 @@ def _date_checks(item: EvalItem) -> list[DateDisagreement]:
 
 def _check_options(batch: str, provenance: str, root: Path) -> Path:
     if not BATCH.fullmatch(batch):
-        raise BatchError(f"batch must be lower-case letters, digits and dashes, not {batch!r}")
+        raise BatchValidationError(f"batch must be lower-case letters, digits and dashes, not {batch!r}")
     if not re.fullmatch(PROVENANCE, provenance) or provenance == "spec":
-        raise BatchError(
+        raise BatchValidationError(
             f"provenance must be hand-written or <family>-<model>, not {provenance!r}"
             + (" (spec is reserved for the spec's seed items)" if provenance == "spec" else "")
         )

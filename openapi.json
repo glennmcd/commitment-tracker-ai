@@ -932,6 +932,10 @@
               }
             ],
             "title": "Generation Prompt"
+          },
+          "today": {
+            "type": "string",
+            "title": "Today"
           }
         },
         "type": "object",
@@ -939,7 +943,8 @@
           "source",
           "content",
           "batch",
-          "provenance"
+          "provenance",
+          "today"
         ],
         "title": "ImportRequest"
       },
