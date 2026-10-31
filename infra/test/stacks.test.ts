@@ -397,4 +397,20 @@ describe("the contract with the SCP", () => {
     const scp = readFileSync(path.join(here, "../scp/commitment-tracker-guardrails.json"), "utf8");
     expect(scp).toContain("CommitmentTrackerApi-BudgetStopFunction");
   });
+
+  it("allows EC2 but caps instance size and volume size", () => {
+    const policy = JSON.parse(readFileSync(path.join(here, "../scp/commitment-tracker-guardrails.json"), "utf8"));
+    const byId = Object.fromEntries(policy.Statement.map((s: { Sid: string }) => [s.Sid, s]));
+    expect(byId.DenyServicesCommitmentTrackerDoesNotUse.NotAction).toContain("ec2:*");
+
+    const types = byId.DenyLargeEc2Instances.Condition.StringNotLike["ec2:InstanceType"];
+    expect(byId.DenyLargeEc2Instances.Action).toContain("ec2:RunInstances");
+    expect(types).toContain("t3.small");
+    expect(types).toContain("t3a.xlarge");
+    expect(types.every((t: string) => /^(t[34]g?\.(nano|micro|small|medium)|t3a\.xlarge)$/.test(t))).toBe(true);
+
+    const size = byId.DenyLargeEc2Volumes.Condition.NumericGreaterThan["ec2:VolumeSize"];
+    expect(Number(size)).toBeLessThanOrEqual(30);
+    expect(byId.DenyLargeEc2Volumes.Action).toEqual(expect.arrayContaining(["ec2:RunInstances", "ec2:CreateVolume"]));
+  });
 });

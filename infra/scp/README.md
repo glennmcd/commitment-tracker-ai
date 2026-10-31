@@ -14,6 +14,8 @@ exempts the AWS-managed `/managed/AWSManaged*` roles, so the account can still b
 | --- | --- |
 | `DenyOutsideUsEast2` | Everything outside us-east-2, except global services (IAM, STS, Budgets, billing, SSO, Route 53 and similar). Route 53 calls are evaluated as us-east-1, hence the exemption. |
 | `DenyServicesCommitmentTrackerDoesNotUse` | Every service not on the allow-list. The list has FlakeHunter's services plus `transcribe:*`, `events:*` (the Transcribe completion rule) and `polly:*` (the sample clips). |
+| `DenyLargeEc2Instances` | `RunInstances` for anything but a `t3` or `t4g` instance of size nano to medium, or a `t3a.xlarge` (4 vCPU, 16 GiB). EC2 itself is on the allow-list (`ec2:*`). |
+| `DenyLargeEc2Volumes` | EBS volumes over 30 GiB, whether created alone or with an instance. This is the "small local storage" cap. |
 | `DenyMultiRegionAndEdgeFeatures` | Lambda@Edge replication, StackSets, DynamoDB global tables, S3 replication and multi-Region KMS keys. |
 | `DenyLongLivedIamCredentials` | IAM users, access keys and login profiles. Access is through SSO only. |
 | `ProtectBudgetKillSwitch` | Changes to the budget, the stop function and its topic, except by CDK's CloudFormation execution role. |
