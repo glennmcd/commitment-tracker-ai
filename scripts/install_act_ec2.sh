@@ -2,6 +2,17 @@
 
 sudo dnf update -y
 sudo dnf install git -y
+sudo dnf install -y 'dnf-command(config-manager)'
+sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+sudo dnf install -y gh
+#gh auth login
+#ssh-keygen -t ed25519 -C "ec2-act-box"
+#cat ~/.ssh/id_ed25519.pub
+#Copy the output into GitHub: Settings → SSH and GPG keys → New SSH key. Then test it:
+#ssh -T git@github.com
+#Update clone from https to SSH if needed
+#git remote set-url origin git@github.com:glennmcd/commitment-tracker-ai.git
+#git remote set-url origin git@github.com:glennmcd/terminal-commands.git
 
 sudo dnf install -y docker
 sudo systemctl enable --now docker
