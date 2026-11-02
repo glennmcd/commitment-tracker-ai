@@ -20,18 +20,24 @@
         "spans": 28
       },
       {
-        "agreement": 0.883117,
-        "kappa": 0.859717,
+        "agreement": 1.0,
+        "kappa": 1.0,
+        "key": "hand-written",
+        "spans": 9
+      },
+      {
+        "agreement": 0.895349,
+        "kappa": 0.874554,
         "key": "all",
-        "spans": 77
+        "spans": 86
       }
     ],
     "labels": [
       {
-        "agreement": 0.933333,
+        "agreement": 0.947368,
         "kappa": null,
         "key": "COMMITMENT",
-        "spans": 15
+        "spans": 19
       },
       {
         "agreement": 0.833333,
@@ -40,10 +46,10 @@
         "spans": 6
       },
       {
-        "agreement": 0.833333,
+        "agreement": 0.875,
         "kappa": null,
         "key": "CONDITIONAL",
-        "spans": 6
+        "spans": 8
       },
       {
         "agreement": 1.0,
@@ -55,7 +61,7 @@
         "agreement": 1.0,
         "kappa": null,
         "key": "REQUEST",
-        "spans": 14
+        "spans": 16
       },
       {
         "agreement": 1.0,
@@ -64,10 +70,10 @@
         "spans": 5
       },
       {
-        "agreement": 0.2,
+        "agreement": 0.333333,
         "kappa": null,
         "key": "REFUSAL",
-        "spans": 5
+        "spans": 6
       },
       {
         "agreement": 0.904762,
@@ -113,68 +119,68 @@
     ],
     "test": [
       {
-        "accuracy": 0.923077,
+        "accuracy": 0.844444,
         "configuration": "haiku",
-        "cost_usd": 0.013359,
+        "cost_usd": 0.016087,
         "effort": "medium",
         "escalation_rate": null,
         "failed_items": 0,
         "fields": {
-          "action": 0.916667,
-          "due": 1.0,
+          "action": 0.846154,
+          "due": 0.962963,
           "owner": 1.0
         },
-        "items": 68,
-        "latency_p50_ms": 1506,
-        "latency_p95_ms": 2191,
-        "ledger_f1": 0.961538,
-        "ledger_precision": 0.925926,
-        "ledger_recall": 1.0,
+        "items": 74,
+        "latency_p50_ms": 1597,
+        "latency_p95_ms": 2473,
+        "ledger_f1": 0.885246,
+        "ledger_precision": 0.9,
+        "ledger_recall": 0.870968,
         "legacy": false,
-        "macro_f1": 0.915522,
+        "macro_f1": 0.841727,
         "model": "claude-haiku-5-5",
         "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
         "prompt_version": "v1",
-        "run": "20261026T045917Z-claude-haiku-5-5-v1",
+        "run": "20261102T183701Z-claude-haiku-5-5-v1",
         "screen_misses": null,
         "set": "test",
-        "set_sha256": "6cd5dd1ad6a909959de6fa73b38e68d6dd9b0a00b3e2926884fe1048771b847d",
+        "set_sha256": "419f2ad60517196f12d6e8dc4922663831687c8e300d792869d2d8cbc97d9382",
         "stages": {
           "extract": "claude-haiku-5-5"
         },
-        "started_at": "2026-10-26T04:59:17.728564+00:00"
+        "started_at": "2026-11-02T18:37:01.215556+00:00"
       },
       {
-        "accuracy": 0.973684,
+        "accuracy": 0.873563,
         "configuration": "opus",
-        "cost_usd": 0.5092,
+        "cost_usd": 0.625044,
         "effort": "medium",
         "escalation_rate": null,
         "failed_items": 0,
         "fields": {
-          "action": 0.916667,
-          "due": 1.0,
+          "action": 0.846154,
+          "due": 0.962963,
           "owner": 1.0
         },
-        "items": 68,
-        "latency_p50_ms": 2733,
-        "latency_p95_ms": 5686,
-        "ledger_f1": 1.0,
-        "ledger_precision": 1.0,
-        "ledger_recall": 1.0,
+        "items": 74,
+        "latency_p50_ms": 2870,
+        "latency_p95_ms": 7601,
+        "ledger_f1": 0.9,
+        "ledger_precision": 0.931034,
+        "ledger_recall": 0.870968,
         "legacy": false,
-        "macro_f1": 0.97132,
+        "macro_f1": 0.877617,
         "model": "claude-opus-5-5",
         "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
         "prompt_version": "v1",
-        "run": "20261026T045624Z-claude-opus-5-5-v1",
+        "run": "20261102T183807Z-claude-opus-5-5-v1",
         "screen_misses": null,
         "set": "test",
-        "set_sha256": "6cd5dd1ad6a909959de6fa73b38e68d6dd9b0a00b3e2926884fe1048771b847d",
+        "set_sha256": "419f2ad60517196f12d6e8dc4922663831687c8e300d792869d2d8cbc97d9382",
         "stages": {
           "extract": "claude-opus-5-5"
         },
-        "started_at": "2026-10-26T04:56:24.203918+00:00"
+        "started_at": "2026-11-02T18:38:07.027221+00:00"
       },
       {
         "accuracy": 0.935065,
@@ -211,6 +217,70 @@
     ]
   },
   "runs": [
+    {
+      "accuracy": 0.873563,
+      "configuration": "opus",
+      "cost_usd": 0.625044,
+      "effort": "medium",
+      "escalation_rate": null,
+      "failed_items": 0,
+      "fields": {
+        "action": 0.846154,
+        "due": 0.962963,
+        "owner": 1.0
+      },
+      "items": 74,
+      "latency_p50_ms": 2870,
+      "latency_p95_ms": 7601,
+      "ledger_f1": 0.9,
+      "ledger_precision": 0.931034,
+      "ledger_recall": 0.870968,
+      "legacy": false,
+      "macro_f1": 0.877617,
+      "model": "claude-opus-5-5",
+      "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
+      "prompt_version": "v1",
+      "run": "20261102T183807Z-claude-opus-5-5-v1",
+      "screen_misses": null,
+      "set": "test",
+      "set_sha256": "419f2ad60517196f12d6e8dc4922663831687c8e300d792869d2d8cbc97d9382",
+      "stages": {
+        "extract": "claude-opus-5-5"
+      },
+      "started_at": "2026-11-02T18:38:07.027221+00:00"
+    },
+    {
+      "accuracy": 0.844444,
+      "configuration": "haiku",
+      "cost_usd": 0.016087,
+      "effort": "medium",
+      "escalation_rate": null,
+      "failed_items": 0,
+      "fields": {
+        "action": 0.846154,
+        "due": 0.962963,
+        "owner": 1.0
+      },
+      "items": 74,
+      "latency_p50_ms": 1597,
+      "latency_p95_ms": 2473,
+      "ledger_f1": 0.885246,
+      "ledger_precision": 0.9,
+      "ledger_recall": 0.870968,
+      "legacy": false,
+      "macro_f1": 0.841727,
+      "model": "claude-haiku-5-5",
+      "prompt_sha256": "b3319acb82e9745a900fc71b4fa2321408bd81ccde82cd7f239459bb19af93cf",
+      "prompt_version": "v1",
+      "run": "20261102T183701Z-claude-haiku-5-5-v1",
+      "screen_misses": null,
+      "set": "test",
+      "set_sha256": "419f2ad60517196f12d6e8dc4922663831687c8e300d792869d2d8cbc97d9382",
+      "stages": {
+        "extract": "claude-haiku-5-5"
+      },
+      "started_at": "2026-11-02T18:37:01.215556+00:00"
+    },
     {
       "accuracy": 0.923077,
       "configuration": "haiku",
@@ -447,30 +517,31 @@
       "description": "Held-out headline set: reviewed drafts from non-Claude models plus hand-written items.",
       "error": null,
       "gated": true,
-      "items": 68,
+      "items": 74,
       "kind": "text",
       "labels": {
-        "COMMITMENT": 14,
-        "CONDITIONAL": 6,
+        "COMMITMENT": 18,
+        "CONDITIONAL": 8,
         "HEDGED": 6,
         "NONE": 21,
-        "REFUSAL": 5,
+        "REFUSAL": 6,
         "REPORTED": 5,
-        "REQUEST": 14,
+        "REQUEST": 16,
         "SUGGESTION": 5
       },
       "name": "test",
       "provenance": {
         "chatgpt-5.6-luna-high": 21,
         "chatgpt-5.6-luna-low": 22,
-        "gemini-2.5-high": 25
+        "gemini-2.5-high": 25,
+        "hand-written": 6
       },
       "review": {
-        "accepted": 67,
+        "accepted": 73,
         "edited": 1
       },
       "role": "test",
-      "sha256": "6cd5dd1ad6a909959de6fa73b38e68d6dd9b0a00b3e2926884fe1048771b847d"
+      "sha256": "419f2ad60517196f12d6e8dc4922663831687c8e300d792869d2d8cbc97d9382"
     }
   ]
 }

@@ -1,0 +1,11 @@
+{
+  "batch": "hw01",
+  "source": "hand-written-1.jsonl",
+  "provenance": "hand-written",
+  "generation_prompt": null,
+  "imported_on": "2026-11-02",
+  "imported": 6,
+  "rejections": [],
+  "date_disagreements": [],
+  "near_duplicates": []
+}

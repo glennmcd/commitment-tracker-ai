@@ -1,0 +1,37 @@
+wording   surface   meaning
+will        
+might       
+if          
+can you     
+us          
+ask
+
+Cue words that lie. surface is different from meaning.  
+account_manager:  We'll get it done today.  Have I been wrong before?
+account_manager:  We'll send it right over.  But first, lets talk terms.
+account_manager:  That part isn't the problem
+
+Questions that commit.
+Want me to send it over tonight?   Do your best.
+Should I book the sale as of tomorrow?   Tomorrow morning?  Only for you.
+
+Retraction
+1:  I can get it done tonight
+2:  Maybe your whole team should be involved.
+1:  No really,  I can just do it.
+2:  If you think so.
+1:  Ya, you are right.  I'll wait for the team to be available.
+
+Condition
+Can you answer this last question, and I'll send it to you?
+
+
+
+will you look at that,
+I'll have Ken do it.  He always gets it done on time, if you get my meaning.
+
+will we finish that today? well, larry said so.
+  REPORTED.  
+we will finish.  
+
+That will work for us.

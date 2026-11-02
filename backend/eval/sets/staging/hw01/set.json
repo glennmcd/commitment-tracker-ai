@@ -1,0 +1,19 @@
+{
+  "name": "staging/hw01",
+  "description": "Imported from hand-written-1.jsonl; awaiting blind review.",
+  "role": "staging",
+  "gated": false,
+  "kind": "text",
+  "items_from": null,
+  "sources": [
+    {
+      "batch": "hw01",
+      "provenance": "hand-written",
+      "generation_prompt": null,
+      "call_date": "2026-11-09",
+      "imported": "2026-11-02",
+      "promoted": null,
+      "items": 6
+    }
+  ]
+}
