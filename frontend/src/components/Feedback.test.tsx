@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { ErrorCode } from "@/lib/apiErrors";
 import { ConsentBox, FeedbackButtons, FeedbackProvider } from "./Feedback";
 
 const client = { POST: vi.fn() };
@@ -12,7 +13,7 @@ vi.mock("@/api/client", async (original) => ({
 
 const JOB = "a".repeat(64);
 const ok = (kept = false) => ({ data: { transcript_kept: kept }, response: new Response(null, { status: 200 }) });
-const failure = (code: string, status: number) => ({
+const failure = (code: ErrorCode, status: number) => ({
   error: { error: { code, message: "m", details: [] } },
   response: new Response(null, { status }),
 });

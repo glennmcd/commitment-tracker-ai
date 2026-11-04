@@ -1,6 +1,7 @@
 import type { ApiClient } from "@/api/client";
 import type { components } from "@/api/schema";
-import { codeOf, explain, type JobResult, NETWORK } from "./jobs";
+import { explain, explainFailure, NETWORK } from "./apiErrors";
+import type { JobResult } from "./jobs";
 
 export type Sample = components["schemas"]["SampleSummary"];
 
@@ -15,7 +16,7 @@ export async function fetchSamples(client: ApiClient): Promise<SamplesResult> {
   try {
     const { data, error, response } = await client.GET("/samples");
     if (data) return { ok: true, samples: data };
-    return { ok: false, message: explain(codeOf(error), response.headers.get("retry-after")) };
+    return { ok: false, message: explainFailure(error, response) };
   } catch {
     return { ok: false, message: NETWORK };
   }
@@ -32,7 +33,7 @@ export async function startSampleJob(
       body: { sample_id: sampleId, call_date: callDate, speaker_names: speakerNames },
     });
     if (data) return { ok: true, job: data };
-    return { ok: false, message: explain(codeOf(error), response.headers.get("retry-after")) };
+    return { ok: false, message: explainFailure(error, response) };
   } catch {
     return { ok: false, message: NETWORK };
   }

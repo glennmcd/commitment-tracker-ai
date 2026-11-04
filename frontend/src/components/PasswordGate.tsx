@@ -2,7 +2,7 @@
 
 import { type FormEvent, type ReactNode, useEffect, useState } from "react";
 import { ApiConfigError, getApiClient } from "@/api/client";
-import { NETWORK } from "@/lib/jobs";
+import { NETWORK } from "@/lib/apiErrors";
 import { setSource, takeLinkParams } from "@/lib/link";
 import { clearPassword, getPassword, PASSWORD_REJECTED, setPassword } from "@/lib/password";
 

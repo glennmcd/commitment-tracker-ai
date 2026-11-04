@@ -1,10 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ApiClient } from "@/api/client";
+import type { ErrorCode } from "@/lib/apiErrors";
 import { sendFeedback } from "./feedback";
 
 const ID = "a".repeat(64);
 const ok = (data: unknown) => ({ data, response: new Response(null, { status: 200 }) });
-const failure = (code: string, status: number) => ({
+const failure = (code: ErrorCode, status: number) => ({
   error: { error: { code, message: "m", details: [] } },
   response: new Response(null, { status }),
 });
@@ -23,7 +24,7 @@ describe("sendFeedback", () => {
     expect(result).toEqual({ ok: true, transcriptKept: true });
   });
 
-  it.each([
+  it.each<[ErrorCode, number, string]>([
     ["job_not_found", 404, "That job has expired, so it can no longer take feedback."],
     ["job_not_finished", 409, "That job has no results to give feedback on."],
     ["span_not_found", 404, "That result is no longer there."],

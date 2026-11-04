@@ -1,5 +1,6 @@
 import type { ApiClient } from "@/api/client";
 import type { components } from "@/api/schema";
+import { explainFailure, NETWORK } from "./apiErrors";
 
 type ImportResult = components["schemas"]["ImportRequest"];
 type ImportReport = components["schemas"]["ImportReport"];
@@ -35,26 +36,11 @@ export function importSummary(options: { [key: string]: any }): string {
   result += `near duplicates ${options["nearDuplicates"]}`;
   return result;
 }
-export const NETWORK = "Could not reach the API. Check your connection and try again.";
-
-export function codeOf(error: unknown): string | undefined {
-  return (error as { error?: { code?: string } } | undefined)?.error?.code;
-}
-
-export function explain(code: string | null | undefined, retryAfter: string | null): string {
-  switch (code) {
-    case "rate_limited":
-      return `Rate limited. Retry after ${retryAfter ?? "unknown"} seconds.`;
-    default:
-      return "An unknown error occurred.";
-  }
-}
-
 export async function checkImport(client: ApiClient, request: ImportResult): Promise<CheckResult> {
   try {
     const { data, error, response } = await client.POST("/eval-imports/check", { body: request });
     if (data) return { ok: true, job: data };
-    return { ok: false, message: explain(codeOf(error), response.headers.get("retry-after")) };
+    return { ok: false, message: explainFailure(error, response) };
   } catch {
     return { ok: false, message: NETWORK };
   }
@@ -64,7 +50,7 @@ export async function importBatch(client: ApiClient, request: ImportResult): Pro
   try {
     const { data, error, response } = await client.POST("/eval-imports", { body: request });
     if (data) return { ok: true, job: data };
-    return { ok: false, message: explain(codeOf(error), response.headers.get("retry-after")) };
+    return { ok: false, message: explainFailure(error, response) };
   } catch {
     return { ok: false, message: NETWORK };
   }
