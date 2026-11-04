@@ -38,6 +38,7 @@ class ErrorCode(StrEnum):
     BATCH_EXISTS = "batch_exists"
     INVALID_IMPORT_OPTIONS = "invalid_import_options"
     BATCH_EMPTY = "batch_empty"
+    BATCH_VALIDATION = "batch_validation"
 
 
 class ErrorDetail(BaseModel):
@@ -141,7 +142,7 @@ BATCH_EMPTY = ApiError(422, ErrorCode.BATCH_EMPTY, "The batch is empty")
 # Same code as VALIDATION, raised when an imported item breaks a rule rather than the request shape.
 BATCH_VALIDATION = ApiError(
     422,
-    ErrorCode.VALIDATION_ERROR,
+    ErrorCode.BATCH_VALIDATION,
     "A field is missing or the content is over the size cap",
 )
 

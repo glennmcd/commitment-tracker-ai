@@ -37,6 +37,7 @@ const MESSAGES: Record<ErrorCode | WorkerErrorCode, string> = {
   batch_empty: "Nothing in that batch could be imported.",
   transcription_failed: "The recording could not be transcribed.",
   no_speech: "No speech was found in the recording.",
+  batch_validation: "A field is missing or the content is over the size cap.",
 };
 
 /** The code in an error body, when it is one the schema defines. */

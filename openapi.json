@@ -1097,7 +1097,7 @@
             }
           },
           "422": {
-            "description": "- `validation_error`: The request is invalid.\n- `validation_error`: A field is missing or the content is over the size cap\n- `invalid_import_options`: The batch name or provenance breaks a rule\n- `batch_empty`: The batch is empty",
+            "description": "- `validation_error`: The request is invalid.\n- `batch_validation`: A field is missing or the content is over the size cap\n- `invalid_import_options`: The batch name or provenance breaks a rule\n- `batch_empty`: The batch is empty",
             "content": {
               "application/json": {
                 "schema": {
@@ -1123,11 +1123,11 @@
                       }
                     }
                   },
-                  "validation_error_2": {
+                  "batch_validation": {
                     "summary": "A field is missing or the content is over the size cap",
                     "value": {
                       "error": {
-                        "code": "validation_error",
+                        "code": "batch_validation",
                         "message": "A field is missing or the content is over the size cap",
                         "details": []
                       }
@@ -1247,7 +1247,7 @@
             }
           },
           "422": {
-            "description": "- `validation_error`: The request is invalid.\n- `validation_error`: A field is missing or the content is over the size cap\n- `invalid_import_options`: The batch name or provenance breaks a rule\n- `batch_empty`: The batch is empty",
+            "description": "- `validation_error`: The request is invalid.\n- `batch_validation`: A field is missing or the content is over the size cap\n- `invalid_import_options`: The batch name or provenance breaks a rule\n- `batch_empty`: The batch is empty",
             "content": {
               "application/json": {
                 "schema": {
@@ -1273,11 +1273,11 @@
                       }
                     }
                   },
-                  "validation_error_2": {
+                  "batch_validation": {
                     "summary": "A field is missing or the content is over the size cap",
                     "value": {
                       "error": {
-                        "code": "validation_error",
+                        "code": "batch_validation",
                         "message": "A field is missing or the content is over the size cap",
                         "details": []
                       }
@@ -1522,7 +1522,8 @@
           "imports_disabled",
           "batch_exists",
           "invalid_import_options",
-          "batch_empty"
+          "batch_empty",
+          "batch_validation"
         ],
         "title": "ErrorCode"
       },

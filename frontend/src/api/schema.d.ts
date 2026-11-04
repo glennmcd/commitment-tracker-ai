@@ -223,7 +223,7 @@ export interface components {
          * ErrorCode
          * @enum {string}
          */
-        ErrorCode: "validation_error" | "rate_limited" | "daily_budget_exhausted" | "model_unavailable" | "model_output_invalid" | "model_refused" | "extraction_failed" | "uploads_unavailable" | "upload_not_found" | "sample_not_found" | "audio_too_long" | "audio_invalid" | "jobs_unavailable" | "job_not_found" | "job_not_finished" | "span_not_found" | "imports_disabled" | "batch_exists" | "invalid_import_options" | "batch_empty";
+        ErrorCode: "validation_error" | "rate_limited" | "daily_budget_exhausted" | "model_unavailable" | "model_output_invalid" | "model_refused" | "extraction_failed" | "uploads_unavailable" | "upload_not_found" | "sample_not_found" | "audio_too_long" | "audio_invalid" | "jobs_unavailable" | "job_not_found" | "job_not_finished" | "span_not_found" | "imports_disabled" | "batch_exists" | "invalid_import_options" | "batch_empty" | "batch_validation";
         /** ErrorDetail */
         ErrorDetail: {
             /** Loc */
@@ -1094,7 +1094,7 @@ export interface operations {
             };
             /**
              * @description - `validation_error`: The request is invalid.
-             *     - `validation_error`: A field is missing or the content is over the size cap
+             *     - `batch_validation`: A field is missing or the content is over the size cap
              *     - `invalid_import_options`: The batch name or provenance breaks a rule
              *     - `batch_empty`: The batch is empty
              */
@@ -1159,7 +1159,7 @@ export interface operations {
             };
             /**
              * @description - `validation_error`: The request is invalid.
-             *     - `validation_error`: A field is missing or the content is over the size cap
+             *     - `batch_validation`: A field is missing or the content is over the size cap
              *     - `invalid_import_options`: The batch name or provenance breaks a rule
              *     - `batch_empty`: The batch is empty
              */

@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 import type { ApiClient } from "@/api/client";
-import type { ErrorBody, ErrorCode, GatewayError } from "./apiErrors";
+import type { ErrorBody, ErrorCode, GatewayError, NETWORK } from "./apiErrors";
 
 /** A client whose calls return the scripted responses in order. */
 export function fakeClient(posts: unknown[], gets: unknown[] = []) {
