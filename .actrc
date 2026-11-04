@@ -2,4 +2,4 @@
 -W .github/workflows/ci.yml
 --pull=false
 --action-offline-mode
---container-options -v act-toolcache:/opt/hostedtoolcache -v act-bun-cache:/root/.bun/install/cache
+--container-options  -v act-bun-cache:/root/.bun/install/cache

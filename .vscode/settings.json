@@ -6,5 +6,6 @@
   "python.testing.pytestArgs": ["tests"],
   "vitest.rootConfig": "${workspaceFolder}/frontend/vitest.config.ts",
   "python.analysis.exclude": ["**/.venv", "**/node_modules", "**/cdk.out", "**/build", "**/dist"],
-  "jestrunner.enableTestExplorer": true
+  "jestrunner.enableTestExplorer": true,
+  "files.eol": "\n"
 }

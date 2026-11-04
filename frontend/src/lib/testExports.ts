@@ -8,7 +8,7 @@ export function fakeClient(posts: unknown[], gets: unknown[] = []) {
   return { client: { POST: post, GET: get } as unknown as ApiClient, post, get };
 }
 
-export const ok = (data: unknown, status = 200) => ({ data, response: new Response(null, { status }) });
+export const ok = <T>(data: T, status = 200) => ({ data, response: new Response(null, { status }) });
 
 export const failure = (code: string, status: number, headers: HeadersInit = {}) => ({
   error: { error: { code, message: "m", details: [] } },

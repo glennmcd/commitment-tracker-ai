@@ -1,0 +1,5 @@
+A rhetorical or venting question that asks for no new action is NONE.
+“Not possible unless X” or “only if X” states a prerequisite without a promise, so it’s REFUSAL. CONDITIONAL needs a real commitment that kicks in once the condition is met.
+Condition words (“unless”, “if”) don’t decide the label, just as “promise” doesn’t.
+A joke or sarcastic statement still gets its own NONE span.
+Each statement with a different label gets its own span, matching the prompt’s rule 2.
