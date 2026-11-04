@@ -20,6 +20,36 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from commitment_tracker.api.errors import (
+    AUDIO_INVALID,
+    AUDIO_TOO_LONG,
+    BATCH_EMPTY,
+    BATCH_EXISTS,
+    BATCH_VALIDATION,
+    BUDGET_EXHAUSTED,
+    EXTRACTION_FAILED,
+    FORBIDDEN,
+    GATEWAY_TIMEOUT,
+    IMPORTS_DISABLED,
+    INVALID_IMPORT_OPTIONS,
+    JOB_NOT_FINISHED,
+    JOB_NOT_FOUND,
+    JOBS_UNAVAILABLE,
+    MODEL_OUTPUT_INVALID,
+    MODEL_REFUSED,
+    MODEL_UNAVAILABLE,
+    RATE_LIMITED,
+    SAMPLE_NOT_FOUND,
+    SPAN_NOT_FOUND,
+    UPLOAD_NOT_FOUND,
+    UPLOADS_UNAVAILABLE,
+    VALIDATION,
+    ApiError,
+    ErrorBody,
+    ErrorDetail,
+    ErrorResponse,
+    route_responses,
+)
 from commitment_tracker.evaluation.importer import (
     BatchDisabled,
     BatchEmpty,
@@ -83,7 +113,7 @@ logger = logging.getLogger(__name__)
 # The API contract version, published as info.version in openapi.json. Bump it by hand when the
 # request or response shape changes; it is separate from the release version (commitment_tracker
 # .__version__), so releases don't change openapi.json or the frontend client generated from it.
-API_VERSION = "0.4.0"
+API_VERSION = "0.5.0"
 
 # A link label such as "alice" or "mailing-2026-10": short and plain, so it cannot forge a log line.
 SOURCE_LABEL = re.compile(r"[A-Za-z0-9._-]{1,64}")
@@ -146,119 +176,104 @@ class SampleSummary(BaseModel):
     duration_ms: int
 
 
-class ErrorDetail(BaseModel):
-    loc: list[str | int]
-    msg: str
-    type: str
-
-
-class ErrorBody(BaseModel):
-    code: str
-    message: str
-    details: list[ErrorDetail] = []
-
-
-class ErrorResponse(BaseModel):
-    error: ErrorBody
-
-
-RATE_LIMITED: dict[str, object] = {
-    "model": ErrorResponse,
-    "description": "Too many requests from this client; see Retry-After",
-}
-
-
 class RateLimited(Exception):
     def __init__(self, retry_after: int) -> None:
         super().__init__("rate limited")
         self.retry_after = retry_after
 
 
-BUDGET_EXHAUSTED: dict[str, object] = {
-    "model": ErrorResponse,
-    "description": "The day's spending cap is reached; see Retry-After (seconds to UTC midnight)",
+# Each domain error: the registry entry (status, code, fixed message) clients see.
+EXTRACTION_ERRORS: dict[type[ExtractionError], ApiError] = {
+    ModelUnavailable: MODEL_UNAVAILABLE,
+    ModelOutputInvalid: MODEL_OUTPUT_INVALID,
+    ModelRefused: MODEL_REFUSED,
+}
+JOB_ERRORS: dict[type[Exception], ApiError] = {
+    UploadNotFound: UPLOAD_NOT_FOUND,
+    SampleNotFound: SAMPLE_NOT_FOUND,
+    AudioTooLong: AUDIO_TOO_LONG,
+    AudioInvalid: AUDIO_INVALID,
+    JobsUnavailable: JOBS_UNAVAILABLE,
+    FeedbackJobNotFound: JOB_NOT_FOUND,
+    JobNotFinished: JOB_NOT_FINISHED,
+    FeedbackSpanNotFound: SPAN_NOT_FOUND,
+}
+IMPORT_ERRORS: dict[type[Exception], ApiError] = {
+    BatchExists: BATCH_EXISTS,
+    BatchInvalidImportOptions: INVALID_IMPORT_OPTIONS,
+    BatchEmpty: BATCH_EMPTY,
+    BatchValidationError: BATCH_VALIDATION,
+    BatchDisabled: IMPORTS_DISABLED,
 }
 
-
-# Each extraction failure: HTTP status, error code and the fixed message clients see.
-EXTRACTION_ERRORS: dict[type[ExtractionError], tuple[int, str, str]] = {
-    ModelUnavailable: (502, "model_unavailable", "The model is unavailable. Try again later."),
-    ModelOutputInvalid: (
-        502,
-        "model_output_invalid",
-        "The model's output failed validation twice. Try again.",
+# What each route documents: the errors it can raise, plus what API Gateway can answer instead.
+ERROR_RESPONSES = route_responses(
+    errors=(
+        VALIDATION,
+        MODEL_REFUSED,
+        RATE_LIMITED,
+        BUDGET_EXHAUSTED,
+        MODEL_UNAVAILABLE,
+        MODEL_OUTPUT_INVALID,
+        EXTRACTION_FAILED,
     ),
-    ModelRefused: (422, "model_refused", "The model declined to analyse this transcript."),
-}
-ERROR_RESPONSES: dict[int | str, dict[str, object]] = {
-    422: {"model": ErrorResponse, "description": "Invalid request, or the model refused it"},
-    429: RATE_LIMITED,
-    503: BUDGET_EXHAUSTED,
-    502: {"model": ErrorResponse, "description": "The model failed or its output was invalid"},
-}
-UPLOAD_RESPONSES: dict[int | str, dict[str, object]] = {
-    429: RATE_LIMITED,
-    503: {"model": ErrorResponse, "description": "Audio storage is not configured"},
-}
-JOB_RESPONSES: dict[int | str, dict[str, object]] = {
-    404: {"model": ErrorResponse, "description": "The upload, sample or job does not exist"},
-    429: RATE_LIMITED,
-    422: {"model": ErrorResponse, "description": "Invalid request, or the audio is not accepted"},
-    503: {
-        "model": ErrorResponse,
-        "description": "Jobs are not configured, or the day's spending cap is reached",
-    },
-}
-# Domain errors raised by the job service: HTTP status, error code and the fixed message.
-JOB_ERRORS: dict[type[Exception], tuple[int, str, str]] = {
-    UploadNotFound: (404, "upload_not_found", "No upload with that id. It may have expired."),
-    SampleNotFound: (404, "sample_not_found", "No sample clip with that id."),
-    AudioTooLong: (422, "audio_too_long", "The recording is longer than 60 seconds."),
-    AudioInvalid: (422, "audio_invalid", "The audio is not a 16 kHz mono 16-bit WAV."),
-    JobsUnavailable: (503, "jobs_unavailable", "Jobs are not available."),
-    FeedbackJobNotFound: (404, "job_not_found", "No job with that id. It may have expired."),
-    JobNotFinished: (409, "job_not_finished", "The job has no results to give feedback on."),
-    FeedbackSpanNotFound: (404, "span_not_found", "The job has no span with that index."),
-}
-IMPORT_RESPONSES: dict[int | str, dict[str, object]] = {
-    404: {"model": ErrorResponse, "description": "Imports are disabled"},
-    409: {"model": ErrorResponse, "description": "The batch already exists"},
-    422: {"model": ErrorResponse, "description": "Invalid request, or the import was refused"},
-}
-IMPORT_ERRORS: dict[type[Exception], tuple[int, str, str]] = {
-    BatchExists: (409, "batch_exists", "The batch already exists"),
-    BatchInvalidImportOptions: (
-        422,
-        "invalid_import_options",
-        "The batch name or provenance breaks a rule",
+    gateway=(FORBIDDEN, GATEWAY_TIMEOUT),
+    limited_success=200,
+)
+UPLOAD_RESPONSES = route_responses(errors=(RATE_LIMITED, UPLOADS_UNAVAILABLE), limited_success=200)
+CREATE_JOB_RESPONSES = route_responses(
+    errors=(
+        UPLOAD_NOT_FOUND,
+        SAMPLE_NOT_FOUND,
+        VALIDATION,
+        AUDIO_TOO_LONG,
+        AUDIO_INVALID,
+        RATE_LIMITED,
+        JOBS_UNAVAILABLE,
+        BUDGET_EXHAUSTED,
     ),
-    BatchEmpty: (422, "batch_empty", "The batch is empty"),
-    BatchValidationError: (
-        422,
-        "validation_error",
-        "A field is missing or the content is over the size cap",
+    gateway=(FORBIDDEN, GATEWAY_TIMEOUT),
+    limited_success=202,
+)
+GET_JOB_RESPONSES = route_responses(
+    errors=(VALIDATION, JOB_NOT_FOUND, RATE_LIMITED, JOBS_UNAVAILABLE), limited_success=200
+)
+SAMPLES_RESPONSES = route_responses(errors=(JOBS_UNAVAILABLE,))
+IMPORT_RESPONSES = route_responses(
+    errors=(
+        IMPORTS_DISABLED,
+        BATCH_EXISTS,
+        VALIDATION,
+        BATCH_VALIDATION,
+        INVALID_IMPORT_OPTIONS,
+        BATCH_EMPTY,
+    )
+)
+FEEDBACK_RESPONSES = route_responses(
+    errors=(
+        VALIDATION,
+        JOB_NOT_FOUND,
+        SPAN_NOT_FOUND,
+        JOB_NOT_FINISHED,
+        RATE_LIMITED,
+        JOBS_UNAVAILABLE,
     ),
-    BatchDisabled: (404, "imports_disabled", "Imports are disabled"),
-    # NothingToImport: (422, "nothing_to_import", "Invalid request, or the import was refused"),
-}
-FEEDBACK_RESPONSES: dict[int | str, dict[str, object]] = {
-    404: {"model": ErrorResponse, "description": "The job or the span does not exist"},
-    409: {"model": ErrorResponse, "description": "The job is not finished"},
-    429: RATE_LIMITED,
-    503: {"model": ErrorResponse, "description": "Feedback storage is not configured"},
-}
+    limited_success=200,
+)
 JOB_ID_PATTERN = r"^[0-9a-f]{64}$"
 
 
 def _error(
-    status: int,
-    code: str,
-    message: str,
+    error: ApiError,
     details: list[ErrorDetail] | None = None,
     headers: dict[str, str] | None = None,
+    retry_after: int | None = None,
 ) -> JSONResponse:
-    body = ErrorResponse(error=ErrorBody(code=code, message=message, details=details or []))
-    return JSONResponse(status_code=status, content=body.model_dump(), headers=headers)
+    message = error.text(retry_after if retry_after is not None else "N")
+    body = ErrorResponse(error=ErrorBody(code=error.code, message=message, details=details or []))
+    return JSONResponse(
+        status_code=error.status, content=body.model_dump(mode="json"), headers=headers
+    )
 
 
 async def within_budget(request: Request) -> None:
@@ -427,36 +442,28 @@ def create_app(
             ErrorDetail(loc=list(e["loc"]), msg=e["msg"], type=e["type"]) for e in exc.errors()
         ]
         logger.info("analyze_rejected path=%s errors=%d", request.url.path, len(details))
-        return _error(422, "validation_error", "The request is invalid.", details)
+        return _error(VALIDATION, details)
 
     @app.exception_handler(RateLimited)
     async def _rate_limited(request: Request, exc: RateLimited) -> JSONResponse:
         logger.info("rate_limited path=%s", request.url.path)
         return _error(
-            429,
-            "rate_limited",
-            f"Too many requests. Try again in {exc.retry_after} seconds.",
+            RATE_LIMITED,
             headers={"Retry-After": str(exc.retry_after)},
+            retry_after=exc.retry_after,
         )
 
     @app.exception_handler(DailyBudgetExhausted)
     async def _budget_exhausted(request: Request, exc: DailyBudgetExhausted) -> JSONResponse:
         logger.info("daily_budget_exhausted path=%s", request.url.path)
-        return _error(
-            503,
-            "daily_budget_exhausted",
-            "The demo has reached its daily spending limit. Try again after midnight UTC.",
-            headers={"Retry-After": str(exc.retry_after)},
-        )
+        return _error(BUDGET_EXHAUSTED, headers={"Retry-After": str(exc.retry_after)})
 
     @app.exception_handler(ExtractionError)
     async def _extraction_failed(request: Request, exc: ExtractionError) -> JSONResponse:
-        status, code, message = EXTRACTION_ERRORS.get(
-            type(exc), (502, "extraction_failed", "The transcript could not be analysed.")
-        )
+        error = EXTRACTION_ERRORS.get(type(exc), EXTRACTION_FAILED)
         # Exception text holds field paths, SDK class names and status codes, never transcript text.
-        logger.warning("analyze_failed code=%s detail=%s", code, exc)
-        return _error(status, code, message)
+        logger.warning("analyze_failed code=%s detail=%s", error.code, exc)
+        return _error(error)
 
     @app.exception_handler(UploadNotFound)
     @app.exception_handler(SampleNotFound)
@@ -468,11 +475,9 @@ def create_app(
     @app.exception_handler(FeedbackSpanNotFound)
     async def _job_failed(request: Request, exc: Exception) -> JSONResponse:
         # Walk the MRO so TextJobsUnavailable finds JobsUnavailable's entry.
-        status, code, message = next(
-            JOB_ERRORS[cls] for cls in type(exc).__mro__ if cls in JOB_ERRORS
-        )
-        logger.info("job_rejected path=%s code=%s", request.url.path, code)
-        return _error(status, code, message)
+        error = next(JOB_ERRORS[cls] for cls in type(exc).__mro__ if cls in JOB_ERRORS)
+        logger.info("job_rejected path=%s code=%s", request.url.path, error.code)
+        return _error(error)
 
     @app.exception_handler(BatchDisabled)
     @app.exception_handler(BatchExists)
@@ -480,19 +485,9 @@ def create_app(
     @app.exception_handler(BatchEmpty)
     @app.exception_handler(BatchValidationError)
     async def _batch_invalid(request: Request, exc: Exception) -> JSONResponse:
-        status, code, message = next(
-            IMPORT_ERRORS[cls] for cls in type(exc).__mro__ if cls in IMPORT_ERRORS
-        )
-        logger.info("import_error path=%s code=%s", request.url.path, code)
-        return _error(status, code, message)
-
-    # @app.exception_handler(BatchEmpty)
-    # async def _batch_empty(request: Request, exc: BatchEmpty) -> JSONResponse:
-    #     status, code, message = IMPORT_ERRORS.get(
-    #         type(exc), (422, "batch_empty", "The batch is empty")
-    #     )
-    #     logger.info("batch_empty path=%s code=%s", request.url.path, code)
-    #     return _error(status, code, message)
+        error = next(IMPORT_ERRORS[cls] for cls in type(exc).__mro__ if cls in IMPORT_ERRORS)
+        logger.info("import_error path=%s code=%s", request.url.path, error.code)
+        return _error(error)
 
     @app.get("/health")
     async def health(request: Request) -> HealthResponse:
@@ -533,7 +528,7 @@ def create_app(
     async def create_upload(request: Request) -> UploadResponse | JSONResponse:
         signer: UploadSigner | None = request.app.state.uploads
         if signer is None:
-            return _error(503, "uploads_unavailable", "Audio uploads are not available.")
+            return _error(UPLOADS_UNAVAILABLE)
         ticket = signer.presign()
         return UploadResponse(
             upload_id=ticket.upload_id,
@@ -553,7 +548,7 @@ def create_app(
         "/jobs",
         status_code=202,
         response_model=JobResponse,
-        responses=JOB_RESPONSES,
+        responses=CREATE_JOB_RESPONSES,
         dependencies=[limited("jobs"), Depends(within_budget)],
     )
     async def create_job(body: JobRequest, request: Request) -> JobResponse:
@@ -574,7 +569,7 @@ def create_app(
     @app.get(
         "/jobs/{job_id}",
         response_model=JobResponse,
-        responses=JOB_RESPONSES,
+        responses=GET_JOB_RESPONSES,
         dependencies=[limited("job_status")],
     )
     async def get_job(
@@ -582,7 +577,7 @@ def create_app(
     ) -> JobResponse | JSONResponse:
         job = await run_in_threadpool(_jobs(request).get, job_id)
         if job is None:
-            return _error(404, "job_not_found", "No job with that id. It may have expired.")
+            return _error(JOB_NOT_FOUND)
         return _job_response(job)
 
     @app.post(
@@ -598,7 +593,7 @@ def create_app(
         result = await run_in_threadpool(service.submit, body)
         return FeedbackResponse(transcript_kept=result.transcript_kept)
 
-    @app.get("/samples", responses=JOB_RESPONSES)
+    @app.get("/samples", responses=SAMPLES_RESPONSES)
     async def list_samples(request: Request) -> list[SampleSummary]:
         clips = _jobs(request).samples().all()
         return [SampleSummary(id=c.id, title=c.title, duration_ms=c.duration_ms) for c in clips]
