@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.12.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.11.0...v0.12.0) (2026-11-05)
+
+
+### Features
+
+* **api:** add 'today' field to ImportRequest and update related logic ([2aec6c7](https://github.com/glennmcd/commitment-tracker-ai/commit/2aec6c7ed45843e81eae5068358bb9bc067dcc93))
+* **eval:** start eval web ui tdd ([#28](https://github.com/glennmcd/commitment-tracker-ai/issues/28)) ([2aec6c7](https://github.com/glennmcd/commitment-tracker-ai/commit/2aec6c7ed45843e81eae5068358bb9bc067dcc93))
+
+
+### Bug Fixes
+
+* enhance type safety in testExports by adding generic type to ok function ([2aec6c7](https://github.com/glennmcd/commitment-tracker-ai/commit/2aec6c7ed45843e81eae5068358bb9bc067dcc93))
+* update Next.js type imports for development environment ([2aec6c7](https://github.com/glennmcd/commitment-tracker-ai/commit/2aec6c7ed45843e81eae5068358bb9bc067dcc93))
+
+
+### Documentation
+
+* add hand-written label guide for evaluation ([2aec6c7](https://github.com/glennmcd/commitment-tracker-ai/commit/2aec6c7ed45843e81eae5068358bb9bc067dcc93))
+
 ## [0.11.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.10.0...v0.11.0) (2026-10-30)
 
 
