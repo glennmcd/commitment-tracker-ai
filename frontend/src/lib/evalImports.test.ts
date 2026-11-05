@@ -1,10 +1,12 @@
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { components } from "@/api/schema";
-import { failure, fakeClient, ok } from "@/lib/testExports";
-import { type CheckResult, checkImport, importBatch, optionProblems } from "./evalImports";
+import { extendedTest, failure, fakeClient, ok } from "@/lib/testExports";
+import { type CheckResult, checkImport, importBatch, optionProblems, readRequest } from "./evalImports";
 
 type ImportResult = components["schemas"]["ImportRequest"];
 type ImportReport = components["schemas"]["ImportReport"];
+type ImportRequest = components["schemas"]["ImportRequest"];
 describe("optionProblems", () => {
   it.each([
     [{ batch: "", provenance: "gemini-3-pro" }, { batch: "Missing batch" }],
@@ -43,6 +45,18 @@ const importReport = (over: Partial<ImportReport> = {}): ImportReport => {
   };
 };
 
+const importRequest = (over: Partial<ImportRequest> = {}): ImportRequest => {
+  return {
+    batch: "gem02",
+    source: "gem02.jsonl",
+    content: "{}\n",
+    provenance: "gemini-3-pro",
+    today: "2026-06-06",
+    generation_prompt: null,
+    ...over,
+  };
+};
+
 describe("basic checkImport", () => {
   it("should return the correct report", async () => {
     const result: ImportReport = importReport();
@@ -66,5 +80,19 @@ describe("basic importBatch", () => {
     const response: CheckResult = await importBatch(client, request);
     expect(post).toHaveBeenCalledWith("/eval-imports", { body: request });
     expect(response).toEqual({ ok: true, job: result });
+  });
+});
+
+describe("request file", () => {
+  extendedTest("request file", async ({ tmpDir }) => {
+    const sourceFile = join(tmpDir, "gem02.jsonl");
+    const request: ImportRequest = importRequest({
+      source: sourceFile,
+      today: new Date().toISOString().slice(0, 10),
+    });
+    const file: File = new File([request.content], request.source);
+    const options = { batch: request.batch, provenance: request.provenance };
+    const response = await readRequest(file, options);
+    expect(response).toEqual({ ok: true, job: request });
   });
 });

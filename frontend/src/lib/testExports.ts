@@ -1,4 +1,7 @@
-import { vi } from "vitest";
+import { it as base,vi } from "vitest";
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import type { ApiClient } from "@/api/client";
 import type { ErrorBody, ErrorCode, GatewayError, NETWORK } from "./apiErrors";
 
@@ -22,3 +25,16 @@ export const gatewayFailure = (status: 403 | 504, message: string) => ({
   error: { message } satisfies GatewayError,
   response: new Response(null, { status }),
 });
+
+
+
+
+// 1. Build the fixture context
+export const extendedTest = base.extend<{ tmpDir: string }>({
+  tmpDir: async ({}, use) => {
+    const directory = mkdtempSync(join(tmpdir(), 'vitest-describe-'));
+    await use(directory);
+    rmSync(directory, { recursive: true, force: true });
+  },
+});
+

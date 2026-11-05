@@ -4,6 +4,7 @@ import { explainFailure, NETWORK } from "./apiErrors";
 
 type ImportResult = components["schemas"]["ImportRequest"];
 type ImportReport = components["schemas"]["ImportReport"];
+type ImportRequest = components["schemas"]["ImportRequest"];
 export type CheckResult = { ok: true; job: components["schemas"]["ImportReport"] } | { ok: false; message: string };
 
 export function optionProblems(options: { [key: string]: any }): { [key: string]: any } {
@@ -53,5 +54,23 @@ export async function importBatch(client: ApiClient, request: ImportResult): Pro
     return { ok: false, message: explainFailure(error, response) };
   } catch {
     return { ok: false, message: NETWORK };
+  }
+}
+
+export async function readRequest(file: File, options: { [key: string]: any }): Promise<{ ok: true; job: ImportRequest } | { ok: false; message: string }> {
+  try {
+    const date = new Date().toISOString().slice(0, 10);
+    const content = await file.text();
+    const request: ImportRequest = {
+      batch: options["batch"],
+      source: file.name,
+      content,
+      provenance: options["provenance"],
+      today: date,
+      generation_prompt: null,
+    };
+    return { ok: true, job: request };
+  } catch (error) {
+    return { ok: false, message: String(error) };
   }
 }
