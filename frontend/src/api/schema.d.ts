@@ -210,8 +210,7 @@ export interface components {
         };
         /** ErrorBody */
         ErrorBody: {
-            /** Code */
-            code: string;
+            code: components["schemas"]["ErrorCode"];
             /** Message */
             message: string;
             /**
@@ -220,6 +219,11 @@ export interface components {
              */
             details: components["schemas"]["ErrorDetail"][];
         };
+        /**
+         * ErrorCode
+         * @enum {string}
+         */
+        ErrorCode: "validation_error" | "rate_limited" | "daily_budget_exhausted" | "model_unavailable" | "model_output_invalid" | "model_refused" | "extraction_failed" | "uploads_unavailable" | "upload_not_found" | "sample_not_found" | "audio_too_long" | "audio_invalid" | "jobs_unavailable" | "job_not_found" | "job_not_finished" | "span_not_found" | "imports_disabled" | "batch_exists" | "invalid_import_options" | "batch_empty" | "batch_validation";
         /** ErrorDetail */
         ErrorDetail: {
             /** Loc */
@@ -262,10 +266,13 @@ export interface components {
             /** Transcript Kept */
             transcript_kept: boolean;
         };
-        /** HTTPValidationError */
-        HTTPValidationError: {
-            /** Detail */
-            detail?: components["schemas"]["ValidationError"][];
+        /**
+         * GatewayErrorResponse
+         * @description What API Gateway sends when it answers instead of the app.
+         */
+        GatewayErrorResponse: {
+            /** Message */
+            message: string;
         };
         /** HealthResponse */
         HealthResponse: {
@@ -557,19 +564,6 @@ export interface components {
              */
             expires_in: number;
         };
-        /** ValidationError */
-        ValidationError: {
-            /** Location */
-            loc: (string | number)[];
-            /** Message */
-            msg: string;
-            /** Error Type */
-            type: string;
-            /** Input */
-            input?: unknown;
-            /** Context */
-            ctx?: Record<string, never>;
-        };
     };
     responses: never;
     parameters: never;
@@ -615,13 +609,31 @@ export interface operations {
             /** @description Successful Response */
             200: {
                 headers: {
+                    /** @description Requests allowed per window for this rule. */
+                    "ratelimit-limit"?: number;
+                    /** @description Requests left in the current window. */
+                    "ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets. */
+                    "ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["AnalyzeResponse"];
                 };
             };
-            /** @description Invalid request, or the model refused it */
+            /** @description The Authorization header is missing or is not the site password. API Gateway's authorizer answers before the request reaches the app. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GatewayErrorResponse"];
+                };
+            };
+            /**
+             * @description - `validation_error`: The request is invalid.
+             *     - `model_refused`: The model declined to analyse this transcript.
+             */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -630,16 +642,22 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Too many requests from this client; see Retry-After */
+            /** @description - `rate_limited`: Too many requests. Try again in N seconds. */
             429: {
                 headers: {
+                    /** @description Seconds to wait before trying again. */
+                    "Retry-After"?: number;
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description The model failed or its output was invalid */
+            /**
+             * @description - `model_unavailable`: The model is unavailable. Try again later.
+             *     - `model_output_invalid`: The model's output failed validation twice. Try again.
+             *     - `extraction_failed`: The transcript could not be analysed.
+             */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -648,13 +666,24 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description The day's spending cap is reached; see Retry-After (seconds to UTC midnight) */
+            /** @description - `daily_budget_exhausted`: The demo has reached its daily spending limit. Try again after midnight UTC. */
             503: {
                 headers: {
+                    /** @description Seconds to wait before trying again. */
+                    "Retry-After"?: number;
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The request took longer than API Gateway's 29 seconds. API Gateway answers, not the app. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GatewayErrorResponse"];
                 };
             };
         };
@@ -671,22 +700,39 @@ export interface operations {
             /** @description Successful Response */
             200: {
                 headers: {
+                    /** @description Requests allowed per window for this rule. */
+                    "ratelimit-limit"?: number;
+                    /** @description Requests left in the current window. */
+                    "ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets. */
+                    "ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["UploadResponse"];
                 };
             };
-            /** @description Too many requests from this client; see Retry-After */
+            /** @description The Authorization header is missing or is not the site password. API Gateway's authorizer answers before the request reaches the app. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GatewayErrorResponse"];
+                };
+            };
+            /** @description - `rate_limited`: Too many requests. Try again in N seconds. */
             429: {
                 headers: {
+                    /** @description Seconds to wait before trying again. */
+                    "Retry-After"?: number;
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Audio storage is not configured */
+            /** @description - `uploads_unavailable`: Audio uploads are not available. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -713,13 +759,31 @@ export interface operations {
             /** @description Successful Response */
             202: {
                 headers: {
+                    /** @description Requests allowed per window for this rule. */
+                    "ratelimit-limit"?: number;
+                    /** @description Requests left in the current window. */
+                    "ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets. */
+                    "ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["JobResponse"];
                 };
             };
-            /** @description The upload, sample or job does not exist */
+            /** @description The Authorization header is missing or is not the site password. API Gateway's authorizer answers before the request reaches the app. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GatewayErrorResponse"];
+                };
+            };
+            /**
+             * @description - `upload_not_found`: No upload with that id. It may have expired.
+             *     - `sample_not_found`: No sample clip with that id.
+             */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -728,7 +792,11 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Invalid request, or the audio is not accepted */
+            /**
+             * @description - `validation_error`: The request is invalid.
+             *     - `audio_too_long`: The recording is longer than 60 seconds.
+             *     - `audio_invalid`: The audio is not a 16 kHz mono 16-bit WAV.
+             */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -737,22 +805,38 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Too many requests from this client; see Retry-After */
+            /** @description - `rate_limited`: Too many requests. Try again in N seconds. */
             429: {
                 headers: {
+                    /** @description Seconds to wait before trying again. */
+                    "Retry-After"?: number;
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Jobs are not configured, or the day's spending cap is reached */
+            /**
+             * @description - `jobs_unavailable`: Jobs are not available.
+             *     - `daily_budget_exhausted`: The demo has reached its daily spending limit. Try again after midnight UTC.
+             */
             503: {
                 headers: {
+                    /** @description Seconds to wait before trying again. */
+                    "Retry-After"?: number;
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The request took longer than API Gateway's 29 seconds. API Gateway answers, not the app. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GatewayErrorResponse"];
                 };
             };
         };
@@ -771,13 +855,28 @@ export interface operations {
             /** @description Successful Response */
             200: {
                 headers: {
+                    /** @description Requests allowed per window for this rule. */
+                    "ratelimit-limit"?: number;
+                    /** @description Requests left in the current window. */
+                    "ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets. */
+                    "ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["JobResponse"];
                 };
             };
-            /** @description The upload, sample or job does not exist */
+            /** @description The Authorization header is missing or is not the site password. API Gateway's authorizer answers before the request reaches the app. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GatewayErrorResponse"];
+                };
+            };
+            /** @description - `job_not_found`: No job with that id. It may have expired. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -786,7 +885,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Invalid request, or the audio is not accepted */
+            /** @description - `validation_error`: The request is invalid. */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -795,16 +894,18 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Too many requests from this client; see Retry-After */
+            /** @description - `rate_limited`: Too many requests. Try again in N seconds. */
             429: {
                 headers: {
+                    /** @description Seconds to wait before trying again. */
+                    "Retry-After"?: number;
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Jobs are not configured, or the day's spending cap is reached */
+            /** @description - `jobs_unavailable`: Jobs are not available. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -831,13 +932,31 @@ export interface operations {
             /** @description Successful Response */
             200: {
                 headers: {
+                    /** @description Requests allowed per window for this rule. */
+                    "ratelimit-limit"?: number;
+                    /** @description Requests left in the current window. */
+                    "ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets. */
+                    "ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["FeedbackResponse"];
                 };
             };
-            /** @description The job or the span does not exist */
+            /** @description The Authorization header is missing or is not the site password. API Gateway's authorizer answers before the request reaches the app. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GatewayErrorResponse"];
+                };
+            };
+            /**
+             * @description - `job_not_found`: No job with that id. It may have expired.
+             *     - `span_not_found`: The job has no span with that index.
+             */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -846,7 +965,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description The job is not finished */
+            /** @description - `job_not_finished`: The job has no results to give feedback on. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -855,17 +974,8 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description - `validation_error`: The request is invalid. */
             422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Too many requests from this client; see Retry-After */
-            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -873,7 +983,18 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Feedback storage is not configured */
+            /** @description - `rate_limited`: Too many requests. Try again in N seconds. */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before trying again. */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description - `jobs_unavailable`: Jobs are not available. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -902,34 +1023,16 @@ export interface operations {
                     "application/json": components["schemas"]["SampleSummary"][];
                 };
             };
-            /** @description The upload, sample or job does not exist */
-            404: {
+            /** @description The Authorization header is missing or is not the site password. API Gateway's authorizer answers before the request reaches the app. */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["GatewayErrorResponse"];
                 };
             };
-            /** @description Invalid request, or the audio is not accepted */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Too many requests from this client; see Retry-After */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Jobs are not configured, or the day's spending cap is reached */
+            /** @description - `jobs_unavailable`: Jobs are not available. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -962,7 +1065,16 @@ export interface operations {
                     "application/json": components["schemas"]["ImportReport"];
                 };
             };
-            /** @description Imports are disabled */
+            /** @description The Authorization header is missing or is not the site password. API Gateway's authorizer answers before the request reaches the app. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GatewayErrorResponse"];
+                };
+            };
+            /** @description - `imports_disabled`: Imports are disabled */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -971,7 +1083,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description The batch already exists */
+            /** @description - `batch_exists`: The batch already exists */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -980,7 +1092,12 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Invalid request, or the import was refused */
+            /**
+             * @description - `validation_error`: The request is invalid.
+             *     - `batch_validation`: A field is missing or the content is over the size cap
+             *     - `invalid_import_options`: The batch name or provenance breaks a rule
+             *     - `batch_empty`: The batch is empty
+             */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -1013,7 +1130,16 @@ export interface operations {
                     "application/json": components["schemas"]["ImportReport"];
                 };
             };
-            /** @description Imports are disabled */
+            /** @description The Authorization header is missing or is not the site password. API Gateway's authorizer answers before the request reaches the app. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GatewayErrorResponse"];
+                };
+            };
+            /** @description - `imports_disabled`: Imports are disabled */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1022,7 +1148,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description The batch already exists */
+            /** @description - `batch_exists`: The batch already exists */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -1031,7 +1157,12 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Invalid request, or the import was refused */
+            /**
+             * @description - `validation_error`: The request is invalid.
+             *     - `batch_validation`: A field is missing or the content is over the size cap
+             *     - `invalid_import_options`: The batch name or provenance breaks a rule
+             *     - `batch_empty`: The batch is empty
+             */
             422: {
                 headers: {
                     [name: string]: unknown;

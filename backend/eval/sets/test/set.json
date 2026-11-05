@@ -32,6 +32,15 @@
       "imported": "2026-10-25",
       "promoted": "2026-10-25",
       "items": 21
+    },
+    {
+      "batch": "hw01",
+      "provenance": "hand-written",
+      "generation_prompt": null,
+      "call_date": "2026-11-09",
+      "imported": "2026-11-02",
+      "promoted": "2026-11-02",
+      "items": 6
     }
   ]
 }

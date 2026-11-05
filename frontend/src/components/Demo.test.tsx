@@ -2,6 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiConfigError } from "@/api/client";
+import type { ErrorCode } from "@/lib/apiErrors";
 import { job, span } from "@/test/builders";
 import { Demo } from "./Demo";
 
@@ -14,7 +15,7 @@ vi.mock("@/api/client", async (original) => ({
 }));
 
 const ok = (data: unknown, status = 200) => ({ data, response: new Response(null, { status }) });
-const failure = (code: string, status: number) => ({
+const failure = (code: ErrorCode, status: number) => ({
   error: { error: { code, message: "m", details: [] } },
   response: new Response(null, { status }),
 });

@@ -1,23 +1,16 @@
 import type { ApiClient } from "@/api/client";
-import { codeOf, explain, NETWORK } from "./jobs";
+import { explainFailure, NETWORK } from "./apiErrors";
 
 export type Vote = "up" | "down";
 
 export type FeedbackResult = { ok: true; transcriptKept: boolean } | { ok: false; message: string };
 
-/** The sentence for a feedback failure; the rest are shared with jobs. */
-function feedbackMessage(code: string | undefined, retryAfter: string | null): string {
-  switch (code) {
-    case "job_not_found":
-      return "That job has expired, so it can no longer take feedback.";
-    case "job_not_finished":
-      return "That job has no results to give feedback on.";
-    case "span_not_found":
-      return "That result is no longer there.";
-    default:
-      return explain(code, retryAfter);
-  }
-}
+/** Feedback words these three codes its own way; the rest are shared with jobs. */
+const FEEDBACK_MESSAGES = {
+  job_not_found: "That job has expired, so it can no longer take feedback.",
+  job_not_finished: "That job has no results to give feedback on.",
+  span_not_found: "That result is no longer there.",
+} as const;
 
 /** A vote on one span. With `consent`, the server also keeps the transcript for up to 90 days. */
 export async function sendFeedback(
@@ -32,8 +25,7 @@ export async function sendFeedback(
       body: { job_id: jobId, span_index: spanIndex, vote, consent },
     });
     if (data) return { ok: true, transcriptKept: data.transcript_kept };
-    const retryAfter = response.headers.get("retry-after");
-    return { ok: false, message: feedbackMessage(codeOf(error), retryAfter) };
+    return { ok: false, message: explainFailure(error, response, FEEDBACK_MESSAGES) };
   } catch {
     return { ok: false, message: NETWORK };
   }

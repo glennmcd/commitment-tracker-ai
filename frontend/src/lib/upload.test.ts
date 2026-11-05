@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ApiClient } from "@/api/client";
+import type { ErrorCode } from "@/lib/apiErrors";
 import { startUploadJob, uploadRecording } from "./upload";
 
 const ID = "a".repeat(32);
@@ -12,7 +13,7 @@ const ticket = {
 };
 
 const ok = (data: unknown, status = 200) => ({ data, response: new Response(null, { status }) });
-const failure = (code: string, status: number) => ({
+const failure = (code: ErrorCode, status: number) => ({
   error: { error: { code, message: "m", details: [] } },
   response: new Response(null, { status }),
 });

@@ -1,5 +1,6 @@
 import type { ApiClient } from "@/api/client";
-import { codeOf, explain, type JobResult, NETWORK } from "./jobs";
+import { explain, explainFailure, NETWORK } from "./apiErrors";
+import type { JobResult } from "./jobs";
 
 type FetchLike = (url: string, init: { method: string; body: FormData }) => Promise<Response>;
 
@@ -16,7 +17,7 @@ export async function uploadRecording(
 ): Promise<UploadResult> {
   try {
     const { data, error, response } = await client.POST("/uploads");
-    if (!data) return { ok: false, message: explain(codeOf(error), response.headers.get("retry-after")) };
+    if (!data) return { ok: false, message: explainFailure(error, response) };
     if (wav.byteLength > data.max_bytes) return { ok: false, message: explain("audio_too_long", null) };
 
     const form = new FormData();
@@ -41,7 +42,7 @@ export async function startUploadJob(
       body: { upload_id: uploadId, call_date: callDate, speaker_names: speakerNames },
     });
     if (data) return { ok: true, job: data };
-    return { ok: false, message: explain(codeOf(error), response.headers.get("retry-after")) };
+    return { ok: false, message: explainFailure(error, response) };
   } catch {
     return { ok: false, message: NETWORK };
   }

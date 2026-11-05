@@ -3,7 +3,14 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, 
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { bundleApi, bundleCommands, PYTHON_PLATFORM, PYTHON_VERSION, type Run } from "../scripts/bundle-api.js";
+import {
+  bundleApi,
+  bundleCommands,
+  EVALUATION_MODULES_IN_PACKAGE,
+  PYTHON_PLATFORM,
+  PYTHON_VERSION,
+  type Run,
+} from "../scripts/bundle-api.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const backend = path.join(here, "../../backend");
@@ -84,12 +91,17 @@ describe("bundleApi", () => {
     }
   });
 
-  it("leaves out the evaluation harness and bytecode caches", () => {
+  it("keeps only the evaluation modules the API imports, none needing scikit-learn, and no bytecode caches", () => {
     const dir = tempDir();
     try {
       const out = bundleApi(path.join(dir, "api"), fakeRun().run);
       const names = readdirSync(path.join(out, "commitment_tracker"), { recursive: true }).map(String);
-      expect(names.some((n) => n.split(path.sep)[0] === "evaluation")).toBe(false);
+      const evaluation = readdirSync(path.join(out, "commitment_tracker", "evaluation")).sort();
+      expect(evaluation).toEqual([...EVALUATION_MODULES_IN_PACKAGE].sort());
+      for (const file of evaluation) {
+        const source = readFileSync(path.join(out, "commitment_tracker", "evaluation", file), "utf8");
+        expect(source).not.toMatch(/sklearn/);
+      }
       expect(names.some((n) => n.includes("__pycache__"))).toBe(false);
     } finally {
       rmSync(dir, { recursive: true, force: true });

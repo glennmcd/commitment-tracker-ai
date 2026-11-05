@@ -3,7 +3,7 @@
   "info": {
     "title": "Commitment Tracker AI",
     "description": "Extracts commitments from conversation transcripts.",
-    "version": "0.4.0"
+    "version": "0.5.0"
   },
   "paths": {
     "/health": {
@@ -42,6 +42,26 @@
         "responses": {
           "200": {
             "description": "Successful Response",
+            "headers": {
+              "ratelimit-limit": {
+                "description": "Requests allowed per window for this rule.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "ratelimit-remaining": {
+                "description": "Requests left in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "ratelimit-reset": {
+                "description": "Seconds until the window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -51,41 +71,178 @@
             }
           },
           "422": {
-            "description": "Invalid request, or the model refused it",
+            "description": "- `validation_error`: The request is invalid.\n- `model_refused`: The model declined to analyse this transcript.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "validation_error": {
+                    "summary": "The request is invalid.",
+                    "value": {
+                      "error": {
+                        "code": "validation_error",
+                        "message": "The request is invalid.",
+                        "details": [
+                          {
+                            "loc": [
+                              "body",
+                              "transcript"
+                            ],
+                            "msg": "Field required",
+                            "type": "missing"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "model_refused": {
+                    "summary": "The model declined to analyse this transcript.",
+                    "value": {
+                      "error": {
+                        "code": "model_refused",
+                        "message": "The model declined to analyse this transcript.",
+                        "details": []
+                      }
+                    }
+                  }
                 }
               }
             }
           },
           "429": {
-            "description": "Too many requests from this client; see Retry-After",
-            "content": {
-              "application/json": {
+            "description": "- `rate_limited`: Too many requests. Try again in N seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "integer"
                 }
               }
-            }
-          },
-          "503": {
-            "description": "The day's spending cap is reached; see Retry-After (seconds to UTC midnight)",
+            },
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests. Try again in N seconds.",
+                    "value": {
+                      "error": {
+                        "code": "rate_limited",
+                        "message": "Too many requests. Try again in 30 seconds.",
+                        "details": []
+                      }
+                    }
+                  }
                 }
               }
             }
           },
           "502": {
-            "description": "The model failed or its output was invalid",
+            "description": "- `model_unavailable`: The model is unavailable. Try again later.\n- `model_output_invalid`: The model's output failed validation twice. Try again.\n- `extraction_failed`: The transcript could not be analysed.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "model_unavailable": {
+                    "summary": "The model is unavailable. Try again later.",
+                    "value": {
+                      "error": {
+                        "code": "model_unavailable",
+                        "message": "The model is unavailable. Try again later.",
+                        "details": []
+                      }
+                    }
+                  },
+                  "model_output_invalid": {
+                    "summary": "The model's output failed validation twice. Try again.",
+                    "value": {
+                      "error": {
+                        "code": "model_output_invalid",
+                        "message": "The model's output failed validation twice. Try again.",
+                        "details": []
+                      }
+                    }
+                  },
+                  "extraction_failed": {
+                    "summary": "The transcript could not be analysed.",
+                    "value": {
+                      "error": {
+                        "code": "extraction_failed",
+                        "message": "The transcript could not be analysed.",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "- `daily_budget_exhausted`: The demo has reached its daily spending limit. Try again after midnight UTC.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "daily_budget_exhausted": {
+                    "summary": "The demo has reached its daily spending limit. Try again after midnight UTC.",
+                    "value": {
+                      "error": {
+                        "code": "daily_budget_exhausted",
+                        "message": "The demo has reached its daily spending limit. Try again after midnight UTC.",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The Authorization header is missing or is not the site password. API Gateway's authorizer answers before the request reaches the app.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GatewayErrorResponse"
+                },
+                "examples": {
+                  "forbidden": {
+                    "value": {
+                      "message": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "The request took longer than API Gateway's 29 seconds. API Gateway answers, not the app.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GatewayErrorResponse"
+                },
+                "examples": {
+                  "gateway_timeout": {
+                    "value": {
+                      "message": "Gateway Timeout"
+                    }
+                  }
                 }
               }
             }
@@ -100,6 +257,26 @@
         "responses": {
           "200": {
             "description": "Successful Response",
+            "headers": {
+              "ratelimit-limit": {
+                "description": "Requests allowed per window for this rule.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "ratelimit-remaining": {
+                "description": "Requests left in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "ratelimit-reset": {
+                "description": "Seconds until the window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -109,21 +286,70 @@
             }
           },
           "429": {
-            "description": "Too many requests from this client; see Retry-After",
+            "description": "- `rate_limited`: Too many requests. Try again in N seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests. Try again in N seconds.",
+                    "value": {
+                      "error": {
+                        "code": "rate_limited",
+                        "message": "Too many requests. Try again in 30 seconds.",
+                        "details": []
+                      }
+                    }
+                  }
                 }
               }
             }
           },
           "503": {
-            "description": "Audio storage is not configured",
+            "description": "- `uploads_unavailable`: Audio uploads are not available.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "uploads_unavailable": {
+                    "summary": "Audio uploads are not available.",
+                    "value": {
+                      "error": {
+                        "code": "uploads_unavailable",
+                        "message": "Audio uploads are not available.",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The Authorization header is missing or is not the site password. API Gateway's authorizer answers before the request reaches the app.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GatewayErrorResponse"
+                },
+                "examples": {
+                  "forbidden": {
+                    "value": {
+                      "message": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -148,6 +374,26 @@
         "responses": {
           "202": {
             "description": "Successful Response",
+            "headers": {
+              "ratelimit-limit": {
+                "description": "Requests allowed per window for this rule.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "ratelimit-remaining": {
+                "description": "Requests left in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "ratelimit-reset": {
+                "description": "Seconds until the window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -157,41 +403,188 @@
             }
           },
           "404": {
-            "description": "The upload, sample or job does not exist",
+            "description": "- `upload_not_found`: No upload with that id. It may have expired.\n- `sample_not_found`: No sample clip with that id.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests from this client; see Retry-After",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "upload_not_found": {
+                    "summary": "No upload with that id. It may have expired.",
+                    "value": {
+                      "error": {
+                        "code": "upload_not_found",
+                        "message": "No upload with that id. It may have expired.",
+                        "details": []
+                      }
+                    }
+                  },
+                  "sample_not_found": {
+                    "summary": "No sample clip with that id.",
+                    "value": {
+                      "error": {
+                        "code": "sample_not_found",
+                        "message": "No sample clip with that id.",
+                        "details": []
+                      }
+                    }
+                  }
                 }
               }
             }
           },
           "422": {
-            "description": "Invalid request, or the audio is not accepted",
+            "description": "- `validation_error`: The request is invalid.\n- `audio_too_long`: The recording is longer than 60 seconds.\n- `audio_invalid`: The audio is not a 16 kHz mono 16-bit WAV.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "validation_error": {
+                    "summary": "The request is invalid.",
+                    "value": {
+                      "error": {
+                        "code": "validation_error",
+                        "message": "The request is invalid.",
+                        "details": [
+                          {
+                            "loc": [
+                              "body",
+                              "transcript"
+                            ],
+                            "msg": "Field required",
+                            "type": "missing"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "audio_too_long": {
+                    "summary": "The recording is longer than 60 seconds.",
+                    "value": {
+                      "error": {
+                        "code": "audio_too_long",
+                        "message": "The recording is longer than 60 seconds.",
+                        "details": []
+                      }
+                    }
+                  },
+                  "audio_invalid": {
+                    "summary": "The audio is not a 16 kHz mono 16-bit WAV.",
+                    "value": {
+                      "error": {
+                        "code": "audio_invalid",
+                        "message": "The audio is not a 16 kHz mono 16-bit WAV.",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "- `rate_limited`: Too many requests. Try again in N seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests. Try again in N seconds.",
+                    "value": {
+                      "error": {
+                        "code": "rate_limited",
+                        "message": "Too many requests. Try again in 30 seconds.",
+                        "details": []
+                      }
+                    }
+                  }
                 }
               }
             }
           },
           "503": {
-            "description": "Jobs are not configured, or the day's spending cap is reached",
+            "description": "- `jobs_unavailable`: Jobs are not available.\n- `daily_budget_exhausted`: The demo has reached its daily spending limit. Try again after midnight UTC.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "jobs_unavailable": {
+                    "summary": "Jobs are not available.",
+                    "value": {
+                      "error": {
+                        "code": "jobs_unavailable",
+                        "message": "Jobs are not available.",
+                        "details": []
+                      }
+                    }
+                  },
+                  "daily_budget_exhausted": {
+                    "summary": "The demo has reached its daily spending limit. Try again after midnight UTC.",
+                    "value": {
+                      "error": {
+                        "code": "daily_budget_exhausted",
+                        "message": "The demo has reached its daily spending limit. Try again after midnight UTC.",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The Authorization header is missing or is not the site password. API Gateway's authorizer answers before the request reaches the app.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GatewayErrorResponse"
+                },
+                "examples": {
+                  "forbidden": {
+                    "value": {
+                      "message": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "The request took longer than API Gateway's 29 seconds. API Gateway answers, not the app.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GatewayErrorResponse"
+                },
+                "examples": {
+                  "gateway_timeout": {
+                    "value": {
+                      "message": "Gateway Timeout"
+                    }
+                  }
                 }
               }
             }
@@ -224,22 +617,44 @@
                   "$ref": "#/components/schemas/JobResponse"
                 }
               }
-            }
-          },
-          "404": {
-            "description": "The upload, sample or job does not exist",
-            "content": {
-              "application/json": {
+            },
+            "headers": {
+              "ratelimit-limit": {
+                "description": "Requests allowed per window for this rule.",
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "integer"
+                }
+              },
+              "ratelimit-remaining": {
+                "description": "Requests left in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "ratelimit-reset": {
+                "description": "Seconds until the window resets.",
+                "schema": {
+                  "type": "integer"
                 }
               }
             }
           },
-          "429": {
-            "description": "Too many requests from this client; see Retry-After",
+          "404": {
+            "description": "- `job_not_found`: No job with that id. It may have expired.",
             "content": {
               "application/json": {
+                "examples": {
+                  "job_not_found": {
+                    "summary": "No job with that id. It may have expired.",
+                    "value": {
+                      "error": {
+                        "code": "job_not_found",
+                        "message": "No job with that id. It may have expired.",
+                        "details": []
+                      }
+                    }
+                  }
+                },
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
@@ -247,21 +662,101 @@
             }
           },
           "422": {
-            "description": "Invalid request, or the audio is not accepted",
+            "description": "- `validation_error`: The request is invalid.",
             "content": {
               "application/json": {
+                "examples": {
+                  "validation_error": {
+                    "summary": "The request is invalid.",
+                    "value": {
+                      "error": {
+                        "code": "validation_error",
+                        "message": "The request is invalid.",
+                        "details": [
+                          {
+                            "loc": [
+                              "body",
+                              "transcript"
+                            ],
+                            "msg": "Field required",
+                            "type": "missing"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
           },
-          "503": {
-            "description": "Jobs are not configured, or the day's spending cap is reached",
+          "429": {
+            "description": "- `rate_limited`: Too many requests. Try again in N seconds.",
             "content": {
               "application/json": {
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests. Try again in N seconds.",
+                    "value": {
+                      "error": {
+                        "code": "rate_limited",
+                        "message": "Too many requests. Try again in 30 seconds.",
+                        "details": []
+                      }
+                    }
+                  }
+                },
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "- `jobs_unavailable`: Jobs are not available.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "jobs_unavailable": {
+                    "summary": "Jobs are not available.",
+                    "value": {
+                      "error": {
+                        "code": "jobs_unavailable",
+                        "message": "Jobs are not available.",
+                        "details": []
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The Authorization header is missing or is not the site password. API Gateway's authorizer answers before the request reaches the app.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "forbidden": {
+                    "value": {
+                      "message": "Forbidden"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/GatewayErrorResponse"
                 }
               }
             }
@@ -286,6 +781,26 @@
         "responses": {
           "200": {
             "description": "Successful Response",
+            "headers": {
+              "ratelimit-limit": {
+                "description": "Requests allowed per window for this rule.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "ratelimit-remaining": {
+                "description": "Requests left in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "ratelimit-reset": {
+                "description": "Seconds until the window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -295,51 +810,155 @@
             }
           },
           "404": {
-            "description": "The job or the span does not exist",
+            "description": "- `job_not_found`: No job with that id. It may have expired.\n- `span_not_found`: The job has no span with that index.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "job_not_found": {
+                    "summary": "No job with that id. It may have expired.",
+                    "value": {
+                      "error": {
+                        "code": "job_not_found",
+                        "message": "No job with that id. It may have expired.",
+                        "details": []
+                      }
+                    }
+                  },
+                  "span_not_found": {
+                    "summary": "The job has no span with that index.",
+                    "value": {
+                      "error": {
+                        "code": "span_not_found",
+                        "message": "The job has no span with that index.",
+                        "details": []
+                      }
+                    }
+                  }
                 }
               }
             }
           },
           "409": {
-            "description": "The job is not finished",
+            "description": "- `job_not_finished`: The job has no results to give feedback on.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests from this client; see Retry-After",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Feedback storage is not configured",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "job_not_finished": {
+                    "summary": "The job has no results to give feedback on.",
+                    "value": {
+                      "error": {
+                        "code": "job_not_finished",
+                        "message": "The job has no results to give feedback on.",
+                        "details": []
+                      }
+                    }
+                  }
                 }
               }
             }
           },
           "422": {
-            "description": "Validation Error",
+            "description": "- `validation_error`: The request is invalid.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "validation_error": {
+                    "summary": "The request is invalid.",
+                    "value": {
+                      "error": {
+                        "code": "validation_error",
+                        "message": "The request is invalid.",
+                        "details": [
+                          {
+                            "loc": [
+                              "body",
+                              "transcript"
+                            ],
+                            "msg": "Field required",
+                            "type": "missing"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "- `rate_limited`: Too many requests. Try again in N seconds.",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before trying again.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests. Try again in N seconds.",
+                    "value": {
+                      "error": {
+                        "code": "rate_limited",
+                        "message": "Too many requests. Try again in 30 seconds.",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "- `jobs_unavailable`: Jobs are not available.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "jobs_unavailable": {
+                    "summary": "Jobs are not available.",
+                    "value": {
+                      "error": {
+                        "code": "jobs_unavailable",
+                        "message": "Jobs are not available.",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The Authorization header is missing or is not the site password. API Gateway's authorizer answers before the request reaches the app.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GatewayErrorResponse"
+                },
+                "examples": {
+                  "forbidden": {
+                    "value": {
+                      "message": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -366,42 +985,41 @@
               }
             }
           },
-          "404": {
-            "description": "The upload, sample or job does not exist",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests from this client; see Retry-After",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Invalid request, or the audio is not accepted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "503": {
-            "description": "Jobs are not configured, or the day's spending cap is reached",
+            "description": "- `jobs_unavailable`: Jobs are not available.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "jobs_unavailable": {
+                    "summary": "Jobs are not available.",
+                    "value": {
+                      "error": {
+                        "code": "jobs_unavailable",
+                        "message": "Jobs are not available.",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The Authorization header is missing or is not the site password. API Gateway's authorizer answers before the request reaches the app.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GatewayErrorResponse"
+                },
+                "examples": {
+                  "forbidden": {
+                    "value": {
+                      "message": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -435,31 +1053,123 @@
             }
           },
           "404": {
-            "description": "Imports are disabled",
+            "description": "- `imports_disabled`: Imports are disabled",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "imports_disabled": {
+                    "summary": "Imports are disabled",
+                    "value": {
+                      "error": {
+                        "code": "imports_disabled",
+                        "message": "Imports are disabled",
+                        "details": []
+                      }
+                    }
+                  }
                 }
               }
             }
           },
           "409": {
-            "description": "The batch already exists",
+            "description": "- `batch_exists`: The batch already exists",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "batch_exists": {
+                    "summary": "The batch already exists",
+                    "value": {
+                      "error": {
+                        "code": "batch_exists",
+                        "message": "The batch already exists",
+                        "details": []
+                      }
+                    }
+                  }
                 }
               }
             }
           },
           "422": {
-            "description": "Invalid request, or the import was refused",
+            "description": "- `validation_error`: The request is invalid.\n- `batch_validation`: A field is missing or the content is over the size cap\n- `invalid_import_options`: The batch name or provenance breaks a rule\n- `batch_empty`: The batch is empty",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "validation_error": {
+                    "summary": "The request is invalid.",
+                    "value": {
+                      "error": {
+                        "code": "validation_error",
+                        "message": "The request is invalid.",
+                        "details": [
+                          {
+                            "loc": [
+                              "body",
+                              "transcript"
+                            ],
+                            "msg": "Field required",
+                            "type": "missing"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "batch_validation": {
+                    "summary": "A field is missing or the content is over the size cap",
+                    "value": {
+                      "error": {
+                        "code": "batch_validation",
+                        "message": "A field is missing or the content is over the size cap",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalid_import_options": {
+                    "summary": "The batch name or provenance breaks a rule",
+                    "value": {
+                      "error": {
+                        "code": "invalid_import_options",
+                        "message": "The batch name or provenance breaks a rule",
+                        "details": []
+                      }
+                    }
+                  },
+                  "batch_empty": {
+                    "summary": "The batch is empty",
+                    "value": {
+                      "error": {
+                        "code": "batch_empty",
+                        "message": "The batch is empty",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The Authorization header is missing or is not the site password. API Gateway's authorizer answers before the request reaches the app.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GatewayErrorResponse"
+                },
+                "examples": {
+                  "forbidden": {
+                    "value": {
+                      "message": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -493,31 +1203,123 @@
             }
           },
           "404": {
-            "description": "Imports are disabled",
+            "description": "- `imports_disabled`: Imports are disabled",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "imports_disabled": {
+                    "summary": "Imports are disabled",
+                    "value": {
+                      "error": {
+                        "code": "imports_disabled",
+                        "message": "Imports are disabled",
+                        "details": []
+                      }
+                    }
+                  }
                 }
               }
             }
           },
           "409": {
-            "description": "The batch already exists",
+            "description": "- `batch_exists`: The batch already exists",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "batch_exists": {
+                    "summary": "The batch already exists",
+                    "value": {
+                      "error": {
+                        "code": "batch_exists",
+                        "message": "The batch already exists",
+                        "details": []
+                      }
+                    }
+                  }
                 }
               }
             }
           },
           "422": {
-            "description": "Invalid request, or the import was refused",
+            "description": "- `validation_error`: The request is invalid.\n- `batch_validation`: A field is missing or the content is over the size cap\n- `invalid_import_options`: The batch name or provenance breaks a rule\n- `batch_empty`: The batch is empty",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "validation_error": {
+                    "summary": "The request is invalid.",
+                    "value": {
+                      "error": {
+                        "code": "validation_error",
+                        "message": "The request is invalid.",
+                        "details": [
+                          {
+                            "loc": [
+                              "body",
+                              "transcript"
+                            ],
+                            "msg": "Field required",
+                            "type": "missing"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "batch_validation": {
+                    "summary": "A field is missing or the content is over the size cap",
+                    "value": {
+                      "error": {
+                        "code": "batch_validation",
+                        "message": "A field is missing or the content is over the size cap",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalid_import_options": {
+                    "summary": "The batch name or provenance breaks a rule",
+                    "value": {
+                      "error": {
+                        "code": "invalid_import_options",
+                        "message": "The batch name or provenance breaks a rule",
+                        "details": []
+                      }
+                    }
+                  },
+                  "batch_empty": {
+                    "summary": "The batch is empty",
+                    "value": {
+                      "error": {
+                        "code": "batch_empty",
+                        "message": "The batch is empty",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The Authorization header is missing or is not the site password. API Gateway's authorizer answers before the request reaches the app.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GatewayErrorResponse"
+                },
+                "examples": {
+                  "forbidden": {
+                    "value": {
+                      "message": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -676,8 +1478,7 @@
       "ErrorBody": {
         "properties": {
           "code": {
-            "type": "string",
-            "title": "Code"
+            "$ref": "#/components/schemas/ErrorCode"
           },
           "message": {
             "type": "string",
@@ -698,6 +1499,33 @@
           "message"
         ],
         "title": "ErrorBody"
+      },
+      "ErrorCode": {
+        "type": "string",
+        "enum": [
+          "validation_error",
+          "rate_limited",
+          "daily_budget_exhausted",
+          "model_unavailable",
+          "model_output_invalid",
+          "model_refused",
+          "extraction_failed",
+          "uploads_unavailable",
+          "upload_not_found",
+          "sample_not_found",
+          "audio_too_long",
+          "audio_invalid",
+          "jobs_unavailable",
+          "job_not_found",
+          "job_not_finished",
+          "span_not_found",
+          "imports_disabled",
+          "batch_exists",
+          "invalid_import_options",
+          "batch_empty",
+          "batch_validation"
+        ],
+        "title": "ErrorCode"
       },
       "ErrorDetail": {
         "properties": {
@@ -797,18 +1625,19 @@
         ],
         "title": "FeedbackResponse"
       },
-      "HTTPValidationError": {
+      "GatewayErrorResponse": {
         "properties": {
-          "detail": {
-            "items": {
-              "$ref": "#/components/schemas/ValidationError"
-            },
-            "type": "array",
-            "title": "Detail"
+          "message": {
+            "type": "string",
+            "title": "Message"
           }
         },
         "type": "object",
-        "title": "HTTPValidationError"
+        "required": [
+          "message"
+        ],
+        "title": "GatewayErrorResponse",
+        "description": "What API Gateway sends when it answers instead of the app."
       },
       "HealthResponse": {
         "properties": {
@@ -1514,46 +2343,6 @@
         ],
         "title": "UploadResponse",
         "description": "A presigned S3 POST: send `fields`, then the file as the last form field, to `url`."
-      },
-      "ValidationError": {
-        "properties": {
-          "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Location"
-          },
-          "msg": {
-            "type": "string",
-            "title": "Message"
-          },
-          "type": {
-            "type": "string",
-            "title": "Error Type"
-          },
-          "input": {
-            "title": "Input"
-          },
-          "ctx": {
-            "type": "object",
-            "title": "Context"
-          }
-        },
-        "type": "object",
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
-        "title": "ValidationError"
       }
     },
     "securitySchemes": {

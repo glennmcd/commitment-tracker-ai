@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ApiClient } from "@/api/client";
+import type { ErrorCode } from "@/lib/apiErrors";
 import { failure, fakeClient, ok } from "@/lib/testExports";
 import { type JobResult, pollJob, startTextJob } from "./jobs";
 
@@ -18,7 +19,7 @@ describe("startTextJob", () => {
     expect(result).toMatchObject({ ok: true, job: { job_id: ID, status: "uploaded" } });
   });
 
-  it.each([
+  it.each<[ErrorCode, number, Record<string, string>, string]>([
     ["rate_limited", 429, { "retry-after": "30" }, "Too many requests. Try again in 30 seconds."],
     [
       "daily_budget_exhausted",
