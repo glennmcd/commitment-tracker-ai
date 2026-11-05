@@ -21,6 +21,8 @@ backend/eval/.audio/
 # Part 2 frontend
 node_modules/
 .next/
+.vitest/
+next-env.d.ts
 
 .DS_Store
 *.log
