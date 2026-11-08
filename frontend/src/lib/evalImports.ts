@@ -9,6 +9,7 @@ export type CheckResult = { ok: true; job: components["schemas"]["ImportReport"]
 
 export function optionProblems(options: { [key: string]: any }): { [key: string]: any } {
   const problems: { [key: string]: any } = {};
+
   if (!("batch" in options) || !options["batch"] || options["batch"].trim() === "") {
     problems["batch"] = "Missing batch";
   }
@@ -30,11 +31,11 @@ export function optionProblems(options: { [key: string]: any }): { [key: string]
 export function importSummary(options: { [key: string]: any }): string {
   let result: string = `imported: ${options["imported"]}`;
   result += ` | `;
-  result += `rejected: ${options["rejected"]}`;
+  result += `rejected: ${options["rejected"] != undefined ? (options["rejected"] as any[]).length : 0}`;
   result += ` | `;
-  result += `date disagreements ${options["dateDisagreements"]}`;
+  result += `date disagreements: ${options["dateDisagreements"] != undefined ? (options["dateDisagreements"] as any[]).length : 0}`;
   result += ` | `;
-  result += `near duplicates ${options["nearDuplicates"]}`;
+  result += `near duplicates: ${options["nearDuplicates"] != undefined ? (options["nearDuplicates"] as any[]).length : 0}`;
   return result;
 }
 export async function checkImport(client: ApiClient, request: ImportResult): Promise<CheckResult> {
@@ -57,7 +58,10 @@ export async function importBatch(client: ApiClient, request: ImportResult): Pro
   }
 }
 
-export async function readRequest(file: File, options: { [key: string]: any }): Promise<{ ok: true; job: ImportRequest } | { ok: false; message: string }> {
+export async function readRequest(
+  file: File,
+  options: { [key: string]: any },
+): Promise<{ ok: true; job: ImportRequest } | { ok: false; message: string }> {
   try {
     const date = new Date().toISOString().slice(0, 10);
     const content = await file.text();

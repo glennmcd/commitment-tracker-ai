@@ -29,6 +29,12 @@
       ],
       "env": { "EXTRACTOR_MODEL": "claude-haiku-5-5" },
       "port": 8001
+    },
+    {
+      "name": "frontend",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--cwd", "frontend", "dev"],
+      "port": 3000
     }
   ]
 }
