@@ -36,9 +36,10 @@ Caveats:
 - Small sample: 3 weeks, 23 sessions, 28 merged PRs. Treat changes under about 1.5x as noise.
 - Per-PR and per-line figures overstate cost: work committed straight to `main` (about 2.6M weighted tokens) has
   tokens but no PR lines.
-- "Over ceiling" in this version of the report means 150k tokens or more, the advisory threshold.
-- Sessions with a `<synthetic>` first record count as first turns with a zero write, which lowers the
-  first-turn median.
+- "Over ceiling" in this version of the report means 150k tokens or more, the context ceiling hook's
+  advisory level; later versions head the same column "Ctx >=150k" (JSON key `over_ceiling_share`).
+- The first-turn medians include sub-agent transcripts, whose first turns are smaller than a main
+  session's.
 
 ## What it showed
 
