@@ -1,0 +1,179 @@
+{
+  "baseline": [
+    "2026-W43",
+    "2026-W44",
+    "2026-W45"
+  ],
+  "weeks": [
+    {
+      "week": "2026-W43",
+      "requests": 632,
+      "raw_tokens": 159990431,
+      "weighted": 22435831,
+      "merged_prs": 18,
+      "changed_lines": 12966,
+      "raw_per_pr": 8888357.277777778,
+      "weighted_per_pr": 1246435.063888889,
+      "weighted_per_line": 1730.3587189572731,
+      "cache_read_share": 0.9843385508474566,
+      "expiry_share": 0.017802059452564564,
+      "median_context": 171134,
+      "p90_context": 566518,
+      "over_ceiling_share": 0.6044303797468354,
+      "first_turn_read": 45006,
+      "first_turn_write": 26894,
+      "weighted_index": 260,
+      "weighted_per_pr_index": 135,
+      "weighted_per_line_index": 199
+    },
+    {
+      "week": "2026-W44",
+      "requests": 62,
+      "raw_tokens": 5761266,
+      "weighted": 1247952,
+      "merged_prs": 8,
+      "changed_lines": 11804,
+      "raw_per_pr": 720158.25,
+      "weighted_per_pr": 155994.0375,
+      "weighted_per_line": 105.72283124364623,
+      "cache_read_share": 0.9458030578695724,
+      "expiry_share": 0.0,
+      "median_context": 92524,
+      "p90_context": 100967,
+      "over_ceiling_share": 0.0,
+      "first_turn_read": 45267,
+      "first_turn_write": 38020,
+      "weighted_index": 14,
+      "weighted_per_pr_index": 17,
+      "weighted_per_line_index": 12
+    },
+    {
+      "week": "2026-W45",
+      "requests": 87,
+      "raw_tokens": 9386075,
+      "weighted": 2192104,
+      "merged_prs": 2,
+      "changed_lines": 5023,
+      "raw_per_pr": 4693037.5,
+      "weighted_per_pr": 1096051.8,
+      "weighted_per_line": 436.4132191917181,
+      "cache_read_share": 0.9395041058163289,
+      "expiry_share": 0.14723665432600905,
+      "median_context": 96843,
+      "p90_context": 153518,
+      "over_ceiling_share": 0.10344827586206896,
+      "first_turn_read": 45582,
+      "first_turn_write": 38253,
+      "weighted_index": 25,
+      "weighted_per_pr_index": 119,
+      "weighted_per_line_index": 50
+    },
+    {
+      "week": "2026-W46",
+      "requests": 2,
+      "raw_tokens": 211352,
+      "weighted": 142895,
+      "merged_prs": 0,
+      "changed_lines": 0,
+      "raw_per_pr": null,
+      "weighted_per_pr": null,
+      "weighted_per_line": null,
+      "cache_read_share": 0.7090635527461296,
+      "expiry_share": 0.8303707892217512,
+      "median_context": 104854,
+      "p90_context": 105110,
+      "over_ceiling_share": 0.0,
+      "first_turn_read": null,
+      "first_turn_write": null,
+      "weighted_index": 2,
+      "weighted_per_pr_index": null,
+      "weighted_per_line_index": null
+    }
+  ],
+  "branches": [
+    {
+      "branch": "part3plan",
+      "weighted": 15480586,
+      "pr": 16,
+      "changed_lines": 1171,
+      "weighted_per_line": 13219.971050384285
+    },
+    {
+      "branch": "gen1",
+      "weighted": 2438103,
+      "pr": 27,
+      "changed_lines": 1344,
+      "weighted_per_line": 1814.0645089285713
+    },
+    {
+      "branch": "part2",
+      "weighted": 2350082,
+      "pr": 2,
+      "changed_lines": 5000,
+      "weighted_per_line": 470.0163299999998
+    },
+    {
+      "branch": "main",
+      "weighted": 1783105,
+      "pr": null,
+      "changed_lines": null,
+      "weighted_per_line": null
+    },
+    {
+      "branch": "gif",
+      "weighted": 1025185,
+      "pr": 14,
+      "changed_lines": 2,
+      "weighted_per_line": 512592.6499999999
+    },
+    {
+      "branch": "part3",
+      "weighted": 849378,
+      "pr": 17,
+      "changed_lines": 5000,
+      "weighted_per_line": 169.8756
+    },
+    {
+      "branch": "import_file1",
+      "weighted": 782398,
+      "pr": null,
+      "changed_lines": null,
+      "weighted_per_line": null
+    },
+    {
+      "branch": "build1",
+      "weighted": 495792,
+      "pr": 11,
+      "changed_lines": 61,
+      "weighted_per_line": 8127.742622950819
+    },
+    {
+      "branch": "pw2",
+      "weighted": 446984,
+      "pr": 7,
+      "changed_lines": 266,
+      "weighted_per_line": 1680.3894736842108
+    },
+    {
+      "branch": "links",
+      "weighted": 155900,
+      "pr": 24,
+      "changed_lines": 201,
+      "weighted_per_line": 775.6208955223882
+    },
+    {
+      "branch": "branch2",
+      "weighted": 129045,
+      "pr": 12,
+      "changed_lines": 33,
+      "weighted_per_line": 3910.466666666667
+    },
+    {
+      "branch": "recfix",
+      "weighted": 82225,
+      "pr": null,
+      "changed_lines": null,
+      "weighted_per_line": null
+    }
+  ]
+}
