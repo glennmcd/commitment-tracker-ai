@@ -26,7 +26,6 @@ export function ImportForm({
     if (!event.target.files?.[0]) {
       setFileIssue("Missing file");
     }
-    
   };
 
   const handleBatchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
