@@ -38,7 +38,7 @@
     "baseline": ".fleet-gates/duplication-baseline.json"
   },
   "verdict": {
-    "reviewers": ["glennmcd"],
+    "reviewers": ["g26work"],
     "exempt_branches": ["release-please--"]
   }
 }
