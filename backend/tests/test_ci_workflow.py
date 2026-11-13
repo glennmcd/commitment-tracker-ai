@@ -45,7 +45,9 @@ def test_every_action_is_pinned_to_a_commit_with_its_tag_in_a_comment() -> None:
     lines = [line for line in read().splitlines() if re.match(r"^\s*-?\s*uses:", line)]
     assert len(lines) >= 6
     for line in lines:
-        assert re.search(r"uses:\s*[\w.-]+/[\w.-]+@[0-9a-f]{40} # v\d+(\.\d+)*\s*$", line), line
+        assert re.search(
+            r"uses:\s*[\w.-]+/[\w.-]+(?:/[\w./-]+)?@[0-9a-f]{40} # v\d+(\.\d+)*\s*$", line
+        ), line
 
 
 def test_uses_no_secrets() -> None:
@@ -56,7 +58,7 @@ def test_the_jobs_each_have_a_timeout() -> None:
     body = read().split("\njobs:\n", 1)[1]
     names = re.findall(r"^  ([a-z0-9-]+):\n", body, flags=re.MULTILINE)
     assert names == ["gates", "backend", "eval-gate", "frontend", "e2e", "infra", "eval-live"]
-    # `gates` calls a reusable workflow, which cannot set a timeout here; fleet-kit sets 10 minutes in it.
+    # `gates` calls a reusable workflow, which cannot set a timeout here; fleet-kit sets one.
     for name in names[1:]:
         assert re.search(r"^    timeout-minutes: \d+$", job(name), re.MULTILINE), name
 
