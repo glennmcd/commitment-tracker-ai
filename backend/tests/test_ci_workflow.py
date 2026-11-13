@@ -1,6 +1,6 @@
-"""The CI workflow runs repository code on every pull request and push to main, so its permissions and its
-actions are checked as text: read-only token, actions pinned to commits, no secrets, and the jobs
-the plan calls for, with the checks each one must run. No YAML parser is needed.
+"""The CI workflow runs repository code on every pull request and push to main, so its permissions
+and actions are checked as text: read-only token, actions pinned to commits, no secrets, and the
+jobs the plan calls for, with the checks each one must run. No YAML parser is needed.
 """
 
 import re
