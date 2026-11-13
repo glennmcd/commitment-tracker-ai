@@ -55,8 +55,9 @@ def test_uses_no_secrets() -> None:
 def test_the_jobs_each_have_a_timeout() -> None:
     body = read().split("\njobs:\n", 1)[1]
     names = re.findall(r"^  ([a-z0-9-]+):\n", body, flags=re.MULTILINE)
-    assert names == ["backend", "eval-gate", "frontend", "e2e", "infra", "eval-live"]
-    for name in names:
+    assert names == ["gates", "backend", "eval-gate", "frontend", "e2e", "infra", "eval-live"]
+    # `gates` calls a reusable workflow, which cannot set a timeout here; fleet-kit sets 10 minutes in it.
+    for name in names[1:]:
         assert re.search(r"^    timeout-minutes: \d+$", job(name), re.MULTILINE), name
 
 
