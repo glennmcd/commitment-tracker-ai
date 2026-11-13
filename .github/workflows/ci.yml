@@ -21,13 +21,13 @@ concurrency:
 jobs:
   # The fleet-kit gates (docs/gates.md in glennmcd/fleet-kit): no silent skips, file-size cap, copy-paste,
   # audit greps, change obligations, and a ratchet that refuses to loosen them. Settings: .fleet-gates.json.
-  # The workflow and the scripts it runs are pinned to the same commit; update both together. While fleet-kit
+  # The workflow and the scripts it runs are pinned to the same commit; update both together.
   gates:
     permissions:
       contents: read
-    uses: glennmcd/fleet-kit/.github/workflows/gates.yml@3dc3c11d4d91abdaef2ae7c4454ee9815eef9996 # v0.2.0
+    uses: glennmcd/fleet-kit/.github/workflows/gates.yml@b593047cef0bde0e05108859ada9ef4f860d7ae9 # v0.3.0
     with:
-      kit-ref: 3dc3c11d4d91abdaef2ae7c4454ee9815eef9996
+      kit-ref: b593047cef0bde0e05108859ada9ef4f860d7ae9
 
   backend:
     runs-on: ubuntu-latest
