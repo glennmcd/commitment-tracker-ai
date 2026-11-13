@@ -4,7 +4,7 @@ Commitment Tracker AI reads a conversation transcript and returns the commitment
 whom, and by when. Every statement gets one of eight labels, so a firm promise is kept apart from a hedge, a
 request, a promise someone else made, or a refusal.
 
-Demo at https://commitmentai.g26work.com.  Ask for access to model in a GitHub issue. 
+Demo at https://commitmentai.g26work.com. To use it, ask for access in a GitHub issue.
 
 ![Commitment Tracker AI: finding a commitment made based on an event, and a date.  Also a refusal](docs/media/commitment-tracker-ai1.gif)
 
