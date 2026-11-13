@@ -275,6 +275,12 @@ bun run test
 `bun run --cwd frontend e2e` also builds the site and runs the Playwright test on Chromium. CI runs all of it
 ([.github/workflows/ci.yml](.github/workflows/ci.yml)).
 
+Every pull request also needs a `reviewer-verdict` check: it passes only when a reviewer listed in
+[.fleet-gates.json](.fleet-gates.json) approved the PR's latest commit, so a push after approval needs a new review.
+Settings are read from `main`, so a PR cannot change who may approve it. The workflow is
+[.github/workflows/verdict.yml](.github/workflows/verdict.yml); how it works is in
+[docs/verdict.md](https://github.com/glennmcd/fleet-kit/blob/main/docs/verdict.md) in fleet-kit.
+
 The code lives in `backend/src/commitment_tracker/`:
 
 - `schemas.py`: the request and response models
