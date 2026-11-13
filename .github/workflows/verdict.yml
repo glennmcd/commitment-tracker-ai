@@ -1,0 +1,35 @@
+name: verdict
+
+# Publishes the `reviewer-verdict` check on a pull request's head commit. It passes only when the reviewer
+# approved that exact commit, so a push after approval needs a new review. The reviewer is the
+# `review-pr` skill from the cc-practices plugin, which posts a comment with a marker this check reads; see
+# docs/verdict.md in glennmcd/fleet-kit. Reviewers and exempt branches are in `.fleet-gates.json`.
+#
+# This is a separate workflow from ci.yml because a comment would otherwise start every CI job.
+# It never checks out or runs the pull request's code.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+# One run per pull request at a time; each run reads the live head, so the newest one is the one that counts.
+concurrency:
+  group: verdict-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  verdict:
+    if: github.event_name == 'pull_request' || github.event.issue.pull_request
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: read
+      issues: read
+    # Pinned to a commit, with the same commit as kit-ref; update both together.
+    uses: glennmcd/fleet-kit/.github/workflows/verdict.yml@b593047cef0bde0e05108859ada9ef4f860d7ae9 # v0.3.0
+    with:
+      kit-ref: b593047cef0bde0e05108859ada9ef4f860d7ae9
