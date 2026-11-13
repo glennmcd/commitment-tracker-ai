@@ -1,4 +1,4 @@
-"""The CI workflow runs repository code on every push and pull request, so its permissions and its
+"""The CI workflow runs repository code on every pull request and push to main, so its permissions and its
 actions are checked as text: read-only token, actions pinned to commits, no secrets, and the jobs
 the plan calls for, with the checks each one must run. No YAML parser is needed.
 """
@@ -24,10 +24,17 @@ def job(name: str) -> str:
     return jobs[name]
 
 
-def test_runs_on_every_push_and_pull_request() -> None:
+def test_runs_on_pull_requests_and_pushes_to_main_only() -> None:
+    # A push to a pull request's branch would run everything twice, and Actions minutes are limited.
     # workflow_dispatch is there for the disabled live evaluation job.
-    on_block = read().split("\non:\n", 1)[1].split("\n\n", 1)[0]
-    assert on_block == "  push:\n  pull_request:\n  workflow_dispatch:"
+    block = read().split("\non:\n", 1)[1].split("\n\n", 1)[0]
+    lines = [line for line in block.splitlines() if not line.strip().startswith("#")]
+    assert lines == [
+        "  push:",
+        "    branches: [main]",
+        "  pull_request:",
+        "  workflow_dispatch:",
+    ]
 
 
 def test_never_runs_on_pull_request_target() -> None:

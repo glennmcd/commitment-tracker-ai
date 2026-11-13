@@ -351,7 +351,7 @@ seed Part 3's audio evaluation items.
 
 ## CI and tooling
 
-`.github/workflows/ci.yml` runs on every push and pull request. Actions are pinned to commit SHAs with the tag in a
+`.github/workflows/ci.yml` runs on every pull request and every push to `main`. Actions are pinned to commit SHAs with the tag in a
 comment, and the workflow has `permissions: contents: read`. There are three jobs:
 
 - **backend**: `uv sync --locked`, pytest (including the `openapi.json` freshness test), Ruff check and format,

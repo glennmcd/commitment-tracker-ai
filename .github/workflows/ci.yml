@@ -1,9 +1,11 @@
 name: ci
 
-# Checks every push and pull request. No job calls AWS or Anthropic: tests use fakes and mocks, `cdk synth`
-# runs against a placeholder account, and the only network use is installing packages and the browser.
+# Checks every pull request and every push to main. No job calls AWS or Anthropic: tests use fakes and mocks,
+# `cdk synth` runs against a placeholder account, and the only network use is installing packages and the browser.
 on:
+  # A push to a branch with an open pull request would run everything twice, so only main runs on push.
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
