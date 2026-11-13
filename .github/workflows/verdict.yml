@@ -30,6 +30,6 @@ jobs:
       pull-requests: read
       issues: read
     # Pinned to a commit, with the same commit as kit-ref; update both together.
-    uses: glennmcd/fleet-kit/.github/workflows/verdict.yml@5b6d9856faff688303fa5987ba557c3e27d51e2a # v0.3.1
+    uses: glennmcd/fleet-kit/.github/workflows/verdict.yml@eee9563e7a6ddc75a5a421e90126cf75ed35c041 # v0.4.0
     with:
-      kit-ref: 5b6d9856faff688303fa5987ba557c3e27d51e2a
+      kit-ref: eee9563e7a6ddc75a5a421e90126cf75ed35c041
