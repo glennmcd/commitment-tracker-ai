@@ -17,6 +17,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # The fleet-kit gates (docs/gates.md in glennmcd/fleet-kit): no silent skips, file-size cap, copy-paste,
+  # audit greps, change obligations, and a ratchet that refuses to loosen them. Settings: .fleet-gates.json.
+  # The workflow and the scripts it runs are pinned to the same commit; update both together. While fleet-kit
+  # is private, FLEET_KIT_TOKEN must be a read-only token for it.
+  gates:
+    permissions:
+      contents: read
+    uses: glennmcd/fleet-kit/.github/workflows/gates.yml@3dc3c11d4d91abdaef2ae7c4454ee9815eef9996
+    with:
+      kit-ref: 3dc3c11d4d91abdaef2ae7c4454ee9815eef9996
+    secrets:
+      kit-token: ${{ secrets.FLEET_KIT_TOKEN }}
+
   backend:
     runs-on: ubuntu-latest
     timeout-minutes: 15

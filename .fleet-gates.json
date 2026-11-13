@@ -1,0 +1,62 @@
+{
+  "silent_skips": {},
+  "file_size": {
+    "cap": 800,
+    "include": [
+      "**/*.py",
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.js",
+      "**/*.jsx",
+      "**/*.mjs"
+    ],
+    "exclude": [
+      "**/*.d.ts"
+    ],
+    "exceptions": {}
+  },
+  "audit": {
+    "rules": [
+      {
+        "id": "log-transcript",
+        "pattern": "\\b(?:logger|logging|log)\\.(?:debug|info|warning|error|exception|critical)\\((?:[^\"'\\n]*[\"'][^\"']*[\"']\\s*,[^#]*\\b(?:transcript|quote)s?\\b|.*\\bf[\"'][^\"']*\\{[^}]*\\b(?:transcript|quote)\\b)",
+        "paths": [
+          "backend/src/**/*.py"
+        ],
+        "message": "log ids, counts, labels, latency and token usage, never transcript text or quotes",
+        "incident": "CLAUDE.md privacy rule: never log transcript text or quotes"
+      }
+    ]
+  },
+  "obligations": [
+    {
+      "id": "backend-needs-tests",
+      "when": [
+        "backend/src/**/*.py"
+      ],
+      "also": [
+        "backend/tests/**",
+        "backend/eval/**"
+      ],
+      "except": [
+        "**/__init__.py"
+      ],
+      "incident": "cc-practices testing rule: new functions, routes and rules ship with their tests"
+    },
+    {
+      "id": "infra-needs-tests",
+      "when": [
+        "infra/lib/**/*.ts"
+      ],
+      "also": [
+        "infra/test/**"
+      ],
+      "incident": "cc-practices testing rule: a stack change is checked by the stack test"
+    }
+  ],
+  "duplication": {
+    "min_lines": 8,
+    "min_chars": 160,
+    "baseline": ".fleet-gates/duplication-baseline.json"
+  }
+}
