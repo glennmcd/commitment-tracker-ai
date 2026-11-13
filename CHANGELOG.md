@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.12.1](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.12.0...v0.12.1) (2026-11-13)
+
+
+### Documentation
+
+* add the agent-ready issue template ([#40](https://github.com/glennmcd/commitment-tracker-ai/issues/40)) ([b3eac3d](https://github.com/glennmcd/commitment-tracker-ai/commit/b3eac3ddfcd67982fa01994ed7fe1337f93178cb))
+* clarify how to get demo access in the README ([#39](https://github.com/glennmcd/commitment-tracker-ai/issues/39)) ([ac74a7e](https://github.com/glennmcd/commitment-tracker-ai/commit/ac74a7edbbf19fd9b20079d5c859e0c22ac00e49)), closes [#38](https://github.com/glennmcd/commitment-tracker-ai/issues/38)
+* describe the reviewer-verdict check in the README ([#34](https://github.com/glennmcd/commitment-tracker-ai/issues/34)) ([f03e671](https://github.com/glennmcd/commitment-tracker-ai/commit/f03e6713f0d05bd7f5ea4c1a628b99009fca5efc))
+
 ## [0.12.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.11.0...v0.12.0) (2026-11-05)
 
 
