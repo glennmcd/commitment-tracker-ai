@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MAX_SECONDS, recordingToWav } from "@/lib/wav";
+import { Playback } from "./Playback";
 
 export interface RecordedClip {
   wav: Uint8Array;
@@ -44,6 +45,7 @@ export function Recorder({ disabled = false, onRecorded, convert = recordingToWa
   const [remainingMs, setRemainingMs] = useState(maxSeconds * 1000);
   const [recordedMs, setRecordedMs] = useState(0);
   const [problem, setProblem] = useState<string | null>(null);
+  const [lastWav, setLastWav] = useState<Uint8Array | null>(null);
 
   const recorder = useRef<MediaRecorder | null>(null);
   const stream = useRef<MediaStream | null>(null);
@@ -72,6 +74,7 @@ export function Recorder({ disabled = false, onRecorded, convert = recordingToWa
 
   async function start() {
     setProblem(null);
+    setLastWav(null);
     onRecorded(null);
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
       setProblem(explainError({ name: "Unsupported" }));
@@ -100,6 +103,7 @@ export function Recorder({ disabled = false, onRecorded, convert = recordingToWa
           const wav = await convert(new Blob(chunks, { type: next.mimeType }));
           if (cancelled.current) return;
           setRecordedMs(durationMs);
+          setLastWav(wav);
           setPhase("ready");
           onRecorded({ wav, durationMs });
         } catch (error) {
@@ -132,9 +136,12 @@ export function Recorder({ disabled = false, onRecorded, convert = recordingToWa
             Your recording is sent to be turned into text and analysed, then deleted. It can be up to {maxSeconds}{" "}
             seconds. Please do not say anything private.
           </p>
-          <button type="button" onClick={start} disabled={disabled} aria-describedby="recording-notice">
-            {phase === "error" ? "Try recording again" : "Start recording"}
-          </button>
+          <div className="recorder-controls">
+            <button type="button" onClick={start} disabled={disabled} aria-describedby="recording-notice">
+              {phase === "error" ? "Try recording again" : "Start recording"}
+            </button>
+            <Playback wav={null} />
+          </div>
         </>
       ) : null}
 
@@ -154,9 +161,12 @@ export function Recorder({ disabled = false, onRecorded, convert = recordingToWa
       {phase === "ready" ? (
         <div className="ready">
           <p>Recorded {clock(recordedMs)}.</p>
-          <button type="button" className="secondary" onClick={start} disabled={disabled}>
-            Record again
-          </button>
+          <div className="recorder-controls">
+            <button type="button" className="secondary" onClick={start} disabled={disabled}>
+              Record again
+            </button>
+            <Playback wav={lastWav} />
+          </div>
         </div>
       ) : null}
 

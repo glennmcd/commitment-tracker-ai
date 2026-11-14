@@ -30,6 +30,7 @@ beforeEach(() => {
   trackStop.mockReset();
   getUserMedia.mockReset().mockResolvedValue({ getTracks: () => [{ stop: trackStop }] });
   vi.stubGlobal("MediaRecorder", FakeRecorder);
+  Object.assign(URL, { createObjectURL: vi.fn(() => "blob:clip"), revokeObjectURL: vi.fn() });
   Object.defineProperty(navigator, "mediaDevices", { value: { getUserMedia }, configurable: true });
 });
 
@@ -103,6 +104,17 @@ describe("Recorder", () => {
 
     expect(onRecorded).toHaveBeenLastCalledWith({ wav, durationMs: 7_000 });
     expect(screen.getByRole("button", { name: "Record again" })).toBeInTheDocument();
+  });
+
+  it("offers playback only once a recording is made", async () => {
+    render(<Recorder onRecorded={() => {}} convert={convert} />);
+    expect(screen.getByRole("group", { name: "Playback" })).toBeDisabled();
+    await press("Start recording");
+
+    await press("Stop recording");
+
+    expect(screen.getByRole("group", { name: "Playback" })).toBeEnabled();
+    expect(document.querySelector("audio")).toHaveAttribute("src", "blob:clip");
   });
 
   it("clears the earlier clip when recording again", async () => {
