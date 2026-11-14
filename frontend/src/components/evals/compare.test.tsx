@@ -65,4 +65,11 @@ describe("the compare view", () => {
     expect(screen.getByText(/different sets/)).toBeInTheDocument();
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
+
+  it("refuses the same run chosen as both A and B", () => {
+    navigation.query = `a=${singleRun.id}&b=${singleRun.id}`;
+    render(<CompareView runs={RUNS} />);
+    expect(screen.getByText(/same run/)).toHaveClass("problem");
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+  });
 });
