@@ -61,7 +61,9 @@ export function CompareView({ runs }: { runs: RunVerdicts[] }) {
   );
 
   let body = <p className="muted">Choose two runs on the same set to compare.</p>;
-  if (a && b && !sameSet(a.row, b.row)) {
+  if (a && b && a === b) {
+    body = <p className="problem">Run A and Run B are the same run. Choose two different runs to compare.</p>;
+  } else if (a && b && !sameSet(a.row, b.row)) {
     body = (
       <p className="problem">
         These runs are on different sets, or different versions of one set, so their items can't be compared.
