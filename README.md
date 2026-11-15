@@ -286,10 +286,10 @@ bun run test
 ([.github/workflows/ci.yml](.github/workflows/ci.yml)).
 
 Every pull request also needs a `reviewer-verdict` check: it passes only when a reviewer listed in
-[.fleet-gates.json](.fleet-gates.json) approved the PR's latest commit, so a push after approval needs a new review.
+[.fleetwright-gates.json](.fleetwright-gates.json) approved the PR's latest commit, so a push after approval needs a new review.
 Settings are read from `main`, so a PR cannot change who may approve it. The workflow is
 [.github/workflows/verdict.yml](.github/workflows/verdict.yml); how it works is in
-[docs/verdict.md](https://github.com/glennmcd/fleet-kit/blob/main/docs/verdict.md) in fleet-kit.
+[docs/verdict.md](https://github.com/glennmcd/fleetwright/blob/main/docs/verdict.md) in fleetwright.
 
 The code lives in `backend/src/commitment_tracker/`:
 
