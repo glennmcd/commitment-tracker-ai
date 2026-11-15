@@ -57,7 +57,14 @@ line-length = 100
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM"]
+select = ["E", "F", "I", "UP", "B", "SIM", "T20"]
+
+[tool.ruff.lint.per-file-ignores]
+# Command-line tools: printing to the terminal is their interface.
+"scripts/**" = ["T20"]
+"src/commitment_tracker/evaluation/cli.py" = ["T20"]
+"src/commitment_tracker/evaluation/review.py" = ["T20"]
+"src/commitment_tracker/api/export_openapi.py" = ["T20"]
 
 [tool.mypy]
 strict = true
