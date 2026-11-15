@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { parseTranscript } from "./transcript";
+import spec from "../../../openapi.json";
+import { MAX_SPEAKER, MAX_TURNS, parseTranscript } from "./transcript";
+
+describe("limits from openapi.json", () => {
+  const { AnalyzeRequest, Turn } = spec.components.schemas;
+
+  it("allows as many turns as the API", () => expect(MAX_TURNS).toBe(AnalyzeRequest.properties.transcript.maxItems));
+
+  it("allows speaker names as long as the API", () => expect(MAX_SPEAKER).toBe(Turn.properties.speaker.maxLength));
+});
 
 describe("parseTranscript", () => {
   it("reads one turn per line, 'Speaker: text'", () => {
