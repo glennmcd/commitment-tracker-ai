@@ -1,0 +1,142 @@
+{
+  "baseline": [
+    "2026-W43"
+  ],
+  "weeks": [
+    {
+      "week": "2026-W43",
+      "requests": 0,
+      "raw_tokens": 0,
+      "weighted": 0,
+      "merged_prs": 18,
+      "changed_lines": 12966,
+      "raw_per_pr": 0.0,
+      "weighted_per_pr": 0.0,
+      "weighted_per_line": 0.0,
+      "cache_read_share": 0.0,
+      "expiry_share": 0.0,
+      "median_context": 0,
+      "p90_context": 0,
+      "over_ceiling_share": 0.0,
+      "first_turn_read": null,
+      "first_turn_write": null,
+      "weighted_index": null,
+      "weighted_per_pr_index": null,
+      "weighted_per_line_index": null
+    },
+    {
+      "week": "2026-W44",
+      "requests": 0,
+      "raw_tokens": 0,
+      "weighted": 0,
+      "merged_prs": 8,
+      "changed_lines": 11804,
+      "raw_per_pr": 0.0,
+      "weighted_per_pr": 0.0,
+      "weighted_per_line": 0.0,
+      "cache_read_share": 0.0,
+      "expiry_share": 0.0,
+      "median_context": 0,
+      "p90_context": 0,
+      "over_ceiling_share": 0.0,
+      "first_turn_read": null,
+      "first_turn_write": null,
+      "weighted_index": null,
+      "weighted_per_pr_index": null,
+      "weighted_per_line_index": null
+    },
+    {
+      "week": "2026-W45",
+      "requests": 0,
+      "raw_tokens": 0,
+      "weighted": 0,
+      "merged_prs": 2,
+      "changed_lines": 5023,
+      "raw_per_pr": 0.0,
+      "weighted_per_pr": 0.0,
+      "weighted_per_line": 0.0,
+      "cache_read_share": 0.0,
+      "expiry_share": 0.0,
+      "median_context": 0,
+      "p90_context": 0,
+      "over_ceiling_share": 0.0,
+      "first_turn_read": null,
+      "first_turn_write": null,
+      "weighted_index": null,
+      "weighted_per_pr_index": null,
+      "weighted_per_line_index": null
+    },
+    {
+      "week": "2026-W46",
+      "requests": 226,
+      "raw_tokens": 6486096,
+      "weighted": 1527844,
+      "merged_prs": 15,
+      "changed_lines": 708,
+      "raw_per_pr": 432406.4,
+      "weighted_per_pr": 101856.24666666666,
+      "weighted_per_line": 2157.9713276836155,
+      "cache_read_share": 0.9196158983770824,
+      "expiry_share": 0.06069747186835931,
+      "median_context": 26520,
+      "p90_context": 43395,
+      "over_ceiling_share": 0.0,
+      "first_turn_read": 11391,
+      "first_turn_write": 8774,
+      "weighted_index": null,
+      "weighted_per_pr_index": null,
+      "weighted_per_line_index": null
+    }
+  ],
+  "branches": [
+    {
+      "branch": "HEAD",
+      "weighted": 381879,
+      "pr": null,
+      "changed_lines": null,
+      "weighted_per_line": null
+    },
+    {
+      "branch": "issue/41",
+      "weighted": 306562,
+      "pr": 44,
+      "changed_lines": 283,
+      "weighted_per_line": 1083.2572438162547
+    },
+    {
+      "branch": "issue/46",
+      "weighted": 240314,
+      "pr": 51,
+      "changed_lines": 22,
+      "weighted_per_line": 10923.35681818182
+    },
+    {
+      "branch": "issue/48",
+      "weighted": 200702,
+      "pr": 49,
+      "changed_lines": 24,
+      "weighted_per_line": 8362.566666666668
+    },
+    {
+      "branch": "issue/47",
+      "weighted": 157318,
+      "pr": 50,
+      "changed_lines": 9,
+      "weighted_per_line": 17479.74444444444
+    },
+    {
+      "branch": "issue/42",
+      "weighted": 154682,
+      "pr": 43,
+      "changed_lines": 11,
+      "weighted_per_line": 14061.995454545455
+    },
+    {
+      "branch": "issue/38",
+      "weighted": 86388,
+      "pr": 39,
+      "changed_lines": 2,
+      "weighted_per_line": 43193.75
+    }
+  ]
+}

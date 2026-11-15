@@ -51,3 +51,55 @@ Caveats:
   this repo's CLAUDE.md growing from 3.4k to 8.7k characters on 23 Oct.
 - Every session's first message carries about 30k characters of skill listing and 5.3k of cc-practices
   SessionStart output, after the system prompt.
+
+## Fleet runs, 13 to 15 November 2026
+
+The first work done by the agent fleet (fleet-kit's control plane on one Linux machine): six issues, each by an
+author agent in its own clone and session, each pull request reviewed by a separate reviewer agent. The
+transcripts are the slots' own, under `/home/<slot>/.claude/projects` on the fleet machine.
+
+| File | Contents |
+| --- | --- |
+| `fleet-2026-11-15.json` | The report as JSON, all slots together |
+| `fleet-2026-11-15.md` | The same report as tables |
+| `merged-prs-2026-11-15.json` | The merged PRs it was computed from |
+
+Made on the fleet machine, as root because a slot's transcripts are readable only by the slot:
+
+```bash
+d=$(mktemp -d); for s in agent01 agent02 agent03 agent04 review01; do ln -s /home/$s/.claude/projects $d/$s; done
+uv run --script /opt/fleet-kit/scripts/fleet_report.py --root $d --prs prs.json --since 2026-11-13 --json
+```
+
+The report's "Merged PRs" column for W46 (15) counts every PR merged in the repository that week. The fleet
+merged six of them (#39, #43, #44, #49, #50, #51; 351 changed lines), and the figures below use those six.
+
+### Against the baseline
+
+| Measure | Baseline (W43 to W45) | Fleet (W46) |
+| --- | --- | --- |
+| Weighted tokens per merged PR | about 925,000 (25.9M over 28) | about 255,000 (1.53M over 6), reviews included |
+| Weighted tokens per changed line | about 870 | about 4,350 |
+| Changed lines per PR | about 1,060 | 59 |
+| Median context per call | 92,500 to 171,000 | 26,500 |
+| 90th percentile context | 101,000 to 567,000 | 43,400 |
+| Calls at 150k context or more | 0% to 60% | 0% |
+| First turn, cache read plus fresh write (median) | 72,000 to 84,000 | about 20,200 (11,400 + 8,800) |
+| Cache reads | 94% to 98% | 92% |
+| Cache expiry | 0% to 15% | 6% |
+
+What it shows:
+
+- **A PR costs about a quarter of what it did.** One task per session keeps the context small: no call reached
+  150k, where 60% of W43's calls were.
+- **Per line the fleet looks five times worse, and that is the size of the tasks, not the fleet.** Five of the
+  six PRs changed 2 to 24 lines, and a session costs about 150k to 300k weighted tokens however small the
+  change. The one PR of ordinary size, #44 (283 lines), cost 1,083 per line, within noise of the baseline's 870.
+- **A quarter of the tokens (382k, the `HEAD` row) are the reviews**, which run on a detached commit. The
+  baseline had no separate reviewer.
+- **The first turn is smaller**, but the two medians are not the same thing: both include sub-agent
+  transcripts, and a fleet session is headless, with two plugins and no claude.ai skills.
+
+Caveats: six PRs over three days is a small sample, and the tasks were chosen to be small. The same caution as
+for the baseline applies: treat changes under about 1.5x as noise. One run was wasted: the allocator handed out
+issue 46 again seconds after its PR merged (about 26k weighted tokens).
