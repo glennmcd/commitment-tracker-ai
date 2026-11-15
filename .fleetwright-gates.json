@@ -35,7 +35,7 @@
   "duplication": {
     "min_lines": 8,
     "min_chars": 160,
-    "baseline": ".fleet-gates/duplication-baseline.json"
+    "baseline": ".fleetwright-gates/duplication-baseline.json"
   },
   "verdict": {
     "reviewers": ["g26work"],
