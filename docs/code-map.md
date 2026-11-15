@@ -43,8 +43,13 @@ Where things live. `CLAUDE.md` has the short version; read this when a task need
   with no server code. A bun workspace with `infra/`, linted by the root Biome config.
   - `src/app/`: the routes; `page.tsx` is the demo, with `<Demo />` inside `PasswordGate`. `evals/` is the
     read-only evaluation section (overview, run, items, compare), outside the gate.
-  - `src/components/`: the demo UI (recorder, sample picker, results, feedback, password gate), with Vitest tests
-    beside each component.
+  - `src/components/`: the demo UI, with Vitest tests beside the components. `Demo.tsx` wires the page together;
+    `Recorder.tsx`, `Playback.tsx` (plays back the last recording), `SamplePicker.tsx`, `PromptChips.tsx` and
+    `JobStatus.tsx` cover input and progress; `Results.tsx`, `LedgerCard.tsx`, `NearMisses.tsx`, `Transcript.tsx`,
+    `LabelBadge.tsx`, `AiMetrics.tsx` and `Feedback.tsx` show the analysis; `PasswordGate.tsx` and `Footer.tsx`
+    frame the page. `codeMap.test.ts` fails when a component here is missing from this list.
+    - `evals/`: the `/evals` views (results table, score bars, confusion matrix, filters, items, item diff,
+      compare).
   - `src/lib/`: plain helpers (job polling, upload, WAV encoding, relabelling, release version), tested alone.
   - `src/api/`: `schema.d.ts` generated from `openapi.json` (never edited by hand) and the typed `client.ts`. The
     API address comes from `NEXT_PUBLIC_API_BASE_URL` at build time.
