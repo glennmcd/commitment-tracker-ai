@@ -25,9 +25,9 @@ jobs:
   gates:
     permissions:
       contents: read
-    uses: glennmcd/fleetwright/.github/workflows/gates.yml@2c8e6b6317d74da6e68ace992373c48dbd3785d5 # v0.5.0
+    uses: glennmcd/fleetwright/.github/workflows/gates.yml@608c35751dba7a7bb14f7382f5af713aa42d56d2 # v0.6.0
     with:
-      kit-ref: 2c8e6b6317d74da6e68ace992373c48dbd3785d5
+      kit-ref: 608c35751dba7a7bb14f7382f5af713aa42d56d2
 
   backend:
     runs-on: ubuntu-latest
