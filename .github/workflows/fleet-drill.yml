@@ -1,0 +1,33 @@
+name: fleet-drill
+
+# Makes main red, or green again, on purpose, to drill fleetwright's watchdog. The watchdog stops the fleet
+# when any check on the default branch's head commit has failed, and this check counts. Run it by hand:
+#
+#   gh workflow run fleet-drill.yml -f fail=true    # main is red; the watchdog sets the stop flag
+#   gh workflow run fleet-drill.yml -f fail=false   # the newer run passes, so main is green again
+#
+# It is not a required check, so it never blocks a merge, and it checks out and runs no code.
+on:
+  workflow_dispatch:
+    inputs:
+      fail:
+        description: Fail the check, to make main red for the watchdog drill
+        type: boolean
+        default: false
+
+permissions: {}
+
+jobs:
+  drill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Pass or fail as asked
+        env:
+          FAIL: ${{ inputs.fail }}
+        run: |
+          if [ "$FAIL" = "true" ]; then
+            echo "Failing on purpose: fleetwright watchdog drill"
+            exit 1
+          fi
+          echo "Passing: main is green for this check"
