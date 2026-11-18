@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from commitment_tracker.evaluation import cli
-from commitment_tracker.evaluation.agreement import agreement
+from commitment_tracker.evaluation.agreement import AgreementRow, agreement, render_agreement
 from commitment_tracker.evaluation.importer import import_batch
 from commitment_tracker.evaluation.promote import PromoteError, promote_batch
 from commitment_tracker.evaluation.review import review_batch
@@ -136,6 +136,27 @@ def test_agreement_by_generator_and_label(tmp_path: Path, root: Path) -> None:
 
 def test_agreement_with_no_reviews_is_empty(root: Path) -> None:
     assert agreement(root) == ([], [])
+
+
+def test_render_agreement_with_no_rows_says_so() -> None:
+    assert render_agreement(([], [])) == ["agreement: no reviewed batches yet"]
+
+
+def test_render_agreement_table() -> None:
+    generators = [
+        AgreementRow("gemini-3-pro", 6, 4 / 6, 0.5),
+        AgreementRow("all", 6, 4 / 6, None),
+    ]
+    labels = [AgreementRow("REQUEST", 3, 2 / 3), AgreementRow("COMMITMENT", 3, 1.0)]
+    assert render_agreement((generators, labels)) == [
+        "agreement (blind label against the generator's, by span)",
+        "  generator                 spans  agreement   kappa",
+        "  gemini-3-pro                  6      0.667   0.500",
+        "  all                           6      0.667     n/a",
+        "  generator label           spans  agreement",
+        "  REQUEST                       3      0.667",
+        "  COMMITMENT                    3      1.000",
+    ]
 
 
 def test_eval_sets_agreement_flag(
