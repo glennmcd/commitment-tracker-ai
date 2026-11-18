@@ -173,6 +173,19 @@ describe("JobStatus", () => {
     rerender(<JobStatus status={null} />);
     expect(region).toBeEmptyDOMElement();
   });
+
+  it("spins only while a job is still in progress", () => {
+    const { rerender } = render(<JobStatus status="submitting" />);
+    const region = screen.getByRole("status", { name: "Progress" });
+    for (const status of ["submitting", "uploading", "uploaded", "transcribing", "analyzing"] as const) {
+      rerender(<JobStatus status={status} />);
+      expect(region).toHaveAttribute("data-busy", "true");
+    }
+    for (const status of ["done", "failed", null] as const) {
+      rerender(<JobStatus status={status} />);
+      expect(region).toHaveAttribute("data-busy", "false");
+    }
+  });
 });
 
 describe("feedback in the results", () => {
