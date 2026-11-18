@@ -31,7 +31,7 @@ export function JobStatus({
       aria-label="Progress"
       aria-live="polite"
       className="status"
-      data-busy={status !== null && status !== "done"}
+      data-busy={status !== null && status !== "done" && status !== "failed"}
     >
       {text}
     </p>
