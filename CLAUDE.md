@@ -22,12 +22,14 @@ plugin, configured in `.claude/cc-practices.json`. This file covers only what is
 
 ## Commands
 
-Run from `backend/`:
+Verify a change with `scripts/check.sh` from the repo root. It runs ruff, the format check, mypy, pytest,
+`eval-gate`, and the root `bun run lint`, `typecheck` and `test`. It prints one `ok` or `FAIL` line per check, the
+output of failing checks only, and exits 1 if any failed.
+
+Single checks, from `backend/` (`uv sync` first):
 
 ```bash
-uv sync
 uv run pytest                       # no network calls
-uv run ruff check . && uv run ruff format --check .
 uv run mypy                         # strict
 uv run eval-gate                    # CI's regression gate
 ```
@@ -40,8 +42,6 @@ Run from `frontend/` (the root's `bun run lint`, `typecheck` and `test` cover `f
 ```bash
 bun install
 bun run dev
-bun run test                        # Vitest, no network calls
-bun run typecheck
 bun run gen:api                     # after `uv run export-openapi`; commit the result
 bun run e2e                         # builds with a fake API address, then runs Playwright against out/
 ```

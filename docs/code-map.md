@@ -2,6 +2,7 @@
 
 Where things live. `CLAUDE.md` has the short version; read this when a task needs to find a module.
 
+- `scripts/check.sh`: runs every check a change must pass and prints one line per check (full output only on failure).
 - `backend/`: the Python project (its own `pyproject.toml` and `uv.lock`).
   - `src/commitment_tracker/schemas.py`: Pydantic v2 models shared by the API, extractor and evaluation.
   - `src/commitment_tracker/settings.py`: pydantic-settings configuration (model, limits, AWS resource names).
