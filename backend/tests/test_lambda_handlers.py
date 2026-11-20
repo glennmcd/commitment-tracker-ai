@@ -41,6 +41,12 @@ def settings(**overrides: Any) -> Settings:
     return Settings(_env_file=None, **overrides)
 
 
+@pytest.fixture(autouse=True)
+def no_host_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    # A key exported in the developer's shell would otherwise win over the SSM parameter under test.
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+
+
 # --- SSM settings --------------------------------------------------------------------------------
 
 
