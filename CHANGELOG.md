@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.1](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.13.0...v0.13.1) (2026-11-21)
+
+
+### Documentation
+
+* bring the evaluation progress page up to v0.13.0 ([#70](https://github.com/glennmcd/commitment-tracker-ai/issues/70)) ([972d79f](https://github.com/glennmcd/commitment-tracker-ai/commit/972d79fa1a39b32968a78cb09f1a7b787d1b9214)), closes [#69](https://github.com/glennmcd/commitment-tracker-ai/issues/69)
+* bring the evaluation progress page up to v0.13.0 ([#74](https://github.com/glennmcd/commitment-tracker-ai/issues/74)) ([098ad3b](https://github.com/glennmcd/commitment-tracker-ai/commit/098ad3b055a9801c7ed32218acdd5d1521a116ad)), closes [#73](https://github.com/glennmcd/commitment-tracker-ai/issues/73)
+
 ## [0.13.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.12.0...v0.13.0) (2026-11-18)
 
 
