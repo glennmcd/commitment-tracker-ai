@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from commitment_tracker.evaluation import cli
+from commitment_tracker.evaluation import audio_cli
 from commitment_tracker.evaluation.audio import (
     AudioSetError,
     add_human,
@@ -183,9 +183,9 @@ def test_eval_sets_counts_clips_by_source(tmp_path: Path, root: Path) -> None:
 def test_cli_make_needs_a_profile_free_synthesizer(
     tmp_path: Path, root: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    monkeypatch.setattr(cli, "make_synthesizer", lambda profile, region: fake_synth)
+    monkeypatch.setattr(audio_cli, "make_synthesizer", lambda profile, region: fake_synth)
     argv = ["make", "--item", "t-01", "--sets-dir", str(root), "--audio-dir", str(tmp_path / "a")]
-    assert cli.audio_main(argv) == 0
+    assert audio_cli.audio_main(argv) == 0
     assert "t-01: polly" in capsys.readouterr().out
 
 
@@ -193,6 +193,6 @@ def test_cli_upload_without_a_bucket_names_the_setting(
     root: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     monkeypatch.delenv("EVAL_AUDIO_BUCKET", raising=False)
-    monkeypatch.setattr(cli, "Settings", lambda: Settings(_env_file=None))
-    assert cli.audio_main(["upload", "--sets-dir", str(root)]) == 2
+    monkeypatch.setattr(audio_cli, "Settings", lambda: Settings(_env_file=None))
+    assert audio_cli.audio_main(["upload", "--sets-dir", str(root)]) == 2
     assert "EVAL_AUDIO_BUCKET" in capsys.readouterr().err

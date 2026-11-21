@@ -1,0 +1,213 @@
+$ eval --help
+usage: eval [-h] [--model MODEL | --config {haiku,sonnet,opus,two-stage}]
+            [--prompt PROMPT] [--effort {low,medium,high,xhigh,max}]
+            [--set SET_NAME | --data DATA] [--sets-dir SETS_DIR]
+            [--transcribe] [--profile PROFILE] [--region REGION]
+            [--bucket BUCKET] [--concurrency CONCURRENCY]
+            [--reports-dir REPORTS_DIR] [--cache-dir CACHE_DIR]
+            [--no-cache | --offline]
+
+`uv run eval`: run the extractor over an evaluation set and write a report.
+
+options:
+  -h, --help            show this help message and exit
+  --model MODEL         a model id (default claude-opus-5-5)
+  --config {haiku,sonnet,opus,two-stage}
+                        a named configuration
+  --prompt PROMPT       prompt version, e.g. v1
+  --effort {low,medium,high,xhigh,max}
+  --set SET_NAME        a named set under eval/sets (default dev)
+  --data DATA           a JSONL file of items, for ad hoc runs
+  --sets-dir SETS_DIR
+  --transcribe          for the audio set: transcribe each clip (cached by
+                        audio hash) and score it
+  --profile PROFILE     AWS profile, for --transcribe on uncached clips
+  --region REGION
+  --bucket BUCKET       evaluation clip bucket (default EVAL_AUDIO_BUCKET)
+  --concurrency CONCURRENCY
+  --reports-dir REPORTS_DIR
+  --cache-dir CACHE_DIR
+  --no-cache            always call the model
+  --offline             answer only from the cache; fail before running if any
+                        item is missing
+
+$ eval import --help
+usage: eval import [-h] --batch BATCH --provenance PROVENANCE
+                   [--generation-prompt GENERATION_PROMPT]
+                   [--sets-dir SETS_DIR]
+                   file
+
+Import a generator's JSONL reply as a staging batch.
+
+positional arguments:
+  file
+
+options:
+  -h, --help            show this help message and exit
+  --batch BATCH         e.g. gem01
+  --provenance PROVENANCE
+                        hand-written or <family>-<model>
+  --generation-prompt GENERATION_PROMPT
+                        default: the latest eval/generation file
+  --sets-dir SETS_DIR
+
+$ eval review --help
+usage: eval review [-h] --batch BATCH [--sets-dir SETS_DIR]
+
+Review a staging batch blind, label by label.
+
+options:
+  -h, --help           show this help message and exit
+  --batch BATCH
+  --sets-dir SETS_DIR
+
+$ eval promote --help
+usage: eval promote [-h] --batch BATCH --to TARGET [--sets-dir SETS_DIR]
+
+Move a reviewed batch's kept items into a set.
+
+options:
+  -h, --help           show this help message and exit
+  --batch BATCH
+  --to TARGET          e.g. test or dev
+  --sets-dir SETS_DIR
+
+$ eval rescore --help
+usage: eval rescore [-h] --set SET_NAME [--sets-dir SETS_DIR]
+                    [--reports-dir REPORTS_DIR]
+
+Re-score a set's reports from their stored predictions.
+
+options:
+  -h, --help            show this help message and exit
+  --set SET_NAME
+  --sets-dir SETS_DIR
+  --reports-dir REPORTS_DIR
+
+$ eval-sets --help
+usage: eval-sets [-h] [--sets-dir SETS_DIR] [--agreement]
+
+List the evaluation sets and what they hold.
+
+options:
+  -h, --help           show this help message and exit
+  --sets-dir SETS_DIR
+  --agreement          agreement with generators, from review logs
+
+$ eval-compare --help
+usage: eval-compare [-h] [--sets-dir SETS_DIR] [--reports-dir REPORTS_DIR] a b
+
+Compare two evaluation runs on the same set.
+
+positional arguments:
+  a                     the earlier run: a report path or its file stem
+  b                     the later run
+
+options:
+  -h, --help            show this help message and exit
+  --sets-dir SETS_DIR
+  --reports-dir REPORTS_DIR
+
+$ eval-gate --help
+usage: eval-gate [-h] [--sets-dir SETS_DIR] [--reports-dir REPORTS_DIR]
+                 [--baseline BASELINE] [--update-baseline]
+                 [--config {haiku,sonnet,opus,two-stage}]
+
+Check committed evaluation reports against the baseline.
+
+options:
+  -h, --help            show this help message and exit
+  --sets-dir SETS_DIR
+  --reports-dir REPORTS_DIR
+  --baseline BASELINE
+  --update-baseline     write the baseline from the latest matching reports
+                        (when a change is intended)
+  --config {haiku,sonnet,opus,two-stage}
+                        configurations to baseline (default opus, haiku)
+
+$ eval-audio --help
+usage: eval-audio [-h] {make,add,upload,fetch} ...
+
+Manage evaluation clips.
+
+positional arguments:
+  {make,add,upload,fetch}
+    make                speak items with Polly
+    add                 pin a human recording
+    upload              push local clips to the bucket
+    fetch               download clips, checking hashes
+
+options:
+  -h, --help            show this help message and exit
+
+$ eval-audio make --help
+usage: eval-audio make [-h] [--sets-dir SETS_DIR] [--audio-dir AUDIO_DIR]
+                       [--profile PROFILE] [--region REGION] [--bucket BUCKET]
+                       --item ITEM [--voices VOICES]
+
+options:
+  -h, --help            show this help message and exit
+  --sets-dir SETS_DIR
+  --audio-dir AUDIO_DIR
+  --profile PROFILE     AWS profile of the project account
+  --region REGION
+  --bucket BUCKET       default: EVAL_AUDIO_BUCKET (stack output)
+  --item ITEM           a test item id
+  --voices VOICES       two Polly voices
+
+$ eval-audio add --help
+usage: eval-audio add [-h] [--sets-dir SETS_DIR] [--audio-dir AUDIO_DIR]
+                      [--profile PROFILE] [--region REGION] [--bucket BUCKET]
+                      --readers READERS
+                      item wav
+
+positional arguments:
+  item
+  wav
+
+options:
+  -h, --help            show this help message and exit
+  --sets-dir SETS_DIR
+  --audio-dir AUDIO_DIR
+  --profile PROFILE     AWS profile of the project account
+  --region REGION
+  --bucket BUCKET       default: EVAL_AUDIO_BUCKET (stack output)
+  --readers READERS     e.g. seller=reader-1,buyer=reader-2
+
+$ eval-audio upload --help
+usage: eval-audio upload [-h] [--sets-dir SETS_DIR] [--audio-dir AUDIO_DIR]
+                         [--profile PROFILE] [--region REGION]
+                         [--bucket BUCKET]
+
+options:
+  -h, --help            show this help message and exit
+  --sets-dir SETS_DIR
+  --audio-dir AUDIO_DIR
+  --profile PROFILE     AWS profile of the project account
+  --region REGION
+  --bucket BUCKET       default: EVAL_AUDIO_BUCKET (stack output)
+
+$ eval-audio fetch --help
+usage: eval-audio fetch [-h] [--sets-dir SETS_DIR] [--audio-dir AUDIO_DIR]
+                        [--profile PROFILE] [--region REGION]
+                        [--bucket BUCKET]
+
+options:
+  -h, --help            show this help message and exit
+  --sets-dir SETS_DIR
+  --audio-dir AUDIO_DIR
+  --profile PROFILE     AWS profile of the project account
+  --region REGION
+  --bucket BUCKET       default: EVAL_AUDIO_BUCKET (stack output)
+
+$ eval-export-site --help
+usage: eval-export-site [-h] [--sets-dir SETS_DIR] [--reports-dir REPORTS_DIR]
+                        [--out OUT]
+
+Write the static data for the /evals pages.
+
+options:
+  -h, --help            show this help message and exit
+  --sets-dir SETS_DIR
+  --reports-dir REPORTS_DIR
+  --out OUT
