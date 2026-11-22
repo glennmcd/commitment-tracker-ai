@@ -4,7 +4,7 @@ import type { components } from "@/api/schema";
 import { extendedTest, failure, fakeClient, ok } from "@/lib/testExports";
 import { type CheckResult, checkImport, importBatch, optionProblems, readRequest } from "./evalImports";
 
-type ImportResult = components["schemas"]["ImportRequest"];
+
 type ImportReport = components["schemas"]["ImportReport"];
 type ImportRequest = components["schemas"]["ImportRequest"];
 describe("optionProblems", () => {
@@ -19,7 +19,7 @@ describe("optionProblems", () => {
   ])("checks %o", (options, problems) => expect(optionProblems(options)).toEqual(problems));
 });
 
-const importResult = (over: Partial<ImportResult> = {}): ImportResult => {
+const ImportRequest = (over: Partial<ImportRequest> = {}): ImportRequest => {
   return {
     batch: "gem02",
     source: "s",
@@ -62,7 +62,7 @@ describe("basic checkImport", () => {
     const result: ImportReport = importReport();
 
     const { client, post } = fakeClient([ok<ImportReport>(result, 200)]);
-    const request: ImportResult = importResult();
+    const request: ImportRequest = importRequest();
 
     const response: CheckResult = await checkImport(client, request);
     expect(post).toHaveBeenCalledWith("/eval-imports/check", { body: request });
@@ -75,7 +75,7 @@ describe("basic importBatch", () => {
     const result: ImportReport = importReport();
 
     const { client, post } = fakeClient([ok<ImportReport>(result, 200)]);
-    const request: ImportResult = importResult();
+    const request: ImportRequest = importRequest();
 
     const response: CheckResult = await importBatch(client, request);
     expect(post).toHaveBeenCalledWith("/eval-imports", { body: request });

@@ -7,7 +7,7 @@ export function report(over: Partial<ImportReport> = {}): ImportReport {
   return {
     batch: "gpt03",
     source: "chatgpt.jsonl",
-    provenance: "chatgpt-5.6-luna-high",
+    provenance: "chatgpt-luna",
     generation_prompt: "prompt-v1",
     imported_on: "2026-10-29",
     imported: 22,

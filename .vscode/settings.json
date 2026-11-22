@@ -7,5 +7,6 @@
   "vitest.rootConfig": "${workspaceFolder}/frontend/vitest.config.ts",
   "python.analysis.exclude": ["**/.venv", "**/node_modules", "**/cdk.out", "**/build", "**/dist"],
   "jestrunner.enableTestExplorer": true,
-  "files.eol": "\n"
+  "files.eol": "\n",
+  "bun.test.filePattern": "{backend,infra,scripts}/**/*{.test.,.spec.,_test_,_spec_}{js,ts,tsx,jsx,mts,cts,cjs,mjs}"
 }

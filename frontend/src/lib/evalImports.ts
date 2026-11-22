@@ -2,7 +2,7 @@ import type { ApiClient } from "@/api/client";
 import type { components } from "@/api/schema";
 import { explainFailure, NETWORK } from "./apiErrors";
 
-type ImportResult = components["schemas"]["ImportRequest"];
+
 type ImportReport = components["schemas"]["ImportReport"];
 type ImportRequest = components["schemas"]["ImportRequest"];
 export type CheckResult = { ok: true; job: components["schemas"]["ImportReport"] } | { ok: false; message: string };
@@ -38,7 +38,7 @@ export function importSummary(options: { [key: string]: any }): string {
   result += `near duplicates: ${options["nearDuplicates"] != undefined ? (options["nearDuplicates"] as any[]).length : 0}`;
   return result;
 }
-export async function checkImport(client: ApiClient, request: ImportResult): Promise<CheckResult> {
+export async function checkImport(client: ApiClient, request: ImportRequest): Promise<CheckResult> {
   try {
     const { data, error, response } = await client.POST("/eval-imports/check", { body: request });
     if (data) return { ok: true, job: data };
@@ -48,7 +48,7 @@ export async function checkImport(client: ApiClient, request: ImportResult): Pro
   }
 }
 
-export async function importBatch(client: ApiClient, request: ImportResult): Promise<CheckResult> {
+export async function importBatch(client: ApiClient, request: ImportRequest): Promise<CheckResult> {
   try {
     const { data, error, response } = await client.POST("/eval-imports", { body: request });
     if (data) return { ok: true, job: data };

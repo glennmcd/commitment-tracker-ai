@@ -1,2 +1,4 @@
 [install]
 peer = true
+[test]
+pathIgnorePatterns = ["**/frontend/**"]
