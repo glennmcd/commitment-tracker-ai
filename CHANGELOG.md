@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.13.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.12.0...v0.13.0) (2026-11-18)
+
+
+### Features
+
+* play back the last recording on the demo page ([#44](https://github.com/glennmcd/commitment-tracker-ai/issues/44)) ([bff7db3](https://github.com/glennmcd/commitment-tracker-ai/commit/bff7db30b6f05d95cef339db3cb9cfa0b866cbba)), closes [#41](https://github.com/glennmcd/commitment-tracker-ai/issues/41)
+
+
+### Bug Fixes
+
+* **evals:** show an error when Run A and Run B are the same run ([#43](https://github.com/glennmcd/commitment-tracker-ai/issues/43)) ([03fb593](https://github.com/glennmcd/commitment-tracker-ai/commit/03fb5932fbc833b07cb3d6e5627553da3baabbd3)), closes [#42](https://github.com/glennmcd/commitment-tracker-ai/issues/42)
+* stop the progress spinner when a job fails ([#67](https://github.com/glennmcd/commitment-tracker-ai/issues/67)) ([8d9c205](https://github.com/glennmcd/commitment-tracker-ai/commit/8d9c205108639277f27e9b310d96e81df49be6f2)), closes [#65](https://github.com/glennmcd/commitment-tracker-ai/issues/65)
+
+
+### Documentation
+
+* add the agent-ready issue template ([#40](https://github.com/glennmcd/commitment-tracker-ai/issues/40)) ([b3eac3d](https://github.com/glennmcd/commitment-tracker-ai/commit/b3eac3ddfcd67982fa01994ed7fe1337f93178cb))
+* clarify how to get demo access in the README ([#39](https://github.com/glennmcd/commitment-tracker-ai/issues/39)) ([ac74a7e](https://github.com/glennmcd/commitment-tracker-ai/commit/ac74a7edbbf19fd9b20079d5c859e0c22ac00e49)), closes [#38](https://github.com/glennmcd/commitment-tracker-ai/issues/38)
+* describe the reviewer-verdict check in the README ([#34](https://github.com/glennmcd/commitment-tracker-ai/issues/34)) ([f03e671](https://github.com/glennmcd/commitment-tracker-ai/commit/f03e6713f0d05bd7f5ea4c1a628b99009fca5efc))
+* name every demo component in the code map and test it ([#49](https://github.com/glennmcd/commitment-tracker-ai/issues/49)) ([fdae575](https://github.com/glennmcd/commitment-tracker-ai/commit/fdae57548037a19f4024b3d589fe6616416e07aa)), closes [#48](https://github.com/glennmcd/commitment-tracker-ai/issues/48)
+* show Haiku, Sonnet and Opus test-set results in the README ([#51](https://github.com/glennmcd/commitment-tracker-ai/issues/51)) ([8afe4ed](https://github.com/glennmcd/commitment-tracker-ai/commit/8afe4ed883ec6208e115b735b0a95b9c318e5ad7)), closes [#46](https://github.com/glennmcd/commitment-tracker-ai/issues/46)
+* trim CLAUDE.md under the 4 KB cap ([#45](https://github.com/glennmcd/commitment-tracker-ai/issues/45)) ([703ad06](https://github.com/glennmcd/commitment-tracker-ai/commit/703ad064546ab6b50b3203e27dd4009e4ea95efb))
+
 ## [0.12.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.11.0...v0.12.0) (2026-11-05)
 
 

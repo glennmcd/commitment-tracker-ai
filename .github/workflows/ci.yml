@@ -1,9 +1,11 @@
 name: ci
 
-# Checks every push and pull request. No job calls AWS or Anthropic: tests use fakes and mocks, `cdk synth`
-# runs against a placeholder account, and the only network use is installing packages and the browser.
+# Checks every pull request and every push to main. No job calls AWS or Anthropic: tests use fakes and mocks,
+# `cdk synth` runs against a placeholder account, and the only network use is installing packages and the browser.
 on:
+  # A push to a branch with an open pull request would run everything twice, so only main runs on push.
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -17,6 +19,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # The fleetwright gates (docs/gates.md in glennmcd/fleetwright): no silent skips, file-size cap, copy-paste,
+  # audit greps, change obligations, and a ratchet that refuses to loosen them. Settings: .fleetwright-gates.json.
+  # The workflow and the scripts it runs are pinned to the same commit; update both together.
+  gates:
+    permissions:
+      contents: read
+    uses: glennmcd/fleetwright/.github/workflows/gates.yml@608c35751dba7a7bb14f7382f5af713aa42d56d2 # v0.6.0
+    with:
+      kit-ref: 608c35751dba7a7bb14f7382f5af713aa42d56d2
+
   backend:
     runs-on: ubuntu-latest
     timeout-minutes: 15

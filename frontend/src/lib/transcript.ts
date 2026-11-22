@@ -5,10 +5,11 @@ export interface TurnInput {
 
 export type ParseResult = { ok: true; turns: TurnInput[] } | { ok: false; error: string };
 
-// The API's limits (backend schemas.py).
+// The API's limits (backend schemas.py); transcript.test.ts checks MAX_TURNS and MAX_SPEAKER against openapi.json.
 export const MAX_TURNS = 200;
+// MAX_TRANSCRIPT_CHARS in backend schemas.py, a validator that openapi.json does not show; no test checks it.
 export const MAX_CHARS = 20_000;
-const MAX_SPEAKER = 100;
+export const MAX_SPEAKER = 100;
 
 /** One turn per line, written "Speaker: what they said". Blank lines are skipped. */
 export function parseTranscript(input: string): ParseResult {

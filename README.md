@@ -4,7 +4,7 @@ Commitment Tracker AI reads a conversation transcript and returns the commitment
 whom, and by when. Every statement gets one of eight labels, so a firm promise is kept apart from a hedge, a
 request, a promise someone else made, or a refusal.
 
-Demo at https://commitmentai.g26work.com.  Ask for access to model in a GitHub issue. 
+Demo at https://commitmentai.g26work.com. To use it, ask for access in a GitHub issue.
 
 ![Commitment Tracker AI: finding a commitment made based on an event, and a date.  Also a refusal](docs/media/commitment-tracker-ai1.gif)
 
@@ -246,13 +246,23 @@ importing, blind review, audio clips, the gate and costs.
 
 ### Results
 
-| Model | Prompt | Dataset | Ledger F1 | Label accuracy | Field accuracy (owner / action / due) | p50 / p95 latency | Cost |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| claude-haiku-5-5, medium effort | v1 | 24 seed items | 1.000 | 1.000 | 13/13, 11/11, 13/13 | 1.5 s / 2.6 s | $0.0046 |
+Each row is one model's newest committed report, at medium effort with prompt v1. Field accuracy counts correct owner,
+action and due date on ledger spans.
 
-The 24 seed items are the development set. The prompt was written with them in view, so this row confirms the
-pipeline end to end rather than measuring accuracy. Accuracy will be measured on a held-out set of 150 items,
-which comes later with the comparison across models.
+| Model | Dataset | Report | Ledger F1 | Label accuracy | Field accuracy (owner / action / due) | p50 / p95 latency | Cost |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| claude-haiku-5-5 | test, 74 items | [20261102T183701Z](backend/eval/reports/test/20261102T183701Z-claude-haiku-5-5-v1.md) | 0.885 | 0.844 | 27/27, 22/26, 26/27 | 1597 / 2473 ms | $0.0161 |
+| claude-sonnet-5-5 | test, 68 items (earlier version) | [20261026T045729Z](backend/eval/reports/test/20261026T045729Z-claude-sonnet-5-5-v1.md) | 0.980 | 0.935 | 25/25, 22/24, 24/25 | 2029 / 2955 ms | $0.2110 |
+| claude-opus-5-5 | test, 74 items | [20261102T183807Z](backend/eval/reports/test/20261102T183807Z-claude-opus-5-5-v1.md) | 0.900 | 0.874 | 27/27, 22/26, 26/27 | 2870 / 7601 ms | $0.6250 |
+| claude-haiku-5-5 | dev, 24 seed items (development set) | [20261022T040145Z](backend/eval/reports/dev/20261022T040145Z-claude-haiku-5-5-v1.md) | 1.000 | 1.000 | 13/13, 11/11, 13/13 | 1512 / 2648 ms | $0.0046 |
+
+The `test` set is the held-out set behind the headline numbers. It has 74 items, as listed in its manifest
+(`backend/eval/sets/test/set.json`): reviewed drafts from `gemini-2.5-high` (25), `chatgpt-5.6-luna-low` (22) and
+`chatgpt-5.6-luna-high` (21), plus 6 hand-written items. None were drafted by Claude. The six hand-written items came
+last, so the newest Sonnet report predates them and covers the earlier 68 items. Its row can't be compared directly with
+the Haiku and Opus rows. In each test run one item is tagged `ambiguous`, and it is reported apart from the scores. The
+24 seed items are the development set. The prompt was written with them in view, so their row checks the pipeline end to
+end and does not measure accuracy.
 
 ## Develop
 
@@ -274,6 +284,12 @@ bun run test
 
 `bun run --cwd frontend e2e` also builds the site and runs the Playwright test on Chromium. CI runs all of it
 ([.github/workflows/ci.yml](.github/workflows/ci.yml)).
+
+Every pull request also needs a `reviewer-verdict` check: it passes only when a reviewer listed in
+[.fleetwright-gates.json](.fleetwright-gates.json) approved the PR's latest commit, so a push after approval needs a new review.
+Settings are read from `main`, so a PR cannot change who may approve it. The workflow is
+[.github/workflows/verdict.yml](.github/workflows/verdict.yml); how it works is in
+[docs/verdict.md](https://github.com/glennmcd/fleetwright/blob/main/docs/verdict.md) in fleetwright.
 
 The code lives in `backend/src/commitment_tracker/`:
 

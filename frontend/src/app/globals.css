@@ -491,6 +491,33 @@ button.secondary {
   border: 1.5px solid var(--line);
 }
 
+.recorder-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1.25rem;
+}
+
+.playback {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.playback legend {
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: 0.25rem;
+}
+
+.playback .position {
+  font-variant-numeric: tabular-nums;
+}
+
 .countdown {
   margin: 0 0 0.75rem;
   font-size: 1.1rem;

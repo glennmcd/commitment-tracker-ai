@@ -1,6 +1,6 @@
-"""The CI workflow runs repository code on every push and pull request, so its permissions and its
-actions are checked as text: read-only token, actions pinned to commits, no secrets, and the jobs
-the plan calls for, with the checks each one must run. No YAML parser is needed.
+"""The CI workflow runs repository code on every pull request and push to main, so its permissions
+and actions are checked as text: read-only token, actions pinned to commits, no secrets, and the
+jobs the plan calls for, with the checks each one must run. No YAML parser is needed.
 """
 
 import re
@@ -24,10 +24,17 @@ def job(name: str) -> str:
     return jobs[name]
 
 
-def test_runs_on_every_push_and_pull_request() -> None:
+def test_runs_on_pull_requests_and_pushes_to_main_only() -> None:
+    # A push to a pull request's branch would run everything twice, and Actions minutes are limited.
     # workflow_dispatch is there for the disabled live evaluation job.
-    on_block = read().split("\non:\n", 1)[1].split("\n\n", 1)[0]
-    assert on_block == "  push:\n  pull_request:\n  workflow_dispatch:"
+    block = read().split("\non:\n", 1)[1].split("\n\n", 1)[0]
+    lines = [line for line in block.splitlines() if not line.strip().startswith("#")]
+    assert lines == [
+        "  push:",
+        "    branches: [main]",
+        "  pull_request:",
+        "  workflow_dispatch:",
+    ]
 
 
 def test_never_runs_on_pull_request_target() -> None:
@@ -45,7 +52,9 @@ def test_every_action_is_pinned_to_a_commit_with_its_tag_in_a_comment() -> None:
     lines = [line for line in read().splitlines() if re.match(r"^\s*-?\s*uses:", line)]
     assert len(lines) >= 6
     for line in lines:
-        assert re.search(r"uses:\s*[\w.-]+/[\w.-]+@[0-9a-f]{40} # v\d+(\.\d+)*\s*$", line), line
+        assert re.search(
+            r"uses:\s*[\w.-]+/[\w.-]+(?:/[\w./-]+)?@[0-9a-f]{40} # v\d+(\.\d+)*\s*$", line
+        ), line
 
 
 def test_uses_no_secrets() -> None:
@@ -55,8 +64,9 @@ def test_uses_no_secrets() -> None:
 def test_the_jobs_each_have_a_timeout() -> None:
     body = read().split("\njobs:\n", 1)[1]
     names = re.findall(r"^  ([a-z0-9-]+):\n", body, flags=re.MULTILINE)
-    assert names == ["backend", "eval-gate", "frontend", "e2e", "infra", "eval-live"]
-    for name in names:
+    assert names == ["gates", "backend", "eval-gate", "frontend", "e2e", "infra", "eval-live"]
+    # `gates` calls a reusable workflow, which cannot set a timeout here; fleetwright sets one.
+    for name in names[1:]:
         assert re.search(r"^    timeout-minutes: \d+$", job(name), re.MULTILINE), name
 
 
