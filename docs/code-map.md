@@ -53,6 +53,8 @@ Where things live. `CLAUDE.md` has the short version; read this when a task need
     frame the page. `codeMap.test.ts` fails when a component here is missing from this list.
     - `evals/`: the `/evals` views (results table, score bars, confusion matrix, filters, items, item diff,
       compare).
+    - `evalImports/`: the evaluation import page. `EvalImporter.tsx` wires it together, `ImportForm.tsx`
+      chooses and submits a findings file, and `ImportFindings.tsx` shows what the import found.
   - `src/lib/`: plain helpers (job polling, upload, WAV encoding, relabelling, release version), tested alone.
   - `src/api/`: `schema.d.ts` generated from `openapi.json` (never edited by hand) and the typed `client.ts`. The
     API address comes from `NEXT_PUBLIC_API_BASE_URL` at build time.

@@ -1,4 +1,4 @@
-import { ImportForm } from "@/components/ImportForm";
+import { ImportForm } from "@/components/evalImports/ImportForm";
 
 // Dev-only preview of ImportForm: run `bun run dev` and open /dev/import-form/.
 // A static export still writes this route, so it renders nothing in a production build.
