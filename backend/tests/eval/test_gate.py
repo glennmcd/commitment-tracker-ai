@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from commitment_tracker.evaluation import cli
+from commitment_tracker.evaluation import gate_cli
 from commitment_tracker.evaluation.gate import (
     BASELINE_PATH,
     GATED_CONFIGURATIONS,
@@ -211,10 +211,10 @@ def test_cli_gate_and_update(
         "--baseline",
         str(baseline_path),
     ]
-    assert cli.gate_main(common) == 1  # no baseline yet for a set with items
-    assert cli.gate_main([*common, "--update-baseline"]) == 0
+    assert gate_cli.gate_main(common) == 1  # no baseline yet for a set with items
+    assert gate_cli.gate_main([*common, "--update-baseline"]) == 0
     assert load_baseline(baseline_path).sets["test"].set_sha256 == repo.sha
-    assert cli.gate_main(common) == 0
+    assert gate_cli.gate_main(common) == 0
     out = capsys.readouterr().out
     assert "PASS test/opus" in out and "PASS test/haiku" in out
 
@@ -256,7 +256,7 @@ def test_a_model_swap_behind_a_configuration_needs_a_new_report(
 
 
 def test_the_committed_reports_pass_the_gate() -> None:
-    result = check(load_baseline(), cli.gate_current())
+    result = check(load_baseline(), gate_cli.gate_current())
     assert result.ok, result.failures
 
 

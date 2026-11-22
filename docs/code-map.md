@@ -2,6 +2,7 @@
 
 Where things live. `CLAUDE.md` has the short version; read this when a task needs to find a module.
 
+- `scripts/check.sh`: runs every check a change must pass and prints one line per check (full output only on failure).
 - `backend/`: the Python project (its own `pyproject.toml` and `uv.lock`).
   - `src/commitment_tracker/schemas.py`: Pydantic v2 models shared by the API, extractor and evaluation.
   - `src/commitment_tracker/settings.py`: pydantic-settings configuration (model, limits, AWS resource names).
@@ -18,7 +19,9 @@ Where things live. `CLAUDE.md` has the short version; read this when a task need
     `GET /jobs/{job_id}`, `POST /feedback`, `GET /samples`) and `export_openapi.py`.
   - `src/commitment_tracker/lambda_handlers.py`: the Mangum API handler and the worker handler; one zip serves
     both, and the Anthropic key is read from SSM on a cold start.
-  - `src/commitment_tracker/evaluation/`: the eval runner and its tools (`cli.py` holds every entry point): sets
+  - `src/commitment_tracker/evaluation/`: the eval runner and its tools (`cli.py` is `eval`, `eval-sets`,
+    `eval-compare` and `eval-export-site`; `curation_cli.py` the `eval import|review|promote|rescore`
+    subcommands, `gate_cli.py` `eval-gate`, `audio_cli.py` `eval-audio`): sets
     and hashes (`sets.py`, `dataset.py`), leak checks, import, blind review, promote, agreement, reports and
     re-scoring, compare, the regression gate (`gate.py`), audio clips and transcribed scoring (`audio.py`,
     `audio_eval.py`, `synthesis.py`) and the site export. `docs/evaluation.md` is the user guide.

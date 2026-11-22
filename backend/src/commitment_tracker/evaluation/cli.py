@@ -21,7 +21,7 @@ import logging
 import sys
 import time
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 import boto3
@@ -29,19 +29,9 @@ from botocore.exceptions import BotoCoreError, ClientError
 
 from commitment_tracker.evaluation.agreement import agreement, render_agreement
 from commitment_tracker.evaluation.audio import (
-    AUDIO_DIR,
-    DEFAULT_VOICES,
     AudioClip,
-    AudioSetError,
-    ClipStore,
-    S3ClipStore,
-    add_human,
-    fetch,
     load_clips,
-    make_polly,
-    parse_readers,
     source_items,
-    upload,
 )
 from commitment_tracker.evaluation.audio_eval import (
     Alignment,
@@ -64,28 +54,13 @@ from commitment_tracker.evaluation.compare import (
     find_report,
     render_comparison,
 )
+from commitment_tracker.evaluation.curation_cli import SUBCOMMANDS
 from commitment_tracker.evaluation.dataset import (
     DatasetError,
     EvalItem,
     canonical_sha256,
     load_dataset,
 )
-from commitment_tracker.evaluation.gate import (
-    BASELINE_PATH,
-    GATED_CONFIGURATIONS,
-    Current,
-    GateError,
-    check,
-    load_baseline,
-    updated_baseline,
-    write_baseline,
-)
-from commitment_tracker.evaluation.importer import (
-    BatchError,
-    import_batch,
-    latest_generation_prompt,
-)
-from commitment_tracker.evaluation.promote import PromoteError, promote_batch
 from commitment_tracker.evaluation.report import (
     DEFAULT_REPORTS_DIR,
     Report,
@@ -93,8 +68,6 @@ from commitment_tracker.evaluation.report import (
     build_report,
     write_report,
 )
-from commitment_tracker.evaluation.rescore import rescore_set
-from commitment_tracker.evaluation.review import review_batch
 from commitment_tracker.evaluation.runner import request_for, run_items
 from commitment_tracker.evaluation.sets import (
     SETS_DIR,
@@ -107,7 +80,6 @@ from commitment_tracker.evaluation.sets import (
     summarize,
 )
 from commitment_tracker.evaluation.site_export import SITE_DATA_DIR, export_site
-from commitment_tracker.evaluation.synthesis import Synthesizer, polly_synthesizer
 from commitment_tracker.extractor.analyzer import Analyzer
 from commitment_tracker.extractor.extractor import Extractor
 from commitment_tracker.extractor.factory import build_analyzer, build_extractor
@@ -252,107 +224,6 @@ def prompt_versions_with_reports(directory: Path) -> set[str]:
     return versions
 
 
-def _import(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(
-        prog="eval import", description="Import a generator's JSONL reply as a staging batch."
-    )
-    parser.add_argument("file", type=Path)
-    parser.add_argument("--batch", required=True, help="e.g. gem01")
-    parser.add_argument("--provenance", required=True, help="hand-written or <family>-<model>")
-    parser.add_argument("--generation-prompt", help="default: the latest eval/generation file")
-    parser.add_argument("--sets-dir", type=Path, default=SETS_DIR)
-    args = parser.parse_args(argv)
-    try:
-        result, _ = import_batch(
-            args.file,
-            batch=args.batch,
-            provenance=args.provenance,
-            generation_prompt=args.generation_prompt or latest_generation_prompt(),
-            root=args.sets_dir,
-            today=date.today(),
-        )
-    except (BatchError, SetError, OSError) as error:
-        print(f"eval import: {error}", file=sys.stderr)
-        return 1
-    print(
-        f"imported {len(result.imported)} | rejected {len(result.rejections)} | "
-        f"date disagreements {len(result.date_disagreements)} | "
-        f"near duplicates {len(result.near_duplicates)}"
-    )
-    for rejection in result.rejections:
-        print(f"  line {rejection.line}: {rejection.reason}")
-    if not result.imported:
-        print("eval import: nothing to import; no batch was written", file=sys.stderr)
-        return 1
-    print(f"staged in {result.directory}; next: uv run eval review --batch {args.batch}")
-    return 0
-
-
-def _review(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(
-        prog="eval review", description="Review a staging batch blind, label by label."
-    )
-    parser.add_argument("--batch", required=True)
-    parser.add_argument("--sets-dir", type=Path, default=SETS_DIR)
-    args = parser.parse_args(argv)
-    try:
-        summary = review_batch(args.batch, args.sets_dir)
-    except SetError as error:
-        print(f"eval review: {error}", file=sys.stderr)
-        return 1
-    print(
-        f"accepted {summary.accepted} | edited {summary.edited} | rejected {summary.rejected} | "
-        f"left to review {summary.remaining}"
-    )
-    if not summary.remaining:
-        print(f"next: uv run eval promote --batch {args.batch} --to test")
-    return 0
-
-
-def _promote(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(
-        prog="eval promote", description="Move a reviewed batch's kept items into a set."
-    )
-    parser.add_argument("--batch", required=True)
-    parser.add_argument("--to", required=True, dest="target", help="e.g. test or dev")
-    parser.add_argument("--sets-dir", type=Path, default=SETS_DIR)
-    args = parser.parse_args(argv)
-    try:
-        result = promote_batch(args.batch, args.target, args.sets_dir, today=date.today())
-    except (PromoteError, SetError) as error:
-        print(f"eval promote: {error}", file=sys.stderr)
-        return 1
-    print(f"promoted {len(result.promoted)} into {result.target}; sha256 {result.sha256}")
-    if result.gated:
-        print(
-            f"{result.target} is gated: its hash changed, so the gate now wants a new report and "
-            f"baseline (uv run eval --set {result.target})"
-        )
-    return 0
-
-
-def _rescore(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(
-        prog="eval rescore", description="Re-score a set's reports from their stored predictions."
-    )
-    parser.add_argument("--set", dest="set_name", required=True)
-    parser.add_argument("--sets-dir", type=Path, default=SETS_DIR)
-    parser.add_argument("--reports-dir", type=Path, default=DEFAULT_REPORTS_DIR)
-    args = parser.parse_args(argv)
-    try:
-        outcomes = rescore_set(args.set_name, args.sets_dir, args.reports_dir)
-    except SetError as error:
-        print(f"eval rescore: {error}", file=sys.stderr)
-        return 1
-    for outcome in outcomes:
-        reason = f" ({outcome.reason})" if outcome.reason else ""
-        print(f"{outcome.status:<9} {outcome.path.name}{reason}")
-    return 0
-
-
-SUBCOMMANDS = {"import": _import, "review": _review, "promote": _promote, "rescore": _rescore}
-
-
 def sets_main(argv: list[str] | None = None) -> int:
     """`uv run eval-sets`: list the sets; `--agreement` adds the review agreement summary."""
     parser = argparse.ArgumentParser(
@@ -369,128 +240,6 @@ def sets_main(argv: list[str] | None = None) -> int:
     if args.agreement:
         print("\n".join(render_agreement(agreement(args.sets_dir))))
     return 1 if any(summary.error for summary in summaries) else 0
-
-
-def gate_current() -> Current:
-    """The configuration the gate holds reports to: committed defaults, never the environment."""
-    version = Settings.model_fields["prompt_version"].default
-    return Current(
-        prompt_version=version,
-        prompt_sha256=load_prompt(version).sha256,
-        effort=Settings.model_fields["extractor_effort"].default,
-    )
-
-
-def gate_main(argv: list[str] | None = None) -> int:
-    """`uv run eval-gate`: check committed reports against the baseline; no model calls."""
-    parser = argparse.ArgumentParser(
-        prog="eval-gate", description="Check committed evaluation reports against the baseline."
-    )
-    parser.add_argument("--sets-dir", type=Path, default=SETS_DIR)
-    parser.add_argument("--reports-dir", type=Path, default=DEFAULT_REPORTS_DIR)
-    parser.add_argument("--baseline", type=Path, default=BASELINE_PATH)
-    parser.add_argument(
-        "--update-baseline",
-        action="store_true",
-        help="write the baseline from the latest matching reports (when a change is intended)",
-    )
-    parser.add_argument(
-        "--config",
-        action="append",
-        choices=list(CONFIGURATIONS),
-        help=f"configurations to baseline (default {', '.join(GATED_CONFIGURATIONS)})",
-    )
-    args = parser.parse_args(argv)
-    current = gate_current()
-    if args.update_baseline:
-        configurations = tuple(args.config or GATED_CONFIGURATIONS)
-        try:
-            baseline = updated_baseline(
-                current,
-                configurations,
-                args.sets_dir,
-                args.reports_dir,
-                existing=load_baseline(args.baseline),
-            )
-        except GateError as error:
-            print(f"eval-gate: {error}", file=sys.stderr)
-            return 1
-        write_baseline(baseline, args.baseline)
-        print(f"wrote {args.baseline} for {', '.join(baseline.sets) or 'no sets'}")
-        return 0
-    result = check(load_baseline(args.baseline), current, args.sets_dir, args.reports_dir)
-    for line in result.passes:
-        print(f"PASS {line}")
-    for line in result.warnings:
-        print(f"WARN {line}")
-    for line in result.failures:
-        print(f"FAIL {line}")
-    return 0 if result.ok else 1
-
-
-def make_synthesizer(profile: str | None, region: str) -> Synthesizer:
-    session = boto3.Session(profile_name=profile, region_name=region)
-    return polly_synthesizer(session.client("polly"))
-
-
-def make_clip_store(profile: str | None, region: str, bucket: str) -> ClipStore:
-    session = boto3.Session(profile_name=profile, region_name=region)
-    return S3ClipStore(session.client("s3"), bucket)
-
-
-def audio_main(argv: list[str] | None = None) -> int:
-    """`uv run eval-audio make|add|upload|fetch`: the evaluation clips and their bucket."""
-    common = argparse.ArgumentParser(add_help=False)
-    common.add_argument("--sets-dir", type=Path, default=SETS_DIR)
-    common.add_argument("--audio-dir", type=Path, default=AUDIO_DIR)
-    common.add_argument("--profile", help="AWS profile of the project account")
-    common.add_argument("--region", default="us-east-2")
-    common.add_argument("--bucket", help="default: EVAL_AUDIO_BUCKET (stack output)")
-    parser = argparse.ArgumentParser(prog="eval-audio", description="Manage evaluation clips.")
-    commands = parser.add_subparsers(dest="command", required=True)
-    make = commands.add_parser("make", parents=[common], help="speak items with Polly")
-    make.add_argument("--item", action="append", required=True, help="a test item id")
-    make.add_argument("--voices", default=",".join(DEFAULT_VOICES), help="two Polly voices")
-    add = commands.add_parser("add", parents=[common], help="pin a human recording")
-    add.add_argument("item")
-    add.add_argument("wav", type=Path)
-    add.add_argument("--readers", required=True, help="e.g. seller=reader-1,buyer=reader-2")
-    commands.add_parser("upload", parents=[common], help="push local clips to the bucket")
-    commands.add_parser("fetch", parents=[common], help="download clips, checking hashes")
-    args = parser.parse_args(argv)
-
-    try:
-        if args.command == "make":
-            first, second = args.voices.split(",")
-            synthesize = make_synthesizer(args.profile, args.region)
-            made = make_polly(
-                args.item, args.sets_dir, args.audio_dir, synthesize, voices=(first, second)
-            )
-            for clip in made:
-                print(f"{clip.test_item_id}: polly, {clip.duration_ms / 1000:.1f} s")
-            return 0
-        if args.command == "add":
-            readers = parse_readers(args.readers)
-            clip = add_human(args.item, args.wav, readers, args.sets_dir, args.audio_dir)
-            print(f"{clip.test_item_id}: human, {clip.duration_ms / 1000:.1f} s")
-            return 0
-        bucket = args.bucket or Settings().eval_audio_bucket
-        if not bucket:
-            print(
-                "eval-audio: set EVAL_AUDIO_BUCKET or pass --bucket (stack output "
-                "EvalAudioBucketName)",
-                file=sys.stderr,
-            )
-            return 2
-        store = make_clip_store(args.profile, args.region, bucket)
-        moved = (upload if args.command == "upload" else fetch)(
-            args.sets_dir, args.audio_dir, store
-        )
-        print(f"{args.command}: {len(moved)} clips ({', '.join(moved) or 'none needed'})")
-        return 0
-    except (AudioSetError, SetError, ValueError) as error:
-        print(f"eval-audio: {error}", file=sys.stderr)
-        return 1
 
 
 def export_site_main(argv: list[str] | None = None) -> int:
