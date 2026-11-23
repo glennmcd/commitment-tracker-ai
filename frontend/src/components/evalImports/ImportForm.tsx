@@ -5,9 +5,13 @@ import { type ApiClient, ApiConfigError, getApiClient } from "@/api/client";
 import { optionProblems } from "@/lib/evalImports";
 
 export function ImportForm({
+  batchRef,
   onCheck,
+  onEdit,
 }: {
+  batchRef?: React.RefObject<HTMLInputElement|null>;
   onCheck: (file: File | null, outputs: { batch: string; provenance: string; generationPrompt: string }) => void;
+  onEdit?: () => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [batch, setBatch] = useState<string>("");
@@ -21,6 +25,7 @@ export function ImportForm({
   // let provenanceIssue: string|null = null;
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onEdit?.();
     setFile(event.target.files?.[0] ?? null);
     setFileIssue(optionProblems({ file: event.target.files?.[0] ?? null, batch, provenance }).file ?? null);
     if (!event.target.files?.[0]) {
@@ -29,10 +34,12 @@ export function ImportForm({
   };
 
   const handleBatchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onEdit?.();
     setBatch(event.target.value);
     setBatchIssue(optionProblems({ file, batch: event.target.value, provenance }).batch ?? null);
   };
   const handleProvenanceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onEdit?.();
     setProvenance(event.target.value);
     setProvenanceIssue(optionProblems({ file, batch, provenance: event.target.value }).provenance ?? null);
   };
@@ -68,6 +75,7 @@ export function ImportForm({
       {fileIssue && <p id="file-issue">{fileIssue}</p>}
       <label htmlFor="batch">Batch</label>
       <input
+        ref={batchRef}
         name="batch"
         id="batch"
         type="text"

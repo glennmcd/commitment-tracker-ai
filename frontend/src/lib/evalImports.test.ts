@@ -80,6 +80,16 @@ describe("basic importBatch", () => {
     expect(post).toHaveBeenCalledWith("/eval-imports", { body: request });
     expect(response).toEqual({ ok: true, job: result });
   });
+  it("should return the error code in check result", async () => {
+    const result: ImportReport = importReport();
+
+    const { client, post } = fakeClient([failure("batch_exists", 409)]);
+    const request: ImportRequest = importRequest();
+
+    const response: CheckResult = await importBatch(client, request);
+    expect(post).toHaveBeenCalledWith("/eval-imports", { body: request });
+    expect(response).toEqual({ ok: false, code: "batch_exists", message: expect.any(String)  });
+  });
 });
 
 describe("request file", () => {
@@ -94,4 +104,7 @@ describe("request file", () => {
     const response = await readRequest(file, options);
     expect(response).toEqual({ ok: true, job: request });
   });
+
+
+
 });

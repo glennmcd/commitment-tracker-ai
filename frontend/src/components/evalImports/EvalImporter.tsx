@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useReducer, useRef, useState } from "react";
 import { type ApiClient } from "@/api/client";
 import type { components } from "@/api/schema";
 import { checkImport, importBatch, readRequest } from "@/lib/evalImports";
@@ -11,30 +11,26 @@ type ImportRequest = components["schemas"]["ImportRequest"];
 type ImportReport = components["schemas"]["ImportReport"];
 
 type EvalImportState =
-  | { status: "editing" }
-  | { status: "checking" }
-  | { status: "checked" | "importing" | "staged"; report: ImportReport };
+  | { status: "editing"; error?: string }
+  | { status: "checking"; error?: string }
+  | { status: "checked" | "importing" | "staged"; report: ImportReport; request: ImportRequest; error?: string };
 
 export function EvalImporter({ client }: { client: ApiClient }) {
   // const [importState, setImportState] = useState<"editing" | "checking"|"checked" | "importing" | "staged">("editing");
-  const [importState, setImportState] = useState<EvalImportState>({ status: "editing" });
+  const [importState, setImportState] = useReducer((state: EvalImportState, newState: EvalImportState) => newState, {
+    status: "editing",
+  });
 
   async function onImportClick() {
     if (importState.status !== "checked") return;
-    setImportState({ status: "importing", report: importState.report });
+    setImportState({ status: "importing", error: undefined, report: importState.report, request: importState.request });
 
-    const response = await importBatch(client, {
-      batch: importState.report.batch,
-      source: importState.report.source,
-      content: "",
-      provenance: importState.report.provenance,
-      today: "",
-      generation_prompt: importState.report.generation_prompt,
-    });
+    const response = await importBatch(client, importState.request);
     if (response.ok) {
-      setImportState({ status: "staged", report: response.job });
+      setImportState({ status: "staged", report: response.job, request: importState.request, error:  undefined });
     } else {
-      setImportState({ status: "checked", report: importState.report });
+      setImportState({ status: "checked", report: importState.report, request: importState.request, error: response?.code ?? undefined });
+      if (response.code === "batch_exists") batchRef.current?.focus();
     }
   }
 
@@ -46,34 +42,35 @@ export function EvalImporter({ client }: { client: ApiClient }) {
       generationPrompt: string;
     },
   ): Promise<void> {
-    setImportState({ status: "editing" });
-
     setImportState({ status: "checking" });
-    if (!file) return;
+    if (!file) {
+      setImportState({ status: "editing" });
+      return;
+    }
     const read = await readRequest(file, options);
-    if (!read || !read.ok || !read.job) return;
+    if (!read || !read.ok || !read.job) {
+      setImportState({ status: "editing",error:  "Failed to read request" });
+      return;
+    }
 
     const result = await checkImport(client, read.job);
     if (result.ok) {
-      setImportState({ status: "checked", report: result.job });
+      setImportState({ status: "checked", report: result.job, request: read.job });
     } else {
-      setImportState({ status: "editing" });
+      setImportState({ status: "editing", error: "Failed to check import"  });
     }
   }
-
+const batchRef = useRef<HTMLInputElement>(null)
   return (
     <div>
       <h2>Evaluation Importer</h2>
-      <ImportForm onCheck={onCheckImportForm} />
-      {importState.status === "checked" || importState.status === "importing" || importState.status === "staged" ? (
-        <ImportFindings importReport={importState.report} />
-      ) : (
-        <p />
-      )}
-      {importState.status === "checked" && (
+      <ImportForm batchRef={batchRef} onCheck={onCheckImportForm} onEdit={() => setImportState({ status: "editing" })} />
+      {"report" in importState ? <ImportFindings importReport={importState.report} /> : null}
+      {importState.status === "checked" && importState.report.imported > 0 && (
         <button onClick={onImportClick}>Import {importState.report.imported} items</button>
       )}
       {importState.status === "staged" && <p role="status">uv run eval review --batch {importState.report.batch}</p>}
+      {importState.error && <p role="alert">{importState.error}</p>}
     </div>
   );
 }

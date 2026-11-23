@@ -4,7 +4,7 @@ import { explainFailure, NETWORK } from "./apiErrors";
 
 type ImportReport = components["schemas"]["ImportReport"];
 type ImportRequest = components["schemas"]["ImportRequest"];
-export type CheckResult = { ok: true; job: ImportReport } | { ok: false; message: string };
+export type CheckResult = { ok: true; job: ImportReport } | { ok: false; code?: string; message: string };
 
 export function optionProblems(options: { [key: string]: any }): { [key: string]: any } {
   const problems: { [key: string]: any } = {};
@@ -51,7 +51,7 @@ export async function importBatch(client: ApiClient, request: ImportRequest): Pr
   try {
     const { data, error, response } = await client.POST("/eval-imports", { body: request });
     if (data) return { ok: true, job: data };
-    return { ok: false, message: explainFailure(error, response) };
+    return { ok: false, code: (error as { error?: { code?: string } } | undefined)?.error?.code, message: explainFailure(error, response) };
   } catch {
     return { ok: false, message: NETWORK };
   }
