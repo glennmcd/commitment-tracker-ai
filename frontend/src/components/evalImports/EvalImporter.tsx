@@ -21,15 +21,22 @@ export function EvalImporter({ client }: { client: ApiClient }) {
     status: "editing",
   });
 
+  const batchRef = useRef<HTMLInputElement>(null);
+
   async function onImportClick() {
     if (importState.status !== "checked") return;
     setImportState({ status: "importing", error: undefined, report: importState.report, request: importState.request });
 
     const response = await importBatch(client, importState.request);
     if (response.ok) {
-      setImportState({ status: "staged", report: response.job, request: importState.request, error:  undefined });
+      setImportState({ status: "staged", report: response.job, request: importState.request, error: undefined });
     } else {
-      setImportState({ status: "checked", report: importState.report, request: importState.request, error: response?.code ?? undefined });
+      setImportState({
+        status: "checked",
+        report: importState.report,
+        request: importState.request,
+        error: response?.message ?? undefined,
+      });
       if (response.code === "batch_exists") batchRef.current?.focus();
     }
   }
@@ -48,8 +55,8 @@ export function EvalImporter({ client }: { client: ApiClient }) {
       return;
     }
     const read = await readRequest(file, options);
-    if (!read || !read.ok || !read.job) {
-      setImportState({ status: "editing",error:  "Failed to read request" });
+    if (!read || !read.ok) {
+      setImportState({ status: "editing", error: read.message ?? "Failed to read request" });
       return;
     }
 
@@ -57,14 +64,18 @@ export function EvalImporter({ client }: { client: ApiClient }) {
     if (result.ok) {
       setImportState({ status: "checked", report: result.job, request: read.job });
     } else {
-      setImportState({ status: "editing", error: "Failed to check import"  });
+      setImportState({ status: "editing", error: result.message ?? "Failed to check import" });
     }
   }
-const batchRef = useRef<HTMLInputElement>(null)
+
   return (
     <div>
       <h2>Evaluation Importer</h2>
-      <ImportForm batchRef={batchRef} onCheck={onCheckImportForm} onEdit={() => setImportState({ status: "editing" })} />
+      <ImportForm
+        batchRef={batchRef}
+        onCheck={onCheckImportForm}
+        onEdit={() => setImportState({ status: "editing" })}
+      />
       {"report" in importState ? <ImportFindings importReport={importState.report} /> : null}
       {importState.status === "checked" && importState.report.imported > 0 && (
         <button onClick={onImportClick}>Import {importState.report.imported} items</button>

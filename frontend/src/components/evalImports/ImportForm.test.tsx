@@ -131,7 +131,12 @@ describe("ImportForm", () => {
   it("typing on form calls onEdit", async () => {
     const user = userEvent.setup();
     const onEdit = vi.fn();
-    render(<ImportForm onCheck={() => ({ file: null, outputs: { batch: "", provenance: "", generationPrompt: "" } })} onEdit={onEdit} />);
+    render(
+      <ImportForm
+        onCheck={() => ({ file: null, outputs: { batch: "", provenance: "", generationPrompt: "" } })}
+        onEdit={onEdit}
+      />,
+    );
 
     await user.type(screen.getByLabelText("Batch"), "new-batch");
     expect(onEdit).toHaveBeenCalled();

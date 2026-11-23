@@ -1,23 +1,18 @@
-import { render, screen, waitFor,type RenderResult } from "@testing-library/react";
+import { type RenderResult, render, screen, waitFor } from "@testing-library/react";
 import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
-import { extendedTest, fakeClient, ok,failure } from "@/lib/testExports";
+import { explain } from "@/lib/apiErrors";
+import { failure, fakeClient, ok } from "@/lib/testExports";
 import { nothingValid, withProblems } from "@/test/evalImportFixtures";
 import { EvalImporter } from "./EvalImporter";
-import { codeOf } from "@/lib/apiErrors";
 
-// async function fillAndCheck(user: ReturnType<typeof userEvent.setup>, { batch, provenance }: { batch: string; provenance: string }) {
-//   await user.type(screen.getByLabelText(/batch/i), batch);
-//   await user.type(screen.getByLabelText(/provenance/i), provenance);
-//   await user.click(screen.getByRole("button", { name: "Check" }));
-// }
 async function fillAndCheck(rr: RenderResult, user: UserEvent) {
   const batch = "gpt03";
-  const provenance = "chatgpt-luna";
+  const provenance = "chatgpt-5.6-luna-high";
 
   const fileInput = rr.container.querySelector('input[name="file"]') as HTMLInputElement;
   const file = new File(["file content"], "test-file.txt", { type: "text/plain" });
-  await userEvent.upload(fileInput, file);
+  await user.upload(fileInput, file);
   await waitFor(() => {
     expect(rr.container).toHaveTextContent("test-file.txt");
   });
@@ -27,22 +22,21 @@ async function fillAndCheck(rr: RenderResult, user: UserEvent) {
   await user.click(screen.getByRole("button", { name: "Check" }));
 }
 
-
-describe("EvalImporter", { timeout: 500_000 }, () => {
+describe("EvalImporter", () => {
   it("batch_exists on import shows the alert, keeps the report, and focuses the Batch field", async () => {
     const user = userEvent.setup();
-    const { client, post } = fakeClient([ok(withProblems), failure("batch_exists",409)]);
+    const { client, post } = fakeClient([ok(withProblems), failure("batch_exists", 409)]);
     const rr = render(<EvalImporter client={client} />);
 
-    const code = "batch_exists";
+    const message = explain("batch_exists", null);
 
     await fillAndCheck(rr, user);
 
-    expect(await screen.findByRole("table", { name: "Rejected lines" })).toBeInTheDocument();
-
     await user.click(screen.getByRole("button", { name: "Import 22 items" }));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(code);
+    expect(await screen.findByRole("alert")).toHaveTextContent(message);
+
+    expect(await screen.findByRole("table", { name: "Rejected lines" })).toBeInTheDocument();
 
     expect(screen.getByLabelText(/batch/i)).toHaveFocus();
   });
@@ -59,8 +53,8 @@ describe("EvalImporter", { timeout: 500_000 }, () => {
 
     expect(post).toHaveBeenLastCalledWith("/eval-imports", expect.anything());
     expect(await screen.findByRole("status")).toHaveTextContent("uv run eval review --batch gpt03");
-    const x = (post.mock.calls as unknown[][]);
-  
+    const x = post.mock.calls as unknown[][];
+
     expect(x[1]?.[1]).toEqual(x[0]?.[1]);
   });
   it("checks, then imports, then says what to do next", async () => {
@@ -87,9 +81,8 @@ describe("EvalImporter", { timeout: 500_000 }, () => {
     await fillAndCheck(rr, user);
 
     expect(screen.queryByRole("button", { name: /^Import/ })).not.toBeInTheDocument();
-
   });
-it("a check of nothingValid shows the report but no Import button", async () => {
+  it("a check of nothingValid shows the report but no Import button", async () => {
     const user = userEvent.setup();
     const { client, post } = fakeClient([ok(nothingValid), new Promise(() => {})]);
     const rr = render(<EvalImporter client={client} />);
@@ -100,7 +93,6 @@ it("a check of nothingValid shows the report but no Import button", async () => 
 
     expect(await screen.findByRole("table", { name: "Rejected lines" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /^Import/ })).not.toBeInTheDocument();
-
   });
   it.each(["batch", "file", "provenance"])("stale check for editable fields %s", async (field) => {
     const user = userEvent.setup();
@@ -116,22 +108,18 @@ it("a check of nothingValid shows the report but no Import button", async () => 
     if (field === "batch") {
       await user.type(screen.getByLabelText(/batch/i), "new-batch");
     } else if (field === "file") {
-      
       const fileInput = rr.container.querySelector('input[name="file"]') as HTMLInputElement;
       const file = new File(["file content"], "test-file1.txt", { type: "text/plain" });
-      await userEvent.upload(fileInput, file);
+      await user.upload(fileInput, file);
       await waitFor(() => {
         expect(rr.container).toHaveTextContent("test-file1.txt");
       });
-      
     } else if (field === "provenance") {
       await user.type(screen.getByLabelText(/provenance/i), "new-provenance");
     }
 
-    expect(await screen.queryByRole("table", { name: "Rejected lines" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("table", { name: "Rejected lines" })).not.toBeInTheDocument();
 
     expect(screen.queryByRole("button", { name: /^Import/ })).not.toBeInTheDocument();
-
   });
-
 });

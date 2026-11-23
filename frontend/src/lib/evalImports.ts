@@ -1,10 +1,10 @@
 import type { ApiClient } from "@/api/client";
 import type { components } from "@/api/schema";
-import { explainFailure, NETWORK } from "./apiErrors";
+import { codeOf, type ErrorCode, explainFailure, NETWORK } from "./apiErrors";
 
 type ImportReport = components["schemas"]["ImportReport"];
 type ImportRequest = components["schemas"]["ImportRequest"];
-export type CheckResult = { ok: true; job: ImportReport } | { ok: false; code?: string; message: string };
+export type CheckResult = { ok: true; job: ImportReport } | { ok: false; code?: ErrorCode; message: string };
 
 export function optionProblems(options: { [key: string]: any }): { [key: string]: any } {
   const problems: { [key: string]: any } = {};
@@ -18,7 +18,11 @@ export function optionProblems(options: { [key: string]: any }): { [key: string]
   if (options["provenance"] && options["provenance"] === "spec") {
     problems["provenance"] = "spec is reserved for the the spec's seed items.";
   }
-  if (options["provenance"] && options["provenance"] !== "spec" && !/^[a-z]+-[a-z0-9-]+$/.test(options["provenance"])) {
+  if (
+    options["provenance"] &&
+    options["provenance"] !== "spec" &&
+    !/^[a-z]+-[a-z0-9][a-z0-9.\-]*$/.test(options["provenance"])
+  ) {
     problems["provenance"] = "use hand-written or <family>-<model>";
   }
   if ("batch" in options && options["batch"].trim() !== "" && !/^[a-z0-9-]+$/.test(options["batch"])) {
@@ -51,7 +55,11 @@ export async function importBatch(client: ApiClient, request: ImportRequest): Pr
   try {
     const { data, error, response } = await client.POST("/eval-imports", { body: request });
     if (data) return { ok: true, job: data };
-    return { ok: false, code: (error as { error?: { code?: string } } | undefined)?.error?.code, message: explainFailure(error, response) };
+    return {
+      ok: false,
+      code: codeOf(error),
+      message: explainFailure(error, response),
+    };
   } catch {
     return { ok: false, message: NETWORK };
   }

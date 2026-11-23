@@ -88,7 +88,7 @@ describe("basic importBatch", () => {
 
     const response: CheckResult = await importBatch(client, request);
     expect(post).toHaveBeenCalledWith("/eval-imports", { body: request });
-    expect(response).toEqual({ ok: false, code: "batch_exists", message: expect.any(String)  });
+    expect(response).toEqual({ ok: false, code: "batch_exists", message: expect.any(String) });
   });
 });
 
@@ -104,7 +104,4 @@ describe("request file", () => {
     const response = await readRequest(file, options);
     expect(response).toEqual({ ok: true, job: request });
   });
-
-
-
 });

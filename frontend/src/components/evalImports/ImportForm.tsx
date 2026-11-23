@@ -9,7 +9,7 @@ export function ImportForm({
   onCheck,
   onEdit,
 }: {
-  batchRef?: React.RefObject<HTMLInputElement|null>;
+  batchRef?: React.RefObject<HTMLInputElement | null>;
   onCheck: (file: File | null, outputs: { batch: string; provenance: string; generationPrompt: string }) => void;
   onEdit?: () => void;
 }) {
