@@ -31,7 +31,7 @@ Where things live. `CLAUDE.md` has the short version; read this when a task need
   - `samples/`: the scripted dialogues behind the demo's sample clips and their ground truth.
   - `scripts/`: run by hand with AWS credentials: `make_samples.py` (Polly clips), `measure_latency.py` and
     `check_audio_gone.py` against the deployed stack.
-  - `tests/test_layout.py`: enforces the import layering below.
+  - `tests/test_layout.py`: enforces the import layering below and that only `extractor/anthropic_adapter.py` imports the Anthropic SDK.
 - `docs/plans/`: build plans; `part-1-extraction-call.md` is the accepted design for the model call,
   `part-2-audio-and-deploy.md` for audio and deployment, and `part-3-evaluation.md` for evaluation.
 - `docs/decisions/`: numbered ADRs. `docs/releasing.md`: how versions and releases work. `docs/deploying.md`: the
