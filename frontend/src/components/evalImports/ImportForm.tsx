@@ -5,10 +5,12 @@ import { type ApiClient, ApiConfigError, getApiClient } from "@/api/client";
 import { optionProblems } from "@/lib/evalImports";
 
 export function ImportForm({
+  disabled = false,
   batchRef,
   onCheck,
   onEdit,
 }: {
+  disabled?: boolean;
   batchRef?: React.RefObject<HTMLInputElement | null>;
   onCheck: (file: File | null, outputs: { batch: string; provenance: string; generationPrompt: string }) => void;
   onEdit?: () => void;
@@ -98,7 +100,7 @@ export function ImportForm({
       {provenanceIssue && <p id="provenance-issue">{provenanceIssue}</p>}
       <button
         type="submit"
-        disabled={!(!!file && !hasOptionProblems())}
+        disabled={disabled || !(!!file && !hasOptionProblems())}
         onClick={(e) => {
           e.preventDefault();
           onCheck(file, { batch: batch, provenance: provenance, generationPrompt: "" });

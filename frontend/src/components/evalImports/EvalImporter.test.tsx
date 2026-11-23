@@ -6,7 +6,7 @@ import { failure, fakeClient, ok } from "@/lib/testExports";
 import { nothingValid, withProblems } from "@/test/evalImportFixtures";
 import { EvalImporter } from "./EvalImporter";
 
-async function fillAndCheck(rr: RenderResult, user: UserEvent) {
+async function fillAndCheck(rr: RenderResult, user: UserEvent, clickCheck = true) {
   const batch = "gpt03";
   const provenance = "chatgpt-5.6-luna-high";
 
@@ -19,10 +19,34 @@ async function fillAndCheck(rr: RenderResult, user: UserEvent) {
   await user.type(screen.getByLabelText(/batch/i), batch);
   await user.type(screen.getByLabelText(/provenance/i), provenance);
   expect(screen.getByRole("button", { name: "Check" })).toBeEnabled();
-  await user.click(screen.getByRole("button", { name: "Check" }));
+  if (clickCheck) {
+    await user.click(screen.getByRole("button", { name: "Check" }));
+  }
 }
 
 describe("EvalImporter", () => {
+  it("while a request is in flight Check is disabled", async () => {
+    const user = userEvent.setup();
+    const { client, post } = fakeClient([new Promise(() => {})]);
+    const rr = render(<EvalImporter client={client} />);
+
+    await fillAndCheck(rr, user, false);
+    const button = screen.getByRole("button", { name: "Check" });
+    await user.click(button);
+    await user.click(button);
+    expect(post).toHaveBeenCalledTimes(1);
+  });
+  it("while a request is in flight Import is disabled", async () => {
+    const user = userEvent.setup();
+    const { client, post } = fakeClient([ok(withProblems), new Promise(() => {})]);
+    const rr = render(<EvalImporter client={client} />);
+
+    await fillAndCheck(rr, user);
+    const button = screen.getByRole("button", { name: "Import 22 items" });
+    await user.click(button);
+    await user.click(button);
+    expect(post).toHaveBeenCalledTimes(2);
+  });
   it("batch_exists on import shows the alert, keeps the report, and focuses the Batch field", async () => {
     const user = userEvent.setup();
     const { client, post } = fakeClient([ok(withProblems), failure("batch_exists", 409)]);

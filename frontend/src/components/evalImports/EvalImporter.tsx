@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer, useRef, useState } from "react";
+import { useReducer, useRef } from "react";
 import { type ApiClient } from "@/api/client";
 import type { components } from "@/api/schema";
 import { checkImport, importBatch, readRequest } from "@/lib/evalImports";
@@ -16,7 +16,6 @@ type EvalImportState =
   | { status: "checked" | "importing" | "staged"; report: ImportReport; request: ImportRequest; error?: string };
 
 export function EvalImporter({ client }: { client: ApiClient }) {
-  // const [importState, setImportState] = useState<"editing" | "checking"|"checked" | "importing" | "staged">("editing");
   const [importState, setImportState] = useReducer((state: EvalImportState, newState: EvalImportState) => newState, {
     status: "editing",
   });
@@ -72,6 +71,7 @@ export function EvalImporter({ client }: { client: ApiClient }) {
     <div>
       <h2>Evaluation Importer</h2>
       <ImportForm
+        disabled={importState.status === "checking" || importState.status === "importing"}
         batchRef={batchRef}
         onCheck={onCheckImportForm}
         onEdit={() => setImportState({ status: "editing" })}

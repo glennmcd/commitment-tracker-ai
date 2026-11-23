@@ -11,6 +11,7 @@ describe("optionProblems", () => {
     [{ batch: "", provenance: "gemini-3-pro" }, { batch: "Missing batch" }],
     [{ batch: "gem02", provenance: "" }, { provenance: "Missing provenance" }],
     [{ batch: "gem02", provenance: "gemini-3-pro" }, {}],
+    [{ batch: "gpt03", provenance: "chatgpt-5.6-luna-high" }, {}],
     [{ batch: "Gem02", provenance: "gemini-3-pro" }, { batch: "Use lower-case letters, digits and dashes." }],
     [{ batch: "gem02", provenance: "spec" }, { provenance: "spec is reserved for the the spec's seed items." }],
     [{ batch: "gem02", provenance: "Gemini" }, { provenance: "use hand-written or <family>-<model>" }],

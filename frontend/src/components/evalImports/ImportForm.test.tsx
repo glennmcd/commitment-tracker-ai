@@ -8,6 +8,14 @@ import { job, span } from "@/test/builders";
 import { ImportForm } from "./ImportForm";
 
 describe("ImportForm", () => {
+  it("Check is disabled when disabled state is true", async () => {
+    const user = userEvent.setup();
+    render(<ImportForm disabled onCheck={vi.fn()} />);
+    await user.upload(screen.getByLabelText("JSONL file"), new File(["{}\n"], "a.jsonl"));
+    await user.type(screen.getByLabelText("Batch"), "gpt03");
+    await user.type(screen.getByLabelText("Provenance"), "chatgpt-5.6-luna-high");
+    expect(screen.getByRole("button", { name: "Check" })).toBeDisabled();
+  });
   it("renders the inputs", () => {
     const rr = render(
       <ImportForm onCheck={() => ({ file: null, outputs: { batch: "", provenance: "", generationPrompt: "" } })} />,

@@ -45,7 +45,7 @@ export async function checkImport(client: ApiClient, request: ImportRequest): Pr
   try {
     const { data, error, response } = await client.POST("/eval-imports/check", { body: request });
     if (data) return { ok: true, job: data };
-    return { ok: false, message: explainFailure(error, response) };
+    return { ok: false, code: codeOf(error), message: explainFailure(error, response) };
   } catch {
     return { ok: false, message: NETWORK };
   }
