@@ -27,17 +27,12 @@ type EvalImportAction =
 function stateReducer(state: EvalImportState, action: EvalImportAction): EvalImportState {
   switch (action.type) {
     case "editing":
-      switch (state.status) {
-        case "editing":
-        case "checking":
-        case "checked":
-        case "importing":
-        case "staged":
-          return { status: "editing" } as EvalImportState;
-      }
+      return { status: "editing" };
     case "checkStarted":
-      return { ...state, status: "checking" } as EvalImportState;
+      if (state.status !== "editing") return state;
+      return { ...state, status: "checking" } ;
     case "checkSucceeded":
+      if (state.status !== "checking") return state;
       return {
         status: "checked",
         report: action.report,
@@ -45,9 +40,10 @@ function stateReducer(state: EvalImportState, action: EvalImportAction): EvalImp
         error: action.error,
       } as EvalImportState;
     case "checkFailed":
-      return { ...state, status: "editing", error: action.error } as EvalImportState;
+      return { ...state, status: "editing", error: action.error } ;
     case "importStarted":
-      return { ...state, status: "importing" } as EvalImportState;
+      if (state.status !== "checked") return state;
+      return { ...state, status: "importing" } ;
     case "importSucceeded":
       return {
         status: "staged",
@@ -56,7 +52,8 @@ function stateReducer(state: EvalImportState, action: EvalImportAction): EvalImp
         error: action.error,
       } as EvalImportState;
     case "importFailed":
-      return { ...state, status: "checked", error: action.error } as EvalImportState;
+      if (state.status !== "importing") return state;
+      return { ...state, status: "checked", error: action.error } ;
     default:
       return state;
   }
@@ -64,7 +61,7 @@ function stateReducer(state: EvalImportState, action: EvalImportAction): EvalImp
 export function EvalImporter({ client }: { client: ApiClient }) {
   const [importState, stateDispatch] = useReducer(stateReducer, {
     status: "editing",
-  } as EvalImportState);
+  } );
 
   const batchRef = useRef<HTMLInputElement>(null);
 
