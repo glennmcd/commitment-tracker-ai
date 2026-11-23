@@ -15,32 +15,77 @@ type EvalImportState =
   | { status: "checking"; error?: string }
   | { status: "checked" | "importing" | "staged"; report: ImportReport; request: ImportRequest; error?: string };
 
+type EvalImportAction =
+  | { type: "editing"; state: EvalImportState }
+  | { type: "checkStarted" }
+  | { type: "checkSucceeded"; report: ImportReport; request: ImportRequest; error?: string }
+  | { type: "checkFailed"; error?: string }
+  | { type: "importStarted" }
+  | { type: "importSucceeded"; report: ImportReport; request: ImportRequest; error?: string }
+  | { type: "importFailed"; error?: string };
+
+function stateReducer(state: EvalImportState, action: EvalImportAction): EvalImportState {
+  switch (action.type) {
+    case "editing":
+      switch (state.status) {
+        case "editing":
+        case "checking":
+        case "checked":
+        case "importing":
+        case "staged":
+          return { status: "editing" } as EvalImportState;
+      }
+    case "checkStarted":
+      return { ...state, status: "checking" } as EvalImportState;
+    case "checkSucceeded":
+      return {
+        status: "checked",
+        report: action.report,
+        request: action.request,
+        error: action.error,
+      } as EvalImportState;
+    case "checkFailed":
+      return { ...state, status: "editing", error: action.error } as EvalImportState;
+    case "importStarted":
+      return { ...state, status: "importing" } as EvalImportState;
+    case "importSucceeded":
+      return {
+        status: "staged",
+        report: action.report,
+        request: action.request,
+        error: action.error,
+      } as EvalImportState;
+    case "importFailed":
+      return { ...state, status: "checked", error: action.error } as EvalImportState;
+    default:
+      return state;
+  }
+}
 export function EvalImporter({ client }: { client: ApiClient }) {
-  const [importState, setImportState] = useReducer((state: EvalImportState, newState: EvalImportState) => newState, {
+  const [importState, stateDispatch] = useReducer(stateReducer, {
     status: "editing",
-  });
+  } as EvalImportState);
 
   const batchRef = useRef<HTMLInputElement>(null);
 
   async function onImportClick() {
     if (importState.status !== "checked") return;
-    setImportState({ status: "importing", error: undefined, report: importState.report, request: importState.request });
+    stateDispatch({ type: "importStarted" });
 
     const response = await importBatch(client, importState.request);
     if (response.ok) {
-      setImportState({ status: "staged", report: response.job, request: importState.request, error: undefined });
+      stateDispatch({ type: "importSucceeded", report: response.job, request: importState.request, error: undefined });
     } else {
-      setImportState({
-        status: "checked",
-        report: importState.report,
-        request: importState.request,
+      stateDispatch({
+        type: "importFailed",
+
         error: response?.message ?? undefined,
       });
       if (response.code === "batch_exists") batchRef.current?.focus();
     }
   }
 
-  async function onCheckImportForm(
+  async function onCheckClick(
     file: File | null,
     options: {
       batch: string;
@@ -48,22 +93,22 @@ export function EvalImporter({ client }: { client: ApiClient }) {
       generationPrompt: string;
     },
   ): Promise<void> {
-    setImportState({ status: "checking" });
+    stateDispatch({ type: "checkStarted" });
     if (!file) {
-      setImportState({ status: "editing" });
+      stateDispatch({ type: "checkFailed", error: "file is required" });
       return;
     }
     const read = await readRequest(file, options);
     if (!read || !read.ok) {
-      setImportState({ status: "editing", error: read.message ?? "Failed to read request" });
+      stateDispatch({ type: "checkFailed", error: read.message ?? "Failed to read request" });
       return;
     }
 
     const result = await checkImport(client, read.job);
     if (result.ok) {
-      setImportState({ status: "checked", report: result.job, request: read.job });
+      stateDispatch({ type: "checkSucceeded", report: result.job, request: read.job, error: undefined });
     } else {
-      setImportState({ status: "editing", error: result.message ?? "Failed to check import" });
+      stateDispatch({ type: "checkFailed", error: result.message ?? "Failed to check import" });
     }
   }
 
@@ -73,14 +118,19 @@ export function EvalImporter({ client }: { client: ApiClient }) {
       <ImportForm
         disabled={importState.status === "checking" || importState.status === "importing"}
         batchRef={batchRef}
-        onCheck={onCheckImportForm}
-        onEdit={() => setImportState({ status: "editing" })}
+        onCheck={onCheckClick}
+        onEdit={() => stateDispatch({ type: "editing", state: { status: "editing" } })}
       />
       {"report" in importState ? <ImportFindings importReport={importState.report} /> : null}
       {importState.status === "checked" && importState.report.imported > 0 && (
         <button onClick={onImportClick}>Import {importState.report.imported} items</button>
       )}
-      {importState.status === "staged" && <p role="status">uv run eval review --batch {importState.report.batch}</p>}
+      {importState.status === "staged" && (
+        <p role="status">
+          ls ./eval/sets/staging/{importState.report.batch}; git commit; uv run eval review --batch{" "}
+          {importState.report.batch}
+        </p>
+      )}
       {importState.error && <p role="alert">{importState.error}</p>}
     </div>
   );

@@ -81,6 +81,22 @@ describe("EvalImporter", () => {
 
     expect(x[1]?.[1]).toEqual(x[0]?.[1]);
   });
+  it("the staged message names the directory and the next two steps", async () => {
+    const user = userEvent.setup();
+    const { client, post } = fakeClient([ok(withProblems), ok(withProblems, 201)]);
+    const rr = render(<EvalImporter client={client} />);
+
+    await fillAndCheck(rr, user);
+
+    expect(await screen.findByRole("table", { name: "Rejected lines" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Import 22 items" }));
+
+    expect(post).toHaveBeenLastCalledWith("/eval-imports", expect.anything());
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "ls ./eval/sets/staging/gpt03; git commit; uv run eval review --batch gpt03",
+    );
+  });
   it("checks, then imports, then says what to do next", async () => {
     const user = userEvent.setup();
     const { client, post } = fakeClient([ok(withProblems), ok(withProblems, 201)]);
