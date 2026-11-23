@@ -16,7 +16,7 @@ type EvalImportState =
   | { status: "checked" | "importing" | "staged"; report: ImportReport; request: ImportRequest; error?: string };
 
 type EvalImportAction =
-  | { type: "editing"; state: EvalImportState }
+  | { type: "editing"; }
   | { type: "checkStarted" }
   | { type: "checkSucceeded"; report: ImportReport; request: ImportRequest; error?: string }
   | { type: "checkFailed"; error?: string }
@@ -30,7 +30,7 @@ function stateReducer(state: EvalImportState, action: EvalImportAction): EvalImp
       return { status: "editing" };
     case "checkStarted":
       if (state.status !== "editing") return state;
-      return { ...state, status: "checking" } ;
+      return { ...state, status: "checking" };
     case "checkSucceeded":
       if (state.status !== "checking") return state;
       return {
@@ -38,22 +38,24 @@ function stateReducer(state: EvalImportState, action: EvalImportAction): EvalImp
         report: action.report,
         request: action.request,
         error: action.error,
-      } as EvalImportState;
+      };
     case "checkFailed":
-      return { ...state, status: "editing", error: action.error } ;
+      if (state.status !== "checking") return state;
+      return { ...state, status: "editing", error: action.error };
     case "importStarted":
       if (state.status !== "checked") return state;
-      return { ...state, status: "importing" } ;
+      return { ...state, status: "importing" };
     case "importSucceeded":
+      if (state.status !== "importing") return state;
       return {
         status: "staged",
         report: action.report,
         request: action.request,
         error: action.error,
-      } as EvalImportState;
+      };
     case "importFailed":
       if (state.status !== "importing") return state;
-      return { ...state, status: "checked", error: action.error } ;
+      return { ...state, status: "checked", error: action.error };
     default:
       return state;
   }
@@ -61,7 +63,7 @@ function stateReducer(state: EvalImportState, action: EvalImportAction): EvalImp
 export function EvalImporter({ client }: { client: ApiClient }) {
   const [importState, stateDispatch] = useReducer(stateReducer, {
     status: "editing",
-  } );
+  });
 
   const batchRef = useRef<HTMLInputElement>(null);
 
@@ -116,7 +118,7 @@ export function EvalImporter({ client }: { client: ApiClient }) {
         disabled={importState.status === "checking" || importState.status === "importing"}
         batchRef={batchRef}
         onCheck={onCheckClick}
-        onEdit={() => stateDispatch({ type: "editing", state: { status: "editing" } })}
+        onEdit={() => stateDispatch({ type: "editing" })}
       />
       {"report" in importState ? <ImportFindings importReport={importState.report} /> : null}
       {importState.status === "checked" && importState.report.imported > 0 && (

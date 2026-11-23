@@ -1,4 +1,4 @@
-import { type RenderResult, render, screen, waitFor, act } from "@testing-library/react";
+import { act, type RenderResult, render, screen, waitFor } from "@testing-library/react";
 import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { explain } from "@/lib/apiErrors";
@@ -25,33 +25,39 @@ async function fillAndCheck(rr: RenderResult, user: UserEvent, clickCheck = true
 }
 
 describe("EvalImporter", () => {
-  it("ensure late check is ignored",{timeout:5_000_000}, async () => {
+  it("ensure late check is ignored", { timeout: 5_000_000 }, async () => {
     const user = userEvent.setup();
     let resolve!: (v: unknown) => void;
-    const { client } = fakeClient([new Promise((r) => { resolve = r; })]);
+    const { client } = fakeClient([
+      new Promise((r) => {
+        resolve = r;
+      }),
+    ]);
     const rr = render(<EvalImporter client={client} />);
 
     await fillAndCheck(rr, user, true);
-    
+
     await user.type(screen.getByLabelText(/batch/i), "new-batch");
 
     await act(async () => resolve(ok(withProblems)));
 
     await waitFor(() => expect(screen.queryByRole("table", { name: "Rejected lines" })).toBeNull());
   });
-  it("ensure late import is ignored",{timeout:5_000_000}, async () => {
+  it("ensure late import is ignored", { timeout: 5_000_000 }, async () => {
     const user = userEvent.setup();
     let resolveImport!: (v: unknown) => void;
-    const { client } = fakeClient([ok(withProblems),
+    const { client } = fakeClient([
+      ok(withProblems),
       new Promise((resolve) => {
         resolveImport = resolve;
-      }),]);
+      }),
+    ]);
     const rr = render(<EvalImporter client={client} />);
 
     await fillAndCheck(rr, user, true);
     const button = screen.getByRole("button", { name: "Import 22 items" });
     await user.click(button);
-    
+
     await user.type(screen.getByLabelText(/batch/i), "new-batch");
 
     await act(async () => resolveImport(failure("batch_exists", 409)));
