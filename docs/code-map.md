@@ -8,8 +8,8 @@ Where things live. `CLAUDE.md` has the short version; read this when a task need
   - `src/commitment_tracker/settings.py`: pydantic-settings configuration (model, limits, AWS resource names).
   - `src/commitment_tracker/extractor/`: prompt files (`prompts/v1.md`, ...) and `prompts/manifest.json`, which pins
     each one's sha256 (`tests/test_prompt_manifest.py` fails on an edit in place or a file with no entry), the model
-    adapter, validation with one retry, the quote check, the date resolver and pricing; `two_stage.py` (Haiku screen, Opus on flagged
-    turns) and `factory.build_analyzer` for the named configurations in `settings.CONFIGURATIONS`.
+    adapter, validation with one retry, the quote check, the date resolver and pricing; `two_stage.py` (Haiku screen,
+    Opus on flagged turns) and `factory.build_analyzer` for the named configurations in `settings.CONFIGURATIONS`.
   - `src/commitment_tracker/transcription/`: the transcriber protocol, the Amazon Transcribe batch adapter, the
     mapping from Transcribe output to timed turns, and a fake.
   - `src/commitment_tracker/jobs/`: the job record and its stores (DynamoDB, memory), presigned uploads, WAV
