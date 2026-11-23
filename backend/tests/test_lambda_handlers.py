@@ -11,7 +11,8 @@ import pytest
 from botocore.stub import Stubber
 from pydantic import SecretStr
 
-from commitment_tracker.api.app import build_job_service, create_app
+from commitment_tracker.api.app import create_app
+from commitment_tracker.api.job_routes import build_job_service
 from commitment_tracker.extractor.extractor import Extractor
 from commitment_tracker.extractor.prompt import load_prompt
 from commitment_tracker.guardrails.ratelimit import Limit, MemoryRateLimitStore, RateLimiter

@@ -15,8 +15,9 @@ Where things live. `CLAUDE.md` has the short version; read this when a task need
     checks, sample clips (`samples.json`) and the worker that transcribes, analyzes and deletes the audio.
   - `src/commitment_tracker/feedback/`: span thumbs up or down, with optional consent to keep the transcript.
   - `src/commitment_tracker/guardrails/`: per-client rate limits and the daily spend cap.
-  - `src/commitment_tracker/api/`: FastAPI app (`GET /health`, `POST /analyze`, `POST /uploads`, `POST /jobs`,
-    `GET /jobs/{job_id}`, `POST /feedback`, `GET /samples`) and `export_openapi.py`.
+  - `src/commitment_tracker/api/`: FastAPI app (`GET /health`, `POST /analyze`, the eval-import routes) in `app.py`;
+    the job routes (`POST /uploads`, `POST /jobs`, `GET /jobs/{job_id}`, `POST /feedback`, `GET /samples`) in
+    `job_routes.py`; the rate-limit and spend guards in `guards.py`; and `export_openapi.py`.
   - `src/commitment_tracker/lambda_handlers.py`: the Mangum API handler and the worker handler; one zip serves
     both, and the Anthropic key is read from SSM on a cold start.
   - `src/commitment_tracker/evaluation/`: the eval runner and its tools (`cli.py` is `eval`, `eval-sets`,

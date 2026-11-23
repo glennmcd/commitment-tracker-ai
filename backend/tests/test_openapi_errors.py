@@ -7,6 +7,7 @@ import pytest
 from commitment_tracker.api import app as app_module
 from commitment_tracker.api.app import create_app
 from commitment_tracker.api.errors import REGISTRY, ErrorCode
+from commitment_tracker.api.job_routes import JOB_ERRORS
 
 HTTP_METHODS = {"get", "post"}
 
@@ -46,7 +47,7 @@ def test_every_error_the_app_can_raise_is_documented_on_some_route(spec: dict[st
     }
     raised = {
         *(e for e in app_module.EXTRACTION_ERRORS.values()),
-        *(e for e in app_module.JOB_ERRORS.values()),
+        *(e for e in JOB_ERRORS.values()),
         *(e for e in app_module.IMPORT_ERRORS.values()),
     }
     for error in raised:
