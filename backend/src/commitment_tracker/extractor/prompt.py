@@ -1,8 +1,9 @@
 """Versioned prompts and the user message built from an analysis request.
 
 A prompt version is a file `prompts/<version>.md`; changing the prompt means adding a version, so
-evaluation reports can name the prompt they ran. The transcript goes into the user message, after
-the cached system prompt.
+evaluation reports can name the prompt they ran. `prompts/manifest.json` lists the sha256 of each
+released version, and a test fails when one of those files changes. The transcript goes into the
+user message, after the cached system prompt.
 """
 
 import hashlib
