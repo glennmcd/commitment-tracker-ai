@@ -67,7 +67,7 @@ def duplicate_ids(root: Path = SETS_DIR) -> list[str]:
 
 def prompt_leaks(root: Path = SETS_DIR, prompts_dir: Path = PROMPTS_DIR) -> list[str]:
     prompts = {
-        path.name: normalize(path.read_text(encoding="utf-8")) for path in prompts_dir.glob("*")
+        path.name: normalize(path.read_text(encoding="utf-8")) for path in prompts_dir.glob("*.md")
     }
     problems = []
     for name, items in _text_sets(root).items():
