@@ -4,7 +4,6 @@ import type { components } from "@/api/schema";
 import { extendedTest, failure, fakeClient, ok } from "@/lib/testExports";
 import { type CheckResult, checkImport, importBatch, optionProblems, readRequest } from "./evalImports";
 
-
 type ImportReport = components["schemas"]["ImportReport"];
 type ImportRequest = components["schemas"]["ImportRequest"];
 describe("optionProblems", () => {

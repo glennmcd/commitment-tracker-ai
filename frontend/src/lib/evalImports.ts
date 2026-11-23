@@ -2,10 +2,9 @@ import type { ApiClient } from "@/api/client";
 import type { components } from "@/api/schema";
 import { explainFailure, NETWORK } from "./apiErrors";
 
-
 type ImportReport = components["schemas"]["ImportReport"];
 type ImportRequest = components["schemas"]["ImportRequest"];
-export type CheckResult = { ok: true; job: components["schemas"]["ImportReport"] } | { ok: false; message: string };
+export type CheckResult = { ok: true; job: ImportReport } | { ok: false; message: string };
 
 export function optionProblems(options: { [key: string]: any }): { [key: string]: any } {
   const problems: { [key: string]: any } = {};
