@@ -108,3 +108,76 @@ def test_checker_ignores_imports_inside_the_package(tmp_path: Path) -> None:
     write(tmp_path, "extractor/__init__.py", "from .dates import resolve\n")
     write(tmp_path, "extractor/dates.py", "import datetime\nfrom dateutil import relativedelta\n")
     assert imported_modules(tmp_path, "extractor") == set()
+
+
+# The Anthropic SDK: only the adapter may import it, so tests can swap in the fake adapter.
+
+SDK = "anthropic"
+SDK_ADAPTER = "extractor/anthropic_adapter.py"
+
+
+def top_level_imports(source: str) -> set[str]:
+    """Top-level names of the absolute imports in `source`, whatever their alias or depth."""
+    names: set[str] = set()
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Import):
+            names.update(alias.name.split(".")[0] for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+            names.add(node.module.split(".")[0])
+    return names
+
+
+def modules_importing(root: Path, top_level: str) -> list[str]:
+    """Paths under `root`, relative to it, of the modules that import `top_level`."""
+    return sorted(
+        path.relative_to(root).as_posix()
+        for path in root.rglob("*.py")
+        if top_level in top_level_imports(path.read_text(encoding="utf-8"))
+    )
+
+
+def test_only_the_adapter_imports_the_anthropic_sdk() -> None:
+    assert modules_importing(PACKAGE_ROOT, SDK) == [SDK_ADAPTER]
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "import anthropic\n",
+        "import anthropic as a\n",
+        "from anthropic import Anthropic\n",
+        "from anthropic import Anthropic as Client\n",
+        "from anthropic.types.beta import BetaMessage\n",
+        "import anthropic.types.beta\n",
+        "from anthropic import *\n",
+        "def build():\n    import anthropic\n",
+        "try:\n    import anthropic\nexcept ImportError:\n    pass\n",
+    ],
+)
+def test_sdk_checker_finds_import(source: str) -> None:
+    assert SDK in top_level_imports(source)
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "import anthropic_helpers\n",
+        "from anthropics import thing\n",
+        "from commitment_tracker.extractor import anthropic_adapter\n",
+        "from . import anthropic\n",
+        "import json  # mentions anthropic only in a comment\n",
+    ],
+)
+def test_sdk_checker_ignores_lookalikes(source: str) -> None:
+    assert SDK not in top_level_imports(source)
+
+
+@pytest.mark.parametrize(
+    "source",
+    ["import anthropic as a\n", "from anthropic import Anthropic\n"],
+)
+def test_sdk_rule_catches_a_stray_import_in_the_tree(tmp_path: Path, source: str) -> None:
+    write(tmp_path, "extractor/__init__.py", "")
+    write(tmp_path, SDK_ADAPTER, "import anthropic\n")
+    write(tmp_path, "extractor/extractor.py", source)
+    assert modules_importing(tmp_path, SDK) == [SDK_ADAPTER, "extractor/extractor.py"]
