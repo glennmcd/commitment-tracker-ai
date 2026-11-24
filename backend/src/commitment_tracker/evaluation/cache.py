@@ -10,6 +10,7 @@ evaluation item through a context variable, which is how the runner knows an ite
 
 import hashlib
 import json
+from collections.abc import Iterator
 from contextvars import ContextVar
 from pathlib import Path
 
@@ -18,7 +19,7 @@ from pydantic import ValidationError
 from commitment_tracker.extractor.adapter import ModelReply, ModelRequest
 from commitment_tracker.extractor.analyzer import Configuration
 from commitment_tracker.extractor.extractor import Extractor
-from commitment_tracker.schemas import AnalyzeRequest, AnalyzeResponse
+from commitment_tracker.schemas import AnalyzeRequest, AnalyzeResponse, Metadata
 
 # backend/src/commitment_tracker/evaluation/cache.py -> backend/eval/.cache (git-ignored)
 DEFAULT_CACHE_DIR = Path(__file__).resolve().parents[3] / "eval" / ".cache"
@@ -72,6 +73,16 @@ class ResponseCache:
         except ValidationError:
             return None
 
+    def metadata(self) -> Iterator[Metadata]:
+        """The metadata of every readable cached response; corrupt files are skipped."""
+        if not self.directory.is_dir():
+            return
+        for path in self.directory.glob("*.json"):
+            try:
+                yield AnalyzeResponse.model_validate_json(path.read_text(encoding="utf-8")).metadata
+            except ValidationError:
+                continue
+
     def put(self, key: str, response: AnalyzeResponse) -> None:
         self.directory.mkdir(parents=True, exist_ok=True)
         # Ledger flags are computed from the label, so they aren't stored.
@@ -100,8 +111,11 @@ class CachedAnalyzer:
             effort=self.effort,
         )
 
+    def lookup(self, request: AnalyzeRequest) -> AnalyzeResponse | None:
+        return None if self.cache is None else self.cache.get(self.key(request))
+
     def is_cached(self, request: AnalyzeRequest) -> bool:
-        return self.cache is not None and self.cache.get(self.key(request)) is not None
+        return self.lookup(request) is not None
 
     def describe(self) -> Configuration:
         return self.extractor.describe()

@@ -4,7 +4,7 @@ usage: eval [-h] [--model MODEL | --config {haiku,sonnet,opus,two-stage}]
             [--set SET_NAME | --data DATA] [--sets-dir SETS_DIR]
             [--transcribe] [--profile PROFILE] [--region REGION]
             [--bucket BUCKET] [--concurrency CONCURRENCY]
-            [--reports-dir REPORTS_DIR] [--cache-dir CACHE_DIR]
+            [--reports-dir REPORTS_DIR] [--cache-dir CACHE_DIR] [--estimate]
             [--no-cache | --offline]
 
 `uv run eval`: run the extractor over an evaluation set and write a report.
@@ -27,6 +27,8 @@ options:
   --concurrency CONCURRENCY
   --reports-dir REPORTS_DIR
   --cache-dir CACHE_DIR
+  --estimate            price the run from the cache and exit: no model calls,
+                        nothing written
   --no-cache            always call the model
   --offline             answer only from the cache; fail before running if any
                         item is missing
