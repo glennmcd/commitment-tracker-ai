@@ -117,6 +117,12 @@ Responses are cached in `eval/.cache/` per stage, by transcript, model, prompt t
 for what changed, and two-stage's screen reuses a Haiku run's responses. `--offline` answers only from the cache and
 exits before calling anything if an item is missing; `--no-cache` always calls the model.
 
+`--estimate` says what a run will cost before it runs: it counts cache hits and misses for the same set, model and
+prompt, and prices the misses from the mean tokens of cached responses (`extractor/pricing.py` rates). It makes no
+model calls and writes no report. A model with no cached responses is priced from other models' responses for the
+same prompt, which is a rough guide. Two-stage's extract windows are only known once the screen is cached, so an
+item with an uncached screen is counted but not priced, and the total is then a lower bound.
+
 Reports go to `eval/reports/<set>/` as JSON and markdown. Runs with `--data` or on a staging batch go to
 `eval/reports/adhoc/`, which is never gated or published. A run on `test` prints which prompt versions already have a
 test report: tune prompts on `dev`, commit a version only when it is final, then run it on `test`.

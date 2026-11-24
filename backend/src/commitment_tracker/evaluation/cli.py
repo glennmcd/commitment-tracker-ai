@@ -3,6 +3,7 @@
     uv run eval --set test --config two-stage --prompt v1
     uv run eval --set test --model claude-opus-5-5
     uv run eval --data some-items.jsonl
+    uv run eval --set test --config opus --estimate
     uv run eval import gemini.jsonl --batch gem01 --provenance gemini-3-pro
     uv run eval review --batch gem01
     uv run eval promote --batch gem01 --to test
@@ -61,6 +62,7 @@ from commitment_tracker.evaluation.dataset import (
     canonical_sha256,
     load_dataset,
 )
+from commitment_tracker.evaluation.estimate import estimate_run, render_estimate
 from commitment_tracker.evaluation.report import (
     DEFAULT_REPORTS_DIR,
     Report,
@@ -138,6 +140,11 @@ def _parser(settings: Settings) -> argparse.ArgumentParser:
     parser.add_argument("--concurrency", type=int, default=4)
     parser.add_argument("--reports-dir", type=Path, default=DEFAULT_REPORTS_DIR)
     parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR)
+    parser.add_argument(
+        "--estimate",
+        action="store_true",
+        help="price the run from the cache and exit: no model calls, nothing written",
+    )
     cache_mode = parser.add_mutually_exclusive_group()
     cache_mode.add_argument("--no-cache", action="store_true", help="always call the model")
     cache_mode.add_argument(
@@ -164,7 +171,7 @@ def _audio_target(args: argparse.Namespace) -> _Target:
     items = source_items(args.sets_dir)
     cache = TranscriptCache(args.cache_dir / "transcripts")
     missing = [clip for clip in clips.values() if cache.get(clip.sha256) is None]
-    if missing and args.offline:
+    if missing and (args.offline or args.estimate):
         raise _MissingTranscripts(f"{len(missing)} clips have no cached transcript")
     if missing:
         transcribe = make_transcriber(
@@ -304,7 +311,7 @@ def main(argv: list[str] | None = None) -> int:
     cache = None if args.no_cache else ResponseCache(args.cache_dir)
 
     def make(stage_model: str) -> Extractor:
-        if args.offline:
+        if args.offline or args.estimate:
             return Extractor(OfflineAdapter(stage_model), load_prompt(args.prompt))
         return build_extractor(settings, model=stage_model)
 
@@ -322,7 +329,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"eval: {error}", file=sys.stderr)
         return 2
     except _MissingTranscripts as error:
-        print(f"eval: --offline: {error}; run without --offline to transcribe", file=sys.stderr)
+        print(f"eval: {error}; run without --offline or --estimate to transcribe", file=sys.stderr)
         return 1
     except (BotoCoreError, ClientError, RuntimeError) as error:
         # AWS credentials, the bucket or a transcription job: transcripts done so far stay cached.
@@ -330,6 +337,11 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     described = analyzer.describe()
     every_item = target.items + (target.audio.text_items if target.audio else [])
+    if args.estimate:
+        requests = [request_for(item) for item in every_item]
+        estimate = estimate_run(requests, analyzer, ResponseCache(args.cache_dir))
+        print("\n".join(render_estimate(estimate, described.prompt_version)))
+        return 0
     if args.offline:
         first = analyzer.screen if isinstance(analyzer, TwoStageExtractor) else analyzer
         assert isinstance(first, CachedAnalyzer)

@@ -58,6 +58,14 @@ def windows(flagged: list[int], context_turns: int) -> list[tuple[int, int]]:
     return merged
 
 
+def flagged_turns(screened: AnalyzeResponse, flag_labels: frozenset[Label]) -> list[int]:
+    return sorted({s.turn_index for s in screened.spans if s.label in flag_labels})
+
+
+def window_request(request: AnalyzeRequest, start: int, end: int) -> AnalyzeRequest:
+    return request.model_copy(update={"transcript": request.transcript[start : end + 1]})
+
+
 def _usage(stage: str, responses: list[AnalyzeResponse], latency_ms: int) -> StageUsage:
     costs = [r.metadata.cost_usd for r in responses]
     return StageUsage(
@@ -105,8 +113,7 @@ class TwoStageExtractor:
         return (await self.analyze_detailed(request)).response
 
     async def _window(self, request: AnalyzeRequest, start: int, end: int) -> AnalyzeResponse:
-        sub = request.model_copy(update={"transcript": request.transcript[start : end + 1]})
-        response = await self.extract.analyze(sub)
+        response = await self.extract.analyze(window_request(request, start, end))
         spans = [
             span.model_copy(update={"turn_index": span.turn_index + start})
             for span in response.spans
@@ -117,7 +124,7 @@ class TwoStageExtractor:
         started = time.perf_counter()
         screened = await self.screen.analyze(request)
         stages = [_usage("screen", [screened], _elapsed_ms(started))]
-        flagged = sorted({s.turn_index for s in screened.spans if s.label in self.flag_labels})
+        flagged = flagged_turns(screened, self.flag_labels)
         spans_by_window = windows(flagged, self.context_turns)
 
         extracted: list[AnalyzeResponse] = []

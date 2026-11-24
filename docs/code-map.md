@@ -26,7 +26,7 @@ Where things live. `CLAUDE.md` has the short version; read this when a task need
     subcommands, `stats.py` and `stats_cli.py` `eval-stats` (label mix and thin labels), `gate_cli.py` `eval-gate`,
     `audio_cli.py` `eval-audio`): sets
     and hashes (`sets.py`, `dataset.py`), leak checks, import, blind review, promote, agreement, reports and
-    re-scoring, compare, the regression gate (`gate.py`), audio clips and transcribed scoring (`audio.py`,
+    re-scoring, compare, the regression gate (`gate.py`), the pre-run cost estimate (`estimate.py`), audio clips and transcribed scoring (`audio.py`,
     `audio_eval.py`, `synthesis.py`) and the site export. `docs/evaluation.md` is the user guide.
   - `eval/`: `sets/<name>/` (items and manifest per set) and `reports/<set>/` (committed),
     `generation/prompt-v1.md` (the prompt for drafting items with other models); `.cache/` holds cached model
