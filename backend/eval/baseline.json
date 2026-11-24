@@ -31,6 +31,12 @@
           },
           "failed_items": 0
         }
+      },
+      "ungated": {
+        "sonnet": {
+          "decided": "2026-11-23",
+          "reason": "its only committed test report (20261026T045729Z) is on an older test set (68 items, sha256 6cd5dd1ad6a9); gating it needs a paid run on the current 74-item set. Set on issue #90, pending Glenn's ruling"
+        }
       }
     }
   }

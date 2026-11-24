@@ -7,6 +7,8 @@ configuration, prompt and set version, and fails when:
 
 - no such report exists (it prints the command that writes one);
 - the set's hash differs from the baseline's: the set changed, so re-baseline on purpose;
+- a configuration with a committed report is neither gated (in the baseline) nor ungated (in the
+  baseline's `ungated`, with a dated reason), or is both;
 - ledger F1 dropped by more than 0.02 from the baseline (both rounded to six places first, so a
   drop of exactly 0.02 passes), or any item failed;
 - the report's stored scores differ from a re-score of its stored predictions with today's
@@ -17,6 +19,7 @@ latest matching reports, for when a change in score is intended.
 """
 
 from dataclasses import dataclass, field
+from datetime import date
 from pathlib import Path
 
 from pydantic import BaseModel, Field
@@ -51,9 +54,17 @@ class BaselineEntry(BaseModel):
     failed_items: int
 
 
+class UngatedConfiguration(BaseModel):
+    """A configuration with a committed report that the gate deliberately doesn't hold."""
+
+    decided: date
+    reason: str = Field(min_length=1)
+
+
 class BaselineSet(BaseModel):
     set_sha256: str
     configurations: dict[str, BaselineEntry] = Field(default_factory=dict)
+    ungated: dict[str, UngatedConfiguration] = Field(default_factory=dict)
 
 
 class Baseline(BaseModel):
@@ -72,6 +83,7 @@ class Current:
 @dataclass
 class GateResult:
     passes: list[str] = field(default_factory=list)
+    ungated: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     failures: list[str] = field(default_factory=list)
 
@@ -113,6 +125,43 @@ def latest_report(
         return None
     _, path, report = max(matches, key=lambda match: match[0])
     return path, report
+
+
+def reported_configurations(reports_dir: Path, set_name: str) -> set[str]:
+    """Every named configuration with a committed report on this set, whatever its prompt or set
+    hash. Reports run with a bare `--model` have no configuration name and are not counted."""
+    names = {
+        Report.model_validate_json(path.read_text(encoding="utf-8")).run.configuration
+        for path in (reports_dir / set_name).glob("*.json")
+    }
+    return {name for name in names if name is not None}
+
+
+def _check_declarations(
+    result: GateResult,
+    name: str,
+    expected: BaselineSet | None,
+    reported: set[str],
+) -> None:
+    """Every configuration with a committed report is gated or ungated, never both or neither."""
+    gated = expected.configurations if expected else {}
+    ungated = expected.ungated if expected else {}
+    for configuration in sorted(set(gated) & set(ungated)):
+        result.failures.append(
+            f"{name}/{configuration}: both gated and ungated; keep one in eval/baseline.json"
+        )
+    for configuration in sorted(reported):
+        label = f"{name}/{configuration}"
+        if configuration in ungated:
+            decision = ungated[configuration]
+            result.ungated.append(
+                f"{label}: {decision.reason} (decided {decision.decided.isoformat()})"
+            )
+        elif configuration not in gated:
+            result.failures.append(
+                f"{label}: has a committed report but is neither gated nor ungated; add it to "
+                "eval/baseline.json with a dated reason, or gate it with --update-baseline"
+            )
 
 
 def _run_command(set_name: str, configuration: str, current: Current) -> str:
@@ -175,6 +224,7 @@ def check(
             continue
         loaded = load_set(name, sets_root, allow_empty=True)
         expected = baseline.sets.get(name)
+        _check_declarations(result, name, expected, reported_configurations(reports_dir, name))
         if expected is None:
             if loaded.items:
                 result.failures.append(
@@ -251,7 +301,10 @@ def updated_baseline(
                 field_accuracy={k: v.accuracy for k, v in report.scores.fields.items()},
                 failed_items=len(report.scores.failed_items),
             )
-        baseline.sets[name] = BaselineSet(set_sha256=loaded.sha256, configurations=entries)
+        ungated = before.ungated if before is not None else {}
+        baseline.sets[name] = BaselineSet(
+            set_sha256=loaded.sha256, configurations=entries, ungated=dict(ungated)
+        )
     return baseline
 
 

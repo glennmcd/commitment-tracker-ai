@@ -70,6 +70,8 @@ def gate_main(argv: list[str] | None = None) -> int:
     result = check(load_baseline(args.baseline), current, args.sets_dir, args.reports_dir)
     for line in result.passes:
         print(f"PASS {line}")
+    for line in result.ungated:
+        print(f"UNGATED {line}")
     for line in result.warnings:
         print(f"WARN {line}")
     for line in result.failures:

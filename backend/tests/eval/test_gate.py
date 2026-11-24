@@ -2,9 +2,11 @@
 
 import json
 import re
+from datetime import date
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
 
 from commitment_tracker.evaluation import gate_cli
 from commitment_tracker.evaluation.gate import (
@@ -13,6 +15,7 @@ from commitment_tracker.evaluation.gate import (
     Baseline,
     Current,
     GateError,
+    UngatedConfiguration,
     check,
     load_baseline,
     updated_baseline,
@@ -250,6 +253,78 @@ def test_a_model_swap_behind_a_configuration_needs_a_new_report(
     monkeypatch.setitem(CONFIGURATIONS, "opus", ("claude-opus-6-0",))
     (failure,) = repo.check(baseline)
     assert "no report" in failure and "claude-opus-6-0" in failure
+
+
+def test_a_reported_configuration_that_is_neither_gated_nor_ungated_fails(repo: Repo) -> None:
+    repo.report("opus")
+    repo.report("sonnet", minute=1)
+    (failure,) = repo.check(repo.baseline())
+    assert failure.startswith(
+        "test/sonnet: has a committed report but is neither gated nor ungated"
+    )
+
+
+def test_an_ungated_configuration_is_named_with_its_reason(repo: Repo) -> None:
+    repo.report("opus")
+    repo.report("sonnet", minute=1)
+    baseline = repo.baseline()
+    baseline.sets["test"].ungated["sonnet"] = UngatedConfiguration(
+        decided=date(2026, 11, 23), reason="its report is on an older set"
+    )
+    result = check(baseline, CURRENT, repo.sets, repo.reports)
+    assert result.ok
+    assert result.ungated == ["test/sonnet: its report is on an older set (decided 2026-11-23)"]
+
+
+def test_a_configuration_both_gated_and_ungated_fails(repo: Repo) -> None:
+    repo.report("opus")
+    baseline = repo.baseline()
+    baseline.sets["test"].ungated["opus"] = UngatedConfiguration(
+        decided=date(2026, 11, 23), reason="a contradiction"
+    )
+    (failure,) = repo.check(baseline)
+    assert "test/opus: both gated and ungated" in failure
+
+
+def test_an_ungated_configuration_needs_a_reason() -> None:
+    with pytest.raises(ValidationError):
+        UngatedConfiguration(decided=date(2026, 11, 23), reason="")
+
+
+def test_cli_names_ungated_configurations(
+    repo: Repo, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo.report("opus")
+    repo.report("sonnet", minute=1)
+    baseline = repo.baseline()
+    baseline.sets["test"].ungated["sonnet"] = UngatedConfiguration(
+        decided=date(2026, 11, 23), reason="its report is on an older set"
+    )
+    baseline_path = tmp_path / "baseline.json"
+    write_baseline(baseline, baseline_path)
+    code = gate_cli.gate_main(
+        [
+            "--sets-dir",
+            str(repo.sets),
+            "--reports-dir",
+            str(repo.reports),
+            "--baseline",
+            str(baseline_path),
+        ]
+    )
+    out = capsys.readouterr().out
+    assert code == 0
+    assert "UNGATED test/sonnet: its report is on an older set (decided 2026-11-23)" in out
+
+
+def test_updating_the_baseline_keeps_ungated_configurations(repo: Repo) -> None:
+    repo.report("opus")
+    repo.report("sonnet", minute=1)
+    baseline = repo.baseline()
+    decision = UngatedConfiguration(decided=date(2026, 11, 23), reason="an older set")
+    baseline.sets["test"].ungated["sonnet"] = decision
+    updated = repo.baseline(existing=baseline)
+    assert updated.sets["test"].ungated == {"sonnet": decision}
 
 
 # --- the committed files -------------------------------------------------------------------------
