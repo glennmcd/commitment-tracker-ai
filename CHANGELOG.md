@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.0](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.13.1...v0.14.0) (2026-11-24)
+
+
+### Features
+
+* **eval:** add eval-stats to show thin labels before a run ([#91](https://github.com/glennmcd/commitment-tracker-ai/issues/91)) ([aab6d9d](https://github.com/glennmcd/commitment-tracker-ai/commit/aab6d9db22215c725df1ae17a51e9a2417d31a55))
+* **evaluation:** add eval --estimate to price a run before it runs ([#93](https://github.com/glennmcd/commitment-tracker-ai/issues/93)) ([23c5d5d](https://github.com/glennmcd/commitment-tracker-ai/commit/23c5d5d297c76b7870ccb12fa7f5168f7cc1c474))
+
 ## [0.13.1](https://github.com/glennmcd/commitment-tracker-ai/compare/v0.13.0...v0.13.1) (2026-11-23)
 
 
