@@ -11,10 +11,21 @@ import pytest
 from commitment_tracker.extractor.adapter import ModelReply, ModelRequest
 from commitment_tracker.extractor.errors import ModelUnavailable
 from commitment_tracker.extractor.extractor import Extractor
+from commitment_tracker.extractor.factory import build_analyzer
+from commitment_tracker.extractor.model_output import ModelDue, ModelOutput, ModelSpan
 from commitment_tracker.extractor.prompt import load_prompt
 from commitment_tracker.extractor.two_stage import NON_NONE, TwoStageExtractor
-from commitment_tracker.schemas import LEDGER_LABELS, AnalyzeRequest, Label, Turn
-from tests.fakes import FunctionAdapter, reply
+from commitment_tracker.schemas import (
+    LEDGER_LABELS,
+    AnalyzeRequest,
+    AnalyzeResponse,
+    Label,
+    Precision,
+    Span,
+    Turn,
+)
+from commitment_tracker.settings import Settings
+from tests.fakes import FakeAdapter, FunctionAdapter, reply
 
 TURN = re.compile(r'<turn index="(\d+)" speaker="[^"]*">(.*?)</turn>')
 
@@ -182,3 +193,203 @@ def test_describe_names_both_stages() -> None:
     assert configuration.name == "two-stage"
     assert configuration.stages == {"screen": "claude-haiku-5-5", "extract": "claude-opus-5-5"}
     assert configuration.prompt_version == "v1"
+
+
+# --- End to end: three spec utterances (docs/spec.md, items 1, 5 and 11) through the factory ---
+
+HAIKU, OPUS = "claude-haiku-5-5", "claude-opus-5-5"
+CALL_DATE = date(2026, 10, 21)
+
+
+def canned(
+    turn: int,
+    label: Label,
+    quote: str,
+    *,
+    owner: str | None = None,
+    recipient: str | None = None,
+    action: str | None = None,
+    due_raw: str | None = None,
+    hint: Precision = Precision.NONE,
+    condition: str | None = None,
+) -> ModelSpan:
+    return ModelSpan(
+        turn_index=turn,
+        label=label,
+        owner=owner,
+        recipient=recipient,
+        action=action,
+        due=ModelDue(raw=due_raw, precision_hint=hint),
+        condition=condition,
+        confidence=0.9,
+        quote=quote,
+        rationale="canned",
+        ambiguous=False,
+    )
+
+
+def run_two_stage(
+    speakers_and_texts: list[tuple[str, str]],
+    screen: list[ModelSpan],
+    extract: list[ModelSpan],
+) -> tuple[AnalyzeResponse, FakeAdapter, FakeAdapter]:
+    """The two-stage analyzer from the factory, each stage answering with its canned reply."""
+    prompt = load_prompt("v1")
+    screen_adapter = FakeAdapter(reply(ModelOutput(spans=screen), served_by=HAIKU), model=HAIKU)
+    extract_adapter = FakeAdapter(reply(ModelOutput(spans=extract), served_by=OPUS), model=OPUS)
+    adapters = {HAIKU: screen_adapter, OPUS: extract_adapter}
+    analyzer = build_analyzer(
+        Settings(_env_file=None),
+        "two-stage",
+        build=lambda model: Extractor(adapters[model], prompt),
+    )
+    request = AnalyzeRequest(
+        transcript=[Turn(speaker=speaker, text=text) for speaker, text in speakers_and_texts],
+        call_date=CALL_DATE,
+    )
+    response = asyncio.run(analyzer.analyze(request))
+    return response, screen_adapter, extract_adapter
+
+
+def as_dicts(spans: list[Span]) -> list[dict[str, object]]:
+    keep = {"turn_index", "label", "owner", "recipient", "action", "condition", "due", "quote"}
+    return [span.model_dump(include=keep) for span in spans]
+
+
+PRICING = "I'll send you the revised pricing by Friday."
+INVOICE_REQUEST = "Can you resend the invoice?"
+INVOICE_REPLY = "Sure, I'll do it this afternoon."
+INTEGRATION = "If legal signs off, we'll ship the integration on the 1st."
+
+
+def test_spec_item_1_due_by_friday_resolves_to_the_friday_after_the_call() -> None:
+    response, screen, extract = run_two_stage(
+        [("seller", PRICING)],
+        screen=[
+            canned(
+                0,
+                Label.COMMITMENT,
+                PRICING,
+                owner="seller",
+                action="send revised pricing",
+                due_raw="by Friday",
+                hint=Precision.DAY,
+            )
+        ],
+        extract=[
+            canned(
+                0,
+                Label.COMMITMENT,
+                PRICING,
+                owner="seller",
+                action="send revised pricing",
+                due_raw="by Friday",
+                hint=Precision.DAY,
+            ),
+            # Not a substring of the turn, so the quote check drops it.
+            canned(0, Label.SUGGESTION, "We should also book a demo"),
+        ],
+    )
+    assert as_dicts(response.spans) == [
+        {
+            "turn_index": 0,
+            "label": Label.COMMITMENT,
+            "owner": "seller",
+            "recipient": None,
+            "action": "send revised pricing",
+            "condition": None,
+            "due": {"raw": "by Friday", "resolved": date(2026, 10, 23), "precision": Precision.DAY},
+            "quote": PRICING,
+        }
+    ]
+    assert response.metadata.dropped_quotes == 1
+    assert (len(screen.requests), len(extract.requests)) == (1, 1)
+
+
+def test_spec_item_5_the_extract_stage_sees_the_prior_turn_and_only_judges_the_flagged_one() -> (
+    None
+):
+    # The screen misses the request (turn 0) and flags the reply (turn 1). The extract window is
+    # turns 0-1; the REQUEST it gives turn 0 is context and must not reach the response.
+    response, _, extract = run_two_stage(
+        [("A", INVOICE_REQUEST), ("B", INVOICE_REPLY)],
+        screen=[
+            canned(
+                1,
+                Label.COMMITMENT,
+                INVOICE_REPLY,
+                owner="B",
+                recipient="A",
+                action="resend the invoice",
+                due_raw="this afternoon",
+                hint=Precision.DAY,
+            )
+        ],
+        extract=[
+            canned(0, Label.REQUEST, INVOICE_REQUEST),
+            canned(
+                1,
+                Label.COMMITMENT,
+                INVOICE_REPLY,
+                owner="B",
+                recipient="A",
+                action="resend the invoice",
+                due_raw="this afternoon",
+                hint=Precision.DAY,
+            ),
+        ],
+    )
+    assert sent_turns(extract.requests[0]) == [INVOICE_REQUEST, INVOICE_REPLY]
+    assert as_dicts(response.spans) == [
+        {
+            "turn_index": 1,
+            "label": Label.COMMITMENT,
+            "owner": "B",
+            "recipient": "A",
+            "action": "resend the invoice",
+            "condition": None,
+            "due": {"raw": "this afternoon", "resolved": CALL_DATE, "precision": Precision.DAY},
+            "quote": INVOICE_REPLY,
+        }
+    ]
+    assert response.metadata.dropped_quotes == 0
+
+
+def test_spec_item_11_conditional_due_on_the_1st_resolves_to_the_next_first() -> None:
+    # Three filler turns put the utterance at index 3, so its window starts at turn 1. The extract
+    # model answers in window-relative indices (2), and the response must use the call's (3).
+    call = [
+        ("seller", "Hi, thanks for taking the call."),
+        ("buyer", "Happy to. How is the rollout going?"),
+        ("seller", "Good. Legal is still reviewing the contract."),
+        ("seller", INTEGRATION),
+    ]
+
+    def item_11(turn: int) -> ModelSpan:
+        return canned(
+            turn,
+            Label.CONDITIONAL,
+            INTEGRATION,
+            owner="seller",
+            action="ship the integration",
+            due_raw="on the 1st",
+            hint=Precision.DAY,
+            condition="legal sign-off",
+        )
+
+    response, screen, extract = run_two_stage(call, screen=[item_11(3)], extract=[item_11(2)])
+    assert sent_turns(extract.requests[0]) == [text for _, text in call[1:]]
+    assert as_dicts(response.spans) == [
+        {
+            "turn_index": 3,
+            "label": Label.CONDITIONAL,
+            "owner": "seller",
+            "recipient": None,
+            "action": "ship the integration",
+            "condition": "legal sign-off",
+            "due": {"raw": "on the 1st", "resolved": date(2026, 11, 1), "precision": Precision.DAY},
+            "quote": INTEGRATION,
+        }
+    ]
+    assert response.metadata.model == "two-stage"
+    assert response.metadata.served_by == OPUS
