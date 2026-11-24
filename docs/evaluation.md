@@ -161,6 +161,12 @@ evaluation code, settings, sets, reports or baseline change. It never calls a mo
 Field-accuracy changes print as warnings. When a change in score is intended, run the gated configurations, then
 `uv run eval-gate --update-baseline`, and commit the reports with the new baseline.
 
+Every configuration with a committed report on a gated set must be either gated (in `baseline.sets.<set>.configurations`)
+or ungated (in `baseline.sets.<set>.ungated`, with a `decided` date and a `reason`). Ungated configurations print as
+`UNGATED` lines, so the gate's output names each one. Sonnet is ungated on `test` (decided 2026-11-23): its only committed
+report is on an older version of the set. To gate it, run `uv run eval --set test --config sonnet` (it costs money),
+then `uv run eval-gate --update-baseline --config sonnet`, and remove its `ungated` entry.
+
 ## Publishing
 
 `uv run eval-export-site` writes the data behind the site's `/evals` pages to `frontend/src/data/evals/`. Run it after
