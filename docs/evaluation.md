@@ -35,6 +35,10 @@ refuse to mix versions.
 `uv run eval-sets` lists every set with its role, size, hash prefix, review counts, label mix and provenance mix.
 `--agreement` adds how often my blind labels agreed with each generator's.
 
+`uv run eval-stats` shows each text set's spans per label (every label, zero included) and its items per provenance.
+A label under `--floor` spans (default 10) is marked `thin`. `--strict` exits 1 when a set it judges has a thin label:
+every non-staging text set, or only the one named by `--set`, since staging sets are still awaiting review.
+
 The suite fails if a transcript appears in two sets, an id is used twice, a turn of six or more words from a non-dev
 item is quoted in a prompt file, a Claude draft is in `test`, or an audio clip points at a missing item.
 
