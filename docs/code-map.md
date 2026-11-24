@@ -23,7 +23,8 @@ Where things live. `CLAUDE.md` has the short version; read this when a task need
     both, and the Anthropic key is read from SSM on a cold start.
   - `src/commitment_tracker/evaluation/`: the eval runner and its tools (`cli.py` is `eval`, `eval-sets`,
     `eval-compare` and `eval-export-site`; `curation_cli.py` the `eval import|review|promote|rescore`
-    subcommands, `gate_cli.py` `eval-gate`, `audio_cli.py` `eval-audio`): sets
+    subcommands, `stats.py` and `stats_cli.py` `eval-stats` (label mix and thin labels), `gate_cli.py` `eval-gate`,
+    `audio_cli.py` `eval-audio`): sets
     and hashes (`sets.py`, `dataset.py`), leak checks, import, blind review, promote, agreement, reports and
     re-scoring, compare, the regression gate (`gate.py`), audio clips and transcribed scoring (`audio.py`,
     `audio_eval.py`, `synthesis.py`) and the site export. `docs/evaluation.md` is the user guide.

@@ -130,6 +130,7 @@ class SetSummary:
     name: str
     role: str
     gated: bool
+    kind: str = "text"
     items: int = 0
     sha256: str = ""
     review: dict[str, int] = field(default_factory=dict)
@@ -183,13 +184,14 @@ def _audio_summary(name: str, manifest: SetManifest, clips: Path) -> SetSummary:
         name=name,
         role=manifest.role,
         gated=manifest.gated,
+        kind="audio",
         items=len(lines),
         sha256=sha256,
         provenance=dict(sorted(sources.items())),
     )
 
 
-def _mix(counts: dict[str, int]) -> str:
+def mix(counts: dict[str, int]) -> str:
     return ", ".join(f"{key} {count}" for key, count in counts.items()) or "-"
 
 
@@ -199,7 +201,7 @@ def render_summary(summary: SetSummary) -> list[str]:
         return [head, f"  error       {summary.error}"]
     return [
         f"{head}  items {summary.items}  sha256 {summary.sha256[:12]}",
-        f"  review      {_mix(summary.review)}",
-        f"  labels      {_mix(summary.labels)}",
-        f"  provenance  {_mix(summary.provenance)}",
+        f"  review      {mix(summary.review)}",
+        f"  labels      {mix(summary.labels)}",
+        f"  provenance  {mix(summary.provenance)}",
     ]
