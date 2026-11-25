@@ -6,6 +6,7 @@ import type { components } from "@/api/schema";
 import { checkImport, importBatch, readRequest } from "@/lib/evalImports";
 import { ImportFindings } from "./ImportFindings";
 import { ImportForm } from "./ImportForm";
+import { clientOrProblem } from "../Demo";
 
 type ImportRequest = components["schemas"]["ImportRequest"];
 type ImportReport = components["schemas"]["ImportReport"];
@@ -16,7 +17,7 @@ type EvalImportState =
   | { status: "checked" | "importing" | "staged"; report: ImportReport; request: ImportRequest; error?: string };
 
 type EvalImportAction =
-  | { type: "editing"; }
+  | { type: "editing" }
   | { type: "checkStarted" }
   | { type: "checkSucceeded"; report: ImportReport; request: ImportRequest; error?: string }
   | { type: "checkFailed"; error?: string }
@@ -60,16 +61,30 @@ function stateReducer(state: EvalImportState, action: EvalImportAction): EvalImp
       return state;
   }
 }
-export function EvalImporter({ client }: { client: ApiClient }) {
+export function EvalImporter({ client }: { client?: ApiClient }) {
   const [importState, stateDispatch] = useReducer(stateReducer, {
     status: "editing",
   });
 
   const batchRef = useRef<HTMLInputElement>(null);
 
+  function ensureClient(problemState:{type:"importFailed"|"checkFailed"}): ApiClient | null {
+    if (client) return client;
+    const api = clientOrProblem();
+    if ("problem" in api) {
+      stateDispatch({ type: problemState.type, error: api.problem });
+      return null;
+    }
+    return api.client;
+  }
+
   async function onImportClick() {
     if (importState.status !== "checked") return;
     stateDispatch({ type: "importStarted" });
+
+    const ensuredClient = ensureClient({ type: "importFailed" });
+    if (!ensuredClient) return;
+    client = ensuredClient;
 
     const response = await importBatch(client, importState.request);
     if (response.ok) {
@@ -102,7 +117,9 @@ export function EvalImporter({ client }: { client: ApiClient }) {
       stateDispatch({ type: "checkFailed", error: read.message ?? "Failed to read request" });
       return;
     }
-
+    const ensuredClient = ensureClient({ type: "checkFailed" });
+    if (!ensuredClient) return;
+    client = ensuredClient;
     const result = await checkImport(client, read.job);
     if (result.ok) {
       stateDispatch({ type: "checkSucceeded", report: result.job, request: read.job, error: undefined });

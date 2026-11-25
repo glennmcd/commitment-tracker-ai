@@ -1,6 +1,6 @@
 import { act, type RenderResult, render, screen, waitFor } from "@testing-library/react";
 import userEvent, { type UserEvent } from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { explain } from "@/lib/apiErrors";
 import { failure, fakeClient, ok } from "@/lib/testExports";
 import { nothingValid, withProblems } from "@/test/evalImportFixtures";
@@ -25,6 +25,16 @@ async function fillAndCheck(rr: RenderResult, user: UserEvent, clickCheck = true
 }
 
 describe("EvalImporter", () => {
+
+  it("renders with empty NEXT_PUBLIC_API_BASE_URL", async () => {
+    vi.stubEnv("NEXT_PUBLIC_API_BASE_URL", "");
+     const user = userEvent.setup();
+     const rr = render(<EvalImporter  />);
+
+    await fillAndCheck(rr, user, true);
+    expect(await screen.findByRole("alert")).toHaveTextContent("NEXT_PUBLIC_API_BASE_URL is not set");
+
+  });
   it("ensure late check is ignored", { timeout: 5_000_000 }, async () => {
     const user = userEvent.setup();
     let resolve!: (v: unknown) => void;

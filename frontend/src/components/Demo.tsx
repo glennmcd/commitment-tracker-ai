@@ -29,7 +29,7 @@ function today(): string {
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }
 
-function clientOrProblem(): { client: ApiClient } | { problem: string } {
+export function clientOrProblem(): { client: ApiClient } | { problem: string } {
   try {
     return { client: getApiClient() };
   } catch (error) {
